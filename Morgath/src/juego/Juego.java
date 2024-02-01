@@ -13,7 +13,7 @@ import configuracion.Config;
 
 public class Juego extends JFrame {
 
-	private JPanel panelPrincipal, panelSuperior, panelInput;
+	private JPanel panelPrincipal, panelSuperior, panelInferior;
 	private JLabel labelLocalizacion, labelPuntuacion, labelCursor;
 	private JScrollPane barraScrollOutput, barraScrollInput;
 	private JTextArea textoOutput;
@@ -33,7 +33,7 @@ public class Juego extends JFrame {
 		// Paneles.
 		panelPrincipal = new JPanel(new BorderLayout());
 		panelSuperior = new JPanel(new BorderLayout());
-		panelInput = new JPanel(new BorderLayout()); // Nuevo panel para textoInput
+		panelInferior = new JPanel(new BorderLayout());
 
 		// Area Texto.
 		textoOutput = new JTextArea();
@@ -76,15 +76,15 @@ public class Juego extends JFrame {
 
 		// Establecer fuente y color.
 		labelLocalizacion.setFont(Config.fuente);
-		labelLocalizacion.setForeground(Color.BLACK);
+		labelLocalizacion.setForeground(new Color(0, 0, 0));
 		labelPuntuacion.setFont(Config.fuente);
-		labelPuntuacion.setForeground(Color.BLACK);
+		labelPuntuacion.setForeground(new Color(0, 0, 0));
 		labelCursor.setFont(Config.fuente);
-		labelCursor.setForeground(new Color(0, 0, 0));
+		labelCursor.setForeground(new Color(180, 180, 180));
 		textoOutput.setFont(Config.fuente);
-		textoOutput.setForeground(new Color(0, 0, 0));
+		textoOutput.setForeground(new Color(180, 180, 180));
 		textoInput.setFont(Config.fuente);
-		textoInput.setForeground(new Color(0, 0, 0));
+		textoInput.setForeground(new Color(180, 180, 180));
 
 		// Panel superior.
 		panelSuperior.add(labelLocalizacion, BorderLayout.WEST);
@@ -92,31 +92,33 @@ public class Juego extends JFrame {
 		panelSuperior.setBorder(new EmptyBorder(10, 10, 5, 10));
 
 		// Panel input.
-		panelInput.add(labelCursor, BorderLayout.WEST); // Agregar el labelCursor a la izquierda.
-		panelInput.add(barraScrollInput, BorderLayout.CENTER);
+		panelInferior.add(labelCursor, BorderLayout.WEST);
+		panelInferior.add(barraScrollInput, BorderLayout.CENTER);
 
 		// Panel principal.
 		panelPrincipal.add(panelSuperior, BorderLayout.NORTH);
 		panelPrincipal.add(barraScrollOutput, BorderLayout.CENTER);
-		panelPrincipal.add(panelInput, BorderLayout.SOUTH); // Agregar el panelInput a la parte inferior.
+		panelPrincipal.add(panelInferior, BorderLayout.SOUTH);
 
-		// Area texto.
+		// Texto Output.
 		textoOutput.setLineWrap(true);
 		textoOutput.setWrapStyleWord(true);
 		textoOutput.setBorder(new EmptyBorder(10, 10, 10, 10));
+		textoOutput.setHighlighter(null);
+		textoOutput.setEditable(false);
 
-		// Texto input.
+		// Texto Input.
 		textoInput.setBorder(new EmptyBorder(10, 10, 10, 10));
-		//textoInput.setHighlighter(null);
+		textoInput.setHighlighter(null);
 
-		panelInput.setBorder(new EmptyBorder(0, 10, 0, 0));
+		panelInferior.setBorder(new EmptyBorder(0, 10, 0, 0));
 
 		// Establecer color de fondo.
-		panelPrincipal.setBackground(Color.BLACK);
-		panelSuperior.setBackground(Color.LIGHT_GRAY);
-		panelInput.setBackground(new Color(255, 255, 255));
-		textoOutput.setBackground(new Color(255, 255, 255));
-		textoInput.setBackground(new Color(255, 255, 255));
+		panelPrincipal.setBackground(new Color(0, 0, 0));
+		panelSuperior.setBackground(new Color(180, 180, 180));
+		panelInferior.setBackground(new Color(0, 0, 0));
+		textoOutput.setBackground(new Color(0, 0, 0));
+		textoInput.setBackground(new Color(0, 0, 0));
 
 		// Añadir paneles a la juego.
 		getContentPane().add(panelPrincipal);
