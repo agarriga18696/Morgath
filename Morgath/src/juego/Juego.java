@@ -7,8 +7,6 @@ import java.awt.event.ActionListener;
 
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
-import javax.swing.border.LineBorder;
-import javax.swing.plaf.basic.BasicTextFieldUI;
 
 import comandos.Comandos;
 import configuracion.Config;
@@ -82,11 +80,11 @@ public class Juego extends JFrame {
 		labelPuntuacion.setFont(Config.fuente);
 		labelPuntuacion.setForeground(Color.BLACK);
 		labelCursor.setFont(Config.fuente);
-		labelCursor.setForeground(Color.LIGHT_GRAY);
+		labelCursor.setForeground(new Color(0, 0, 0));
 		textoOutput.setFont(Config.fuente);
-		textoOutput.setForeground(Color.LIGHT_GRAY);
+		textoOutput.setForeground(new Color(0, 0, 0));
 		textoInput.setFont(Config.fuente);
-		textoInput.setForeground(Color.LIGHT_GRAY);
+		textoInput.setForeground(new Color(0, 0, 0));
 
 		// Panel superior.
 		panelSuperior.add(labelLocalizacion, BorderLayout.WEST);
@@ -106,7 +104,6 @@ public class Juego extends JFrame {
 		textoOutput.setLineWrap(true);
 		textoOutput.setWrapStyleWord(true);
 		textoOutput.setBorder(new EmptyBorder(10, 10, 10, 10));
-		textoOutput.setEditable(false);
 
 		// Texto input.
 		textoInput.setBorder(new EmptyBorder(10, 10, 10, 10));
@@ -117,12 +114,12 @@ public class Juego extends JFrame {
 		// Establecer color de fondo.
 		panelPrincipal.setBackground(Color.BLACK);
 		panelSuperior.setBackground(Color.LIGHT_GRAY);
-		panelInput.setBackground(Color.BLACK);
-		textoOutput.setBackground(Color.BLACK);
-		textoInput.setBackground(Color.BLACK);
+		panelInput.setBackground(new Color(255, 255, 255));
+		textoOutput.setBackground(new Color(255, 255, 255));
+		textoInput.setBackground(new Color(255, 255, 255));
 
 		// Añadir paneles a la juego.
-		add(panelPrincipal);
+		getContentPane().add(panelPrincipal);
 
 	}
 
