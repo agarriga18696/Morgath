@@ -1,12 +1,11 @@
-package principal;
-
-import iu.Menu;
+package juego;
 
 public class Principal {
 
 	public static void main(String[] args) {
 		
-		Menu.MenuPrincipal("Opción");
+		Juego juego = new Juego();
+		juego.nuevaPartida();
 		
 	}
 
