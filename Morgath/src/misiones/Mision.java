@@ -1,7 +1,7 @@
 package misiones;
 
 public class Mision {
-	
+
 	private String nombre;
 	private String objetivo;
 	private String mensaje;
@@ -9,7 +9,7 @@ public class Mision {
 	private boolean activada;
 	private boolean completada;
 	private boolean mensajeMostrado;
-	
+
 	public Mision(String nombre, String objetivo, String mensaje, int recompensa) {
 		this.nombre = nombre;
 		this.objetivo = objetivo;
@@ -72,7 +72,12 @@ public class Mision {
 	public void setMensajeMostrado(boolean mensajeMostrado) {
 		this.mensajeMostrado = mensajeMostrado;
 	}
-	
-	
+
+	// Método para finalizar misiones.
+	public void finalizarMision(Mision mision) {
+		mision.setCompletada(true);
+		mision.setActivada(false);
+	}
+
 
 }

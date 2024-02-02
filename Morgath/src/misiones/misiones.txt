@@ -1,15 +1,21 @@
-# Misión 1
-Objetivo: Mata al Inquisidor Oscuro.
-Mensaje: ¡Saludos, aventurero! Te doy la bienvenida a Morgath.
-Tu aventura no ha hecho más que empezar, por lo que te daré unos consejos que te serán de gran ayuda, ya me lo agradecerás.
-Primero de todo, debes saber que esto no es un juego de aventuras cualquiera, donde puedes salirte siempre con la tuya y termines ileso. La muerte acecha en cada esquina y rincón de éste insólito mundo repleto de peligros y desafíos.
-El objetivo principal del juego es matar al Inquisidor, que es el enemigo final. Aunque no será tarea fácil, ya que tendrás que superar muchos obstáculos, hacerte con ciertos objetos que serán imprescindibles para completar las misiones, y sobretodo, no perder la fe.
-Dicho todo esto, estás preparado para seguir adelante con tu cometido. Explora, piérdete en este fantástico mundo y empápate de conocimientos e historia.
-¡Buena suerte, aventurero!
+# Iniciación
+-Objetivo: Empieza tu aventura.
+-Mensaje:
+¡Bienvenido a Morgath, aventurero! Tu viaje apenas comienza, así que aquí tienes algunos consejos que te serán de gran ayuda, ¡ya me lo agradecerás! En este mundo insólito, lleno de peligros y desafíos, la muerte acecha en cada esquina y rincón.
+El objetivo principal del juego es derrotar al Inquisidor, el enemigo final. No será fácil, deberás superar numerosos obstáculos y adquirir objetos esenciales para completar las misiones. Pero, sobre todo, no pierdas la esperanza.
+Estás listo para avanzar en tu misión. Explora, sumérgete en la fascinante historia de este mundo y ¡mucha suerte, aventurero!
 Escribe 'AYUDA' en cualquier momento para ver los comandos.
-Recompensa: 10
+-Recompensa: 0
 
-# Misión 2
-Objetivo: Consigue la llave de la torre.
-Mensaje: Debes poder acceder a la torre por la puerta secreta, pero necesitas encontrar la llave. Búscala para poder seguir con tu misión.
-Recompensa: 10
+# Encerrado
+-Objetivo: Encuentra una salida.
+-Mensaje:
+Te encuentras encerrado en un sótano. No estás seguro de cómo has llegado hasta aquí, lo último que recuerdas un duro golpe en la cabeza.
+Deberías investigar cómo has llegado hasta aquí y encontrar una salida lo antes posible.
+-Recompensa: 20
+
+# La torre
+-Objetivo: Consigue la llave de la torre.
+-Mensaje: 
+Debes poder acceder a la torre por la puerta secreta, pero necesitas encontrar la llave. Búscala para poder seguir con tu misión.
+-Recompensa: 30

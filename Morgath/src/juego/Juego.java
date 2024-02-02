@@ -17,7 +17,7 @@ public class Juego extends JFrame {
 
 	private static final long serialVersionUID = 1L;
 	private JPanel panelPrincipal, panelCentral, panelSuperior, panelInferior;
-	private JLabel labelLocalizacion, labelPuntuacion, labelCursor;
+	private JLabel labelUbicacion, labelPuntuacion, labelCursor;
 	private JScrollPane barraScrollOutput;
 	private JTextArea outputTexto;
 	private JTextField inputTexto;
@@ -25,7 +25,7 @@ public class Juego extends JFrame {
 	private Jugador jugador = new Jugador("CAMINO");
 	private Misiones misiones = new Misiones();
 	private Comandos comandos = new Comandos(jugador, this, misiones);
-	public Mision misionActiva = misiones.ejecutarMisiones();
+	public Mision misionActiva;
 
 	public Juego() {
 
@@ -33,7 +33,7 @@ public class Juego extends JFrame {
 		setResizable(false);
 		setDefaultCloseOperation(EXIT_ON_CLOSE);
 		setLocationRelativeTo(null);
-		setTitle(jugador.getLocalizacion().toUpperCase());
+		setTitle("MORGATH I");
 
 		// Paneles.
 		panelPrincipal = new JPanel(new BorderLayout());
@@ -52,9 +52,10 @@ public class Juego extends JFrame {
 				outputTexto(Config.CURSOR + " " + comando);
 				comandos.ejecutarComando(comando);
 
-				inputTexto.setText(""); // Limpiar el campo de texto después de obtener el texto.
+				// Limpiar el campo de texto después de obtener el texto.
+				inputTexto.setText("");
 
-				// Notificar al bucle que se ha ingresado un comando
+				// Notificar al bucle que se ha ingresado un comando.
 				notificarComandoIngresado();
 			}
 		});
@@ -65,9 +66,9 @@ public class Juego extends JFrame {
 		barraScrollOutput.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_NEVER);
 
 		// Etiquetas.
-		labelLocalizacion = new JLabel(jugador.getLocalizacion());
+		labelUbicacion = new JLabel("UBICACIÓN: " + jugador.getLocalizacion());
 		labelPuntuacion = new JLabel("PUNTOS: " + jugador.getPuntos());
-		labelCursor = new JLabel(">");
+		labelCursor = new JLabel(Config.CURSOR);
 
 		configurarVentana();
 		setVisible(true);
@@ -83,10 +84,10 @@ public class Juego extends JFrame {
 	private void configurarVentana() {
 
 		// Establecer fuente y color.
-		labelLocalizacion.setFont(Config.fuente);
-		labelLocalizacion.setForeground(Config.colorPrincipal);
+		labelUbicacion.setFont(Config.fuente);
+		labelUbicacion.setForeground(Config.colorSecundario);
 		labelPuntuacion.setFont(Config.fuente);
-		labelPuntuacion.setForeground(Config.colorPrincipal);
+		labelPuntuacion.setForeground(Config.colorSecundario);
 		labelCursor.setFont(Config.fuente);
 		labelCursor.setForeground(Config.colorSecundario);
 		outputTexto.setFont(Config.fuente);
@@ -103,11 +104,11 @@ public class Juego extends JFrame {
 
 		// Panel superior.
 		panelSuperior.setLayout(new GridLayout(1, 2));
-		panelSuperior.add(labelLocalizacion);
+		panelSuperior.add(labelUbicacion);
 		panelSuperior.add(labelPuntuacion);
 		labelPuntuacion.setHorizontalAlignment(SwingConstants.RIGHT);
 		panelSuperior.setBorder(Config.borde);
-		panelSuperior.setBackground(Config.colorSecundario);
+		panelSuperior.setBackground(Config.colorPrincipal);
 
 		// Panel central.
 		panelCentral.setLayout(new BorderLayout());
@@ -126,7 +127,7 @@ public class Juego extends JFrame {
 		panelInferior.add(labelCursor, BorderLayout.WEST);
 		panelInferior.add(inputTexto, BorderLayout.CENTER);
 		panelInferior.setBackground(Config.colorPrincipal);
-		labelCursor.setBorder(new EmptyBorder(0, 10, 0, 0));
+		labelCursor.setBorder(new EmptyBorder(0, 20, 0, 0));
 		inputTexto.setBorder(Config.borde);
 		inputTexto.setHighlighter(null);
 		inputTexto.setBackground(Config.colorPrincipal);
@@ -142,45 +143,94 @@ public class Juego extends JFrame {
 		outputTexto.setCaretPosition(outputTexto.getDocument().getLength());
 	}
 
-	// Método para iniciar una partida nueva.
+	// Método para iniciar la partida.
 	public void nuevaPartida() {
+		misionActiva = misiones.ejecutarMisiones();
+		
 		while (true) {
-
+			
+			ejecutarMision();
+			
+			// Verificar si has terminado todas las misiones.
 			if (misionActiva == null) {
-				// Si no hay más misiones activas, terminar el juego.
 				outputTexto("¡Has completado todas las misiones! ¡Felicidades!");
 				break;
 			}
 
-			// Mostrar el mensaje de la misión al jugador (mostrar solo una vez).
-			if(!misionActiva.isMensajeMostrado()) {
-				String mensajeSistema = "Nueva Misión: " + misionActiva.getNombre() + "\n\n" + misionActiva.getMensaje();
-				outputTexto(mensajeSistema);
-				misionActiva.setMensajeMostrado(true);
+			mostrarMensajeDeMision();
+
+			// Finalizar la misión inicial (introducción).
+			if (misionActiva.getNombre().equalsIgnoreCase("Iniciación")) {
+				misionActiva.finalizarMision(misionActiva);
 			}
 
-			// Esperar a que el jugador escriba un comando.
-			synchronized (this) {
-				try {
-					wait();
-				} catch (InterruptedException e) {
-					e.printStackTrace();
-				}
+			if (misionActiva.isCompletada()) {
+				procesarMisionCompletada();
 			}
+			
+			actualizarLabelPuntos();
 
-			// Obtener el último comando ingresado por el jugador
-			String comando = obtenerComandoJugador();
-			outputTexto(comando);
+			esperarComando();
+		}
+	}
 
-			// Verificar que el jugador haya escrito "TERMINAR".
-			if (comando.equalsIgnoreCase("TERMINAR")) {
-				outputTexto("¡Hasta la próxima, aventurero!");
-				break; // Salir del bucle
-			} else {
-				// Ejecutar el comando.
-				comandos.ejecutarComando(comando);
+	// Método para ejecutar la misión.
+	private void ejecutarMision() {
+		misionActiva = misiones.ejecutarMisiones();
+	}
+
+	// Mostrar mensaje de la misión.
+	private void mostrarMensajeDeMision() {
+		if (!misionActiva.isMensajeMostrado()) {
+			String mensajeSistema = "- Nueva Misión: " + misionActiva.getNombre() + "\n\n" + misionActiva.getMensaje();
+			outputTexto(mensajeSistema);
+			
+			misionActiva.setMensajeMostrado(true);
+		}
+	}
+
+	// Completar una misión.
+	private void procesarMisionCompletada() {
+		int recompensa = misionActiva.getRecompensa();
+		
+		String mensaje = String.format("- ¡Misión \"%s\" completada!\n- Recompensa: %d puntos.", misionActiva.getNombre(), recompensa);
+		outputTexto(mensaje);
+		
+		jugador.setPuntos(jugador.getPuntos() + recompensa);
+		actualizarLabelPuntos();
+		
+		// Avanzar a la siguiente misión.
+		avanzarASiguienteMision();
+	}
+	
+	// Actualizar label de puntos.
+	private void actualizarLabelPuntos() {
+		labelPuntuacion.setText("PUNTOS: " + jugador.getPuntos());
+	}
+
+	// Método para esperar a que el jugador introduzca un comando.
+	private void esperarComando() {
+		synchronized (this) {
+			try {
+				wait();
+			} catch (InterruptedException e) {
+				e.printStackTrace();
 			}
 		}
+		outputTexto(obtenerComandoJugador());
+	}
+
+	// Método para avanzar a la siguiente misión al completar una.
+	private void avanzarASiguienteMision() {
+		misionActiva = misiones.ejecutarMisiones();
+
+		if (misionActiva != null && !misionActiva.isMensajeMostrado()) {
+			String mensajeSistema = "\nNueva Misión: " + misionActiva.getNombre() + "\n\n" + misionActiva.getMensaje();
+			outputTexto(mensajeSistema);
+			misionActiva.setMensajeMostrado(true);
+		}
+
+		notificarComandoIngresado();
 	}
 
 	// Método para notificar al hilo principal cuando se ha ingresado un comando.

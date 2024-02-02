@@ -1,14 +1,19 @@
 package comandos;
 
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
 import javax.swing.SwingUtilities;
+import javax.swing.Timer;
 
+import configuracion.Config;
 import juego.Juego;
 import juego.Jugador;
 import misiones.Misiones;
+import utilidades.Aleatorio;
 
 public class Comandos {
 
@@ -54,7 +59,10 @@ public class Comandos {
 		OESTE("O"),
 		MISION("M"),
 		TERMINAR("T"),
-		AYUDA("A");
+		AYUDA("A"),
+		CREDITOS,
+		TOC,
+		JUEGO;
 
 		private final String[] atajo;
 
@@ -118,6 +126,15 @@ public class Comandos {
 				case AYUDA:
 					comandoAyuda();
 					break;
+				case CREDITOS:
+					comandoCreditos();
+					break;
+				case TOC:
+					comandoToc(argumento);
+					break;
+				case JUEGO:
+					comandoJuego();
+					break;
 				default:
 					juego.outputTexto("No conozco el comando '" + comando + "'.");
 					break;
@@ -132,7 +149,6 @@ public class Comandos {
 	// NORTE
 	private void comandoNorte() {
 		juego.outputTexto("Te mueves en dirección norte.");
-		jugador.setPuntos(10);
 	}
 
 	// SUR
@@ -158,20 +174,63 @@ public class Comandos {
 	// TERMINAR
 	private void comandoTerminar() {
 		SwingUtilities.invokeLater(() -> {
-			juego.outputTexto("¡Hasta la próxima, aventurero!");
-			System.exit(0);
-		});
+	        juego.outputTexto("¡Hasta la próxima, aventurero!");
+	        // Agregar un temporizador para dar tiempo a leer el mensaje antes de salir.
+	        Timer timer = new Timer(2000, (ActionListener) new ActionListener() {
+	            @Override
+	            public void actionPerformed(ActionEvent e) {
+	                System.exit(0);
+	            }
+	        });
+	        timer.setRepeats(false); // Hacer que el temporizador solo se ejecute una vez
+	        timer.start();
+	    });
 	}
 
 	// AYUDA
 	private void comandoAyuda() {
-		juego.outputTexto("LISTA DE COMANDOS:");
-		juego.outputTexto("- NORTE: Te mueves en dirección norte.");
-		juego.outputTexto("- SUR: Te mueves en dirección sur.");
-		juego.outputTexto("- ESTE: Te mueves en dirección este.");
-		juego.outputTexto("- OESTE: Te mueves en dirección oeste.");
-		juego.outputTexto("- MISION: Muestra la misión actual.");
-		juego.outputTexto("- TERMINAR: Terminar la partida y salir del juego.");
+		String mensaje = "LISTA DE COMANDOS:\n"
+				+ "- NORTE: Te mueves en dirección norte.\n"
+				+ "- SUR: Te mueves en dirección sur.\n"
+				+ "- ESTE: Te mueves en dirección este.\n"
+				+ "- OESTE: Te mueves en dirección oeste.\n"
+				+ "- MISION: Muestra la misión actual.\n"
+				+ "- TERMINAR: Terminar la partida y salir del juego.\n"
+				+ "- CREDITOS: Muestra información sobre el creador del juego.";
+		
+		juego.outputTexto(mensaje);
+	}
+	
+	// CREDITOS
+	private void comandoCreditos() {
+		String mensaje = "(C) 2024 MORGATH I\n"
+				+ "Desarrollado por: ANDREU GARRIGA CENDÁN\n"
+				+ "Programado en: Java\n"
+				+ "Fuente utilizada: Flexi IBM VGA True (www.1001fonts.com)";
+				
+		juego.outputTexto(mensaje);
+	}
+	
+	// TOC-TOC
+	private void comandoToc(String arg) {
+		String mensaje = "";
+		String[] respuesta = {"¿Si?", "Adelante", "¿Quién es?", "¿Penny?"}; 
+		
+		if(arg == null) {
+			mensaje = "Mmm...";
+		} else if(arg.equalsIgnoreCase("TOC")) {
+			mensaje = respuesta[Aleatorio.Int(0, respuesta.length - 1)];
+		} else {
+			mensaje = "¿En serio? ¿Toc " + arg + "?";
+		}
+		
+		juego.outputTexto(mensaje);
+		
+	}
+	
+	// JUEGO
+	private void comandoJuego() {
+		juego.outputTexto("Estás jugando MORGATH I");
 	}
 
 }

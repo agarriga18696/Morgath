@@ -9,107 +9,106 @@ import java.util.List;
 public class Misiones {
 
 	private List<Mision> misiones;
+	private Mision misionActual = null;
 
 	public Misiones() {
-
 		this.misiones = new ArrayList<>();
-		
-		// Iniciar misiones.
-		//misionPrincipal();
-		obtenerMisionesArchivo("src/misiones/misiones.txt");
 
+		// Iniciar misiones.
+		obtenerMisionesArchivo("src/misiones/misiones.txt");
 	}
 
-	// Añadir misión al registro de misiones.
+	// Método para agregar una misión a la lista.
 	private void agregarMision(Mision mision) {
 		misiones.add(mision);
 	}
-	
-	// Acceder a una misión en concreto.
+
+	// Método para buscar una misión en concreto.
 	public Mision buscarMision(String nombre) {
-		Mision mision = null;
-		
-		for(Mision m : misiones) {
-			if(nombre != null && m.getNombre().equalsIgnoreCase(nombre.trim())) {
-				mision = m;
-				break;
-			}
-		}
-		
-		return mision;
-	}
-	
-	// Ejecutar las misiones.
-	public Mision ejecutarMisiones() {
-		
-		for(Mision m : misiones) {
-			
-			if(!m.isActivada()) {
-				int i = 0;
-				
-				Mision misionActual = misiones.get(i);
-				misiones.get(i).setActivada(true);
-				
-				if(misionActual.isCompletada()) {
-					misionActual.setActivada(false);
-					i++;
-				}
-					
-			}
-			
-			if(m.isActivada() && !m.isCompletada()) {
+
+		for (Mision m : misiones) {
+			if (nombre != null && m.getNombre().equalsIgnoreCase(nombre.trim())) {
 				return m;
 			}
 		}
-		
+
 		return null;
-		
 	}
 
-	// MISIONES
+	// Método para ejecutar las misiones.
+	public Mision ejecutarMisiones() {
+
+		for (Mision m : misiones) {
+			if (!m.isActivada() && !m.isCompletada()) {
+				//m.setActivada(true);
+				return m;
+			}
+		}
+
+		return null;
+	}
+
+	// Leer mensaje del archivo de misiones
+	private String leerMensaje(BufferedReader bReader) throws IOException {
+		StringBuilder mensaje = new StringBuilder();
+
+		String linea = bReader.readLine();
+
+		// Leer las líneas de texto hasta encontrar '#' o 'Recompensa:'.
+		while (linea != null && !linea.trim().startsWith("#") && !linea.trim().startsWith("-Recompensa:")) {
+			mensaje.append(linea.trim()).append("\n");
+			linea = bReader.readLine(); // Leer la siguiente línea dentro del bucle.
+		}
+
+		// Obtener el valor de la recompensa si la línea comienza con 'Recompensa:'.
+		if (linea != null && linea.trim().startsWith("-Recompensa:")) {
+			String recompensaString = linea.substring(12).trim();
+			int recompensa = Integer.parseInt(recompensaString);
+			misionActual.setRecompensa(recompensa);
+
+		} else if (linea != null && !linea.startsWith("#")) {
+			// La línea no es 'Recompensa:' ni '#', así que es parte del mensaje
+			mensaje.append(linea.trim()).append("\n");
+		}
+
+		return mensaje.toString();
+	}
+
+	// Método para obtener las misiones del archivo de misiones.
 	private void obtenerMisionesArchivo(String nombreArchivo) {
-		
-		try(BufferedReader bReader = new BufferedReader(new FileReader(nombreArchivo))){
+		try (BufferedReader bReader = new BufferedReader(new FileReader(nombreArchivo))) {
 			String linea;
-			Mision misionActual = null;
-			
-			while((linea = bReader.readLine()) != null) {
-				if(linea.startsWith("#")) {
+
+			while ((linea = bReader.readLine()) != null) {
+				if (linea.startsWith("#")) {
 					// Nueva misión.
-					if(misionActual != null) {
+					if (misionActual != null) {
 						agregarMision(misionActual);
 					}
-					
+
 					// Inicializar misión.
 					misionActual = new Mision(null, null, null, 0);
-					
+
 					// Asignar los valores desde el archivo.
 					misionActual.setNombre(linea.substring(2).trim());
-					
-				} else if(linea.startsWith("Objetivo:")) {
-					misionActual.setObjetivo(linea.substring(9).trim());
-					
-				} else if(linea.startsWith("Mensaje:")) {
-					StringBuilder mensaje = new StringBuilder(linea.substring(8).trim());
-					
-					while((linea = bReader.readLine()) != null && !linea.startsWith("#") && !linea.startsWith("Recompensa:")) {
-						mensaje.append("\n").append(linea.trim());
-					}
-					
-					misionActual.setMensaje(mensaje.toString() + "\n");
-					
-				} else if(linea.startsWith("Recompensa:")) {
-					misionActual.setRecompensa(Integer.parseInt(linea.substring(11).trim()));
+
+				} else if (linea.startsWith("-Objetivo:")) {
+					misionActual.setObjetivo(linea.substring(10).trim());
+
+				} else if (linea.startsWith("-Mensaje:")) {
+					misionActual.setMensaje(leerMensaje(bReader));
+
 				}
 			}
-			
+
 			// Añadir la misión y activarla.
-			if(misionActual != null) {
+			if (misionActual != null) {
 				agregarMision(misionActual);
 			}
-			
-		} catch(IOException e) {
+
+		} catch (IOException e) {
 			e.printStackTrace();
+			System.out.println("No se ha podido obtener la misión del archivo.");
 		}
 	}
 
