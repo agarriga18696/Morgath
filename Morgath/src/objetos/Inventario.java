@@ -17,7 +17,6 @@ public class Inventario {
 	public void agregarObjeto(Objeto objeto) {
 		
 		objetos.add(objeto);
-
 	}
 
 }

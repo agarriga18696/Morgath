@@ -1,6 +1,7 @@
-package juego;
+/*package juego;
 
 import java.awt.BorderLayout;
+import java.awt.Color;
 import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -13,9 +14,8 @@ import configuracion.Config;
 import misiones.Mision;
 import misiones.Misiones;
 
-public class Juego extends JFrame {
+public class Juego2 extends JFrame {
 
-	private static final long serialVersionUID = 1L;
 	private JPanel panelPrincipal, panelCentral, panelSuperior, panelInferior;
 	private JLabel labelLocalizacion, labelPuntuacion, labelCursor;
 	private JScrollPane barraScrollOutput;
@@ -27,7 +27,7 @@ public class Juego extends JFrame {
 	private Comandos comandos = new Comandos(jugador, this, misiones);
 	public Mision misionActiva = misiones.ejecutarMisiones();
 
-	public Juego() {
+	public Juego2() {
 
 		setSize(Config.anchoVentana, Config.altoVentana);
 		setResizable(false);
@@ -49,7 +49,7 @@ public class Juego extends JFrame {
 			@Override
 			public void actionPerformed(ActionEvent e) {
 				String comando = inputTexto.getText();
-				outputTexto(Config.CURSOR + " " + comando);
+				outputTexto(comando);
 				comandos.ejecutarComando(comando);
 
 				inputTexto.setText(""); // Limpiar el campo de texto después de obtener el texto.
@@ -84,52 +84,49 @@ public class Juego extends JFrame {
 
 		// Establecer fuente y color.
 		labelLocalizacion.setFont(Config.fuente);
-		labelLocalizacion.setForeground(Config.colorPrincipal);
+		labelLocalizacion.setForeground(new Color(0, 0, 0));
 		labelPuntuacion.setFont(Config.fuente);
-		labelPuntuacion.setForeground(Config.colorPrincipal);
+		labelPuntuacion.setForeground(new Color(0, 0, 0));
 		labelCursor.setFont(Config.fuente);
-		labelCursor.setForeground(Config.colorSecundario);
+		labelCursor.setForeground(new Color(180, 180, 180));
 		outputTexto.setFont(Config.fuente);
-		outputTexto.setForeground(Config.colorSecundario);
+		outputTexto.setForeground(new Color(180, 180, 180));
 		inputTexto.setFont(Config.fuente);
-		inputTexto.setForeground(Config.colorSecundario);
+		inputTexto.setForeground(new Color(180, 180, 180));
 
 		// Panel principal.
-		panelPrincipal.setLayout(new BorderLayout());
 		panelPrincipal.add(panelSuperior, BorderLayout.NORTH);
 		panelPrincipal.add(panelCentral, BorderLayout.CENTER);
 		panelPrincipal.add(panelInferior, BorderLayout.SOUTH);
-		panelPrincipal.setBackground(Config.colorPrincipal);
-
+		
 		// Panel superior.
-		panelSuperior.setLayout(new GridLayout(1, 2));
-		panelSuperior.add(labelLocalizacion);
-		panelSuperior.add(labelPuntuacion);
-		labelPuntuacion.setHorizontalAlignment(SwingConstants.RIGHT);
-		panelSuperior.setBorder(Config.borde);
-		panelSuperior.setBackground(Config.colorSecundario);
+		panelSuperior.add(labelLocalizacion, 1, 0);
+		panelSuperior.add(labelPuntuacion, BorderLayout.EAST);
+		panelSuperior.setBorder(new EmptyBorder(10, 10, 5, 10));
 
-		// Panel central.
-		panelCentral.setLayout(new BorderLayout());
-		panelCentral.add(barraScrollOutput, BorderLayout.CENTER);
-		panelCentral.setBackground(Config.colorPrincipal);
-		barraScrollOutput.setBorder(null);
-		outputTexto.setLineWrap(true);
-		outputTexto.setWrapStyleWord(true);
-		outputTexto.setBorder(Config.borde);
-		outputTexto.setHighlighter(null);
-		outputTexto.setEditable(false);
-		outputTexto.setBackground(Config.colorPrincipal);
-
-		// Panel inferior.
-		panelInferior.setLayout(new BorderLayout());
+		// Panel input.
 		panelInferior.add(labelCursor, BorderLayout.WEST);
 		panelInferior.add(inputTexto, BorderLayout.CENTER);
-		panelInferior.setBackground(Config.colorPrincipal);
-		labelCursor.setBorder(new EmptyBorder(0, 10, 0, 0));
-		inputTexto.setBorder(Config.borde);
+
+		// Texto Output.
+		outputTexto.setLineWrap(true);
+		outputTexto.setWrapStyleWord(true);
+		outputTexto.setBorder(new EmptyBorder(10, 10, 10, 10));
+		outputTexto.setHighlighter(null);
+		outputTexto.setEditable(false);
+
+		// Texto Input.
+		inputTexto.setBorder(new EmptyBorder(10, 10, 10, 10));
 		inputTexto.setHighlighter(null);
-		inputTexto.setBackground(Config.colorPrincipal);
+
+		panelInferior.setBorder(new EmptyBorder(0, 10, 0, 0));
+
+		// Establecer color de fondo.
+		panelPrincipal.setBackground(new Color(0, 0, 0));
+		panelSuperior.setBackground(new Color(180, 180, 180));
+		panelInferior.setBackground(new Color(0, 0, 0));
+		outputTexto.setBackground(new Color(0, 0, 0));
+		inputTexto.setBackground(new Color(0, 0, 0));
 
 		// Añadir paneles a la juego.
 		getContentPane().add(panelPrincipal);
@@ -154,7 +151,7 @@ public class Juego extends JFrame {
 
 			// Mostrar el mensaje de la misión al jugador (mostrar solo una vez).
 			if(!misionActiva.isMensajeMostrado()) {
-				String mensajeSistema = "Nueva Misión: " + misionActiva.getNombre() + "\n\n" + misionActiva.getMensaje();
+				String mensajeSistema = misionActiva.getMensaje();
 				outputTexto(mensajeSistema);
 				misionActiva.setMensajeMostrado(true);
 			}
@@ -194,4 +191,4 @@ public class Juego extends JFrame {
 		return inputTexto.getText().trim();
 	}
 
-}
+}*/
