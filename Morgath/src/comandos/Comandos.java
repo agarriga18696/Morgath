@@ -196,7 +196,8 @@ public class Comandos {
 				+ "- OESTE: Te mueves en dirección oeste.\n"
 				+ "- MISION: Muestra la misión actual.\n"
 				+ "- TERMINAR: Terminar la partida y salir del juego.\n"
-				+ "- CREDITOS: Muestra información sobre el creador del juego.";
+				+ "- CREDITOS: Muestra información sobre el creador del juego.\n"
+				+ "- JUEGO: Muestra la versión del juego.";
 		
 		juego.outputTexto(mensaje);
 	}
@@ -230,7 +231,7 @@ public class Comandos {
 	
 	// JUEGO
 	private void comandoJuego() {
-		juego.outputTexto("Estás jugando MORGATH I");
+		juego.outputTexto("Estás jugando MORGATH I (v.1.0.3)");
 	}
 
 }

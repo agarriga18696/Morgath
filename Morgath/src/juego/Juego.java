@@ -128,7 +128,7 @@ public class Juego extends JFrame {
 		panelInferior.add(inputTexto, BorderLayout.CENTER);
 		panelInferior.setBackground(Config.colorPrincipal);
 		labelCursor.setBorder(new EmptyBorder(0, 20, 0, 0));
-		inputTexto.setBorder(Config.borde);
+		inputTexto.setBorder(new EmptyBorder(20, 10, 20, 20));
 		inputTexto.setHighlighter(null);
 		inputTexto.setBackground(Config.colorPrincipal);
 
