@@ -15,6 +15,7 @@ import juego.Juego;
 import juego.Jugador;
 import localizaciones.Habitacion;
 import localizaciones.Mapa;
+import misiones.Mision;
 import objetos.Objeto;
 import utilidades.Aleatorio;
 
@@ -65,6 +66,7 @@ public class Comandos {
 		SOLTAR,
 		INVENTARIO("I"),
 		MISION("M"),
+		DIARIO,
 		TERMINAR("T"),
 		AYUDA("A"),
 		CREDITOS,
@@ -139,6 +141,9 @@ public class Comandos {
 					break;
 				case MISION:
 					comandoMision();
+					break;
+				case DIARIO:
+					comandoDiario();
 					break;
 				case TERMINAR:
 					comandoTerminar();
@@ -251,7 +256,7 @@ public class Comandos {
 		List<Objeto> objetosEnHabitacion = habitacionActual.getObjetos();
 
 		if (objetosEnHabitacion != null && !objetosEnHabitacion.isEmpty()) {
-			StringBuilder mensaje = new StringBuilder("Objetos en la habitación:");
+			StringBuilder mensaje = new StringBuilder("Objetos del lugar:");
 
 			for (Objeto objeto : objetosEnHabitacion) {
 				mensaje.append("\n- ").append(objeto.getNombre()).append(": ").append(objeto.getDescripcion());
@@ -260,7 +265,7 @@ public class Comandos {
 			juego.outputTexto(mensaje.toString());
 
 		} else {
-			juego.outputTexto("No hay objetos en la habitación.");
+			juego.outputTexto("No ves ningún objeto en este lugar.");
 		}
 
 	}
@@ -289,10 +294,10 @@ public class Comandos {
 			}
 
 			if (!encontrado) {
-				mensaje.append("El objeto '" + arg + "' no se encuentra en esta habitación.");
+				mensaje.append("El objeto '" + arg + "' no se encuentra en este lugar.");
 			}
 		} else {
-			mensaje.append("No hay objetos en esta habitación.");
+			mensaje.append("No hay objetos en este sitio.");
 		}
 
 		juego.outputTexto(mensaje.toString());
@@ -361,6 +366,25 @@ public class Comandos {
 	private void comandoMision() {
 		juego.outputTexto("\nMisión actual: " + juego.misionActiva.getNombre() + "\nObjetivo: " + juego.misionActiva.getObjetivo());
 	}
+	
+	// DIARIO
+	private void comandoDiario() {
+		// Muestra las misiones completadas.
+		StringBuilder mensaje = new StringBuilder();
+		List<Mision> misionesCompletadas = jugador.getMisionesCompletadas();
+		
+		if(misionesCompletadas != null && !misionesCompletadas.isEmpty()) {
+			mensaje.append("Diario de misiones:\n");
+			for(Mision mision : misionesCompletadas) {
+				mensaje.append("- ").append(mision.getNombre());
+			}
+		} else {
+			mensaje.append("Todavía no has completado ninguna misión.");
+		}
+		
+		juego.outputTexto(mensaje.toString());
+		
+	}
 
 	// TERMINAR
 	private void comandoTerminar() {
@@ -385,9 +409,14 @@ public class Comandos {
 				+ "- SUR: Te mueves en dirección sur.\n"
 				+ "- ESTE: Te mueves en dirección este.\n"
 				+ "- OESTE: Te mueves en dirección oeste.\n"
+				+ "- MIRAR: Miras a tu alrededor en busca de objetos.\n"
+				+ "- COGER <OBJETO>: Coges un objeto y lo guardas en tu inventario.\n"
+				+ "- SOLTAR <OBJETO>: Tiras un objeto de tu inventario y al suelo.\n"
+				+ "- INVENTARIO: Muestra una lista de los objetos que posees.\n"
 				+ "- MISION: Muestra la misión actual.\n"
+				+ "- DIARIO: Muestra las misiones que has completado."
 				+ "- TERMINAR: Terminar la partida y salir del juego.\n"
-				+ "- TEMA [tema]: Puedes alternar el color de la interfaz.\n"
+				+ "- TEMA <TEMA>: Cambia el esquema de color de la interfaz.\n"
 				+ "- CREDITOS: Muestra información sobre el creador del juego.\n"
 				+ "- JUEGO: Muestra la versión del juego.";
 

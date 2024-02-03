@@ -12,10 +12,9 @@ import comandos.Comandos;
 import configuracion.Config;
 import localizaciones.Habitacion;
 import localizaciones.Mapa;
+import localizaciones.Mapa.Direccion;
 import misiones.Mision;
 import misiones.Misiones;
-import objetos.FabricaObjetos;
-import objetos.Objeto;
 
 public class Juego extends JFrame {
 
@@ -31,6 +30,7 @@ public class Juego extends JFrame {
 	private Mapa mapa;
 	private Comandos comandos;
 	public Mision misionActiva;
+	private boolean empezarJuego = false;
 
 	public Juego() {
 
@@ -149,9 +149,10 @@ public class Juego extends JFrame {
 	// Método para iniciar la partida.
 	public void nuevaPartida() {
 		misionActiva = misiones.ejecutarMisiones();
-
-		while (true) {
-
+		mostrarMensajeDeMision();
+		empezarJuego = true;
+		
+		while(empezarJuego) {
 			ejecutarMision();
 
 			// Verificar si has terminado todas las misiones.
@@ -159,12 +160,22 @@ public class Juego extends JFrame {
 				outputTexto("¡Has completado todas las misiones! ¡Felicidades!");
 				break;
 			}
-
 			mostrarMensajeDeMision();
 
 			// Finalizar la misión inicial (introducción).
 			if (misionActiva.getNombre().equalsIgnoreCase("Iniciación")) {
-				misionActiva.finalizarMision(misionActiva);
+			    if (obtenerUltimoComando().equalsIgnoreCase("EXPLORAR")) {
+			        misionActiva.finalizarMision(misionActiva);
+			        // Obtener la habitación hacia el norte desde la habitación actual del jugador.
+			        mapa.agregarConexion(jugador.getUbicacion(), mapa.habitacion1, Direccion.ESTE);
+			    }
+			}
+
+
+			if(misionActiva.getNombre().equalsIgnoreCase("Despertar")) {
+				if(jugador.getInventario() != null && !jugador.getInventario().isEmpty() && jugador.getInventario().get(0).getNombre().equalsIgnoreCase("Espada")) {
+					misionActiva.finalizarMision(misionActiva);
+				}
 			}
 
 			if (misionActiva.isCompletada()) {
@@ -172,7 +183,6 @@ public class Juego extends JFrame {
 			}
 
 			actualizarLabelPuntos();
-
 			esperarComando();
 		}
 	}
@@ -199,8 +209,12 @@ public class Juego extends JFrame {
 		String mensaje = String.format("- ¡Misión \"%s\" completada!\n- Recompensa: %d puntos.", misionActiva.getNombre(), recompensa);
 		outputTexto(mensaje);
 
+		// Sumar los puntos de la misión.
 		jugador.setPuntos(jugador.getPuntos() + recompensa);
 		actualizarLabelPuntos();
+
+		// Añadir misión a la lista de misiones completadas.
+		jugador.getMisionesCompletadas().add(misionActiva);
 
 		// Avanzar a la siguiente misión.
 		avanzarASiguienteMision();
@@ -233,16 +247,18 @@ public class Juego extends JFrame {
 				e.printStackTrace();
 			}
 		}
-		outputTexto(obtenerComandoJugador());
+		
+		outputTexto(obtenerUltimoComando());
 	}
+
 	// Método para notificar al hilo principal cuando se ha ingresado un comando.
 	public synchronized void notificarComandoIngresado() {
 		notify();
 	}
 
-	// Método para obtener el comando del jugador del inputTexto.
-	private String obtenerComandoJugador() {
 
+	// Método para obtener el comando del jugador del inputTexto.
+	private String obtenerUltimoComando() {
 		return inputTexto.getText().trim();
 	}
 

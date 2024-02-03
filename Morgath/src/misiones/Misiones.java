@@ -23,28 +23,14 @@ public class Misiones {
 		misiones.add(mision);
 	}
 
-	// Método para buscar una misión en concreto.
-	public Mision buscarMision(String nombre) {
-
-		for (Mision m : misiones) {
-			if (nombre != null && m.getNombre().equalsIgnoreCase(nombre.trim())) {
-				return m;
-			}
-		}
-
-		return null;
-	}
-
 	// Método para ejecutar las misiones.
 	public Mision ejecutarMisiones() {
-
 		for (Mision m : misiones) {
 			if (!m.isActivada() && !m.isCompletada()) {
 				//m.setActivada(true);
 				return m;
 			}
 		}
-
 		return null;
 	}
 

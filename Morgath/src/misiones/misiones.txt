@@ -1,17 +1,16 @@
 # Iniciación
 -Objetivo: Empieza tu aventura.
 -Mensaje:
-¡Bienvenido a Morgath, aventurero! Tu viaje apenas comienza, así que aquí tienes algunos consejos que te serán de gran ayuda, ¡ya me lo agradecerás! En este mundo insólito, lleno de peligros y desafíos, la muerte acecha en cada esquina y rincón.
-El objetivo principal del juego es derrotar al Inquisidor, el enemigo final. No será fácil, deberás superar numerosos obstáculos y adquirir objetos esenciales para completar las misiones. Pero, sobre todo, no pierdas la esperanza.
-Estás listo para avanzar en tu misión. Explora, sumérgete en la fascinante historia de este mundo y ¡mucha suerte, aventurero!
+Bienvenido, valeroso aventurero. Te encuentras en un mundo enigmático, repleto de desafíos y peligros que acechan en las sombras. El propósito fundamental de tu travesía es la derrota del Inquisidor, el astuto enemigo final que aguarda en la penumbra. No subestimes la magnitud de la tarea; enfrentarás obstáculos que pondrán a prueba tu astucia y valentía. Recolecta objetos esenciales para completar las misiones, pero, sobre todo, mantén la llama de la esperanza ardiendo en tu corazón.
+Te aguarda una misión épica. Explora cada rincón, sumérgete en la intrigante narrativa de este mundo y que la fortuna te acompañe, intrépido aventurero.
 Escribe 'AYUDA' en cualquier momento para ver los comandos.
 -Recompensa: 0
 
 # Despertar
--Objetivo: Sigue tu instinto.
+-Objetivo: Hazte con una espada.
 -Mensaje:
-Es de noche, y te encuentras en mitad de un camino. No estás seguro de cómo has llegado hasta aquí, lo último que recuerdas un duro golpe en la cabeza, y luego, oscuridad.
-Deberías seguir tu instinto y encontrar el camino de vuelta lo antes posible, la noche no es amigable en estos tiempos... 
+Es plena noche, te encuentras en mitad de un camino, dubitativo sobre cómo arribaste a este lugar. La última imagen que reposa en tu memoria es la de disfrutar de aguardiente en una celebración local.
+Frente a ti se despliega un angosto sendero que conduce a una casa vetusta. La noche, poco amigable en estos tiempos, presenta un riesgo inminente para alguien en tus condiciones; una presa fácil para los bandidos. La prudencia te sugiere hallar refugio y procurar una espada para asegurar tu defensa.
 -Recompensa: 20
 
 # La torre
