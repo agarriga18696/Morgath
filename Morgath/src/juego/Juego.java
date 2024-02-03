@@ -10,24 +10,35 @@ import javax.swing.border.EmptyBorder;
 
 import comandos.Comandos;
 import configuracion.Config;
+import localizaciones.Habitacion;
+import localizaciones.Mapa;
 import misiones.Mision;
 import misiones.Misiones;
+import objetos.FabricaObjetos;
+import objetos.Objeto;
 
 public class Juego extends JFrame {
 
 	private static final long serialVersionUID = 1L;
-	private JPanel panelPrincipal, panelCentral, panelSuperior, panelInferior;
-	private JLabel labelUbicacion, labelPuntuacion, labelCursor;
-	private JScrollPane barraScrollOutput;
-	private JTextArea outputTexto;
-	private JTextField inputTexto;
+	public JPanel panelPrincipal, panelCentral, panelSuperior, panelInferior;
+	public JLabel labelUbicacion, labelPuntuacion, labelCursor;
+	public JScrollPane barraScrollOutput;
+	public JTextArea outputTexto;
+	public JTextField inputTexto;
 
-	private Jugador jugador = new Jugador("CAMINO");
-	private Misiones misiones = new Misiones();
-	private Comandos comandos = new Comandos(jugador, this, misiones);
+	private Jugador jugador;
+	private Misiones misiones;
+	private Mapa mapa;
+	private Comandos comandos;
 	public Mision misionActiva;
 
 	public Juego() {
+
+		mapa = new Mapa();
+		Habitacion ubicacionInicial = mapa.obtenerHabitacionInicial();
+		jugador = new Jugador(ubicacionInicial);
+		misiones = new Misiones();
+		comandos = new Comandos(jugador, this, mapa);
 
 		setSize(Config.anchoVentana, Config.altoVentana);
 		setResizable(false);
@@ -36,10 +47,10 @@ public class Juego extends JFrame {
 		setTitle("MORGATH I");
 
 		// Paneles.
-		panelPrincipal = new JPanel(new BorderLayout());
-		panelCentral = new JPanel(new GridLayout(1, 0));
-		panelSuperior = new JPanel(new GridLayout(1, 2));
-		panelInferior = new JPanel(new BorderLayout());
+		panelPrincipal = new JPanel();
+		panelCentral = new JPanel();
+		panelSuperior = new JPanel();
+		panelInferior = new JPanel();
 
 		// Area Texto.
 		outputTexto = new JTextArea();
@@ -66,7 +77,7 @@ public class Juego extends JFrame {
 		barraScrollOutput.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_NEVER);
 
 		// Etiquetas.
-		labelUbicacion = new JLabel("UBICACIÓN: " + jugador.getLocalizacion());
+		labelUbicacion = new JLabel("UBICACIÓN: " + jugador.getUbicacion().getNombre());
 		labelPuntuacion = new JLabel("PUNTOS: " + jugador.getPuntos());
 		labelCursor = new JLabel(Config.CURSOR);
 
@@ -82,59 +93,51 @@ public class Juego extends JFrame {
 	}
 
 	private void configurarVentana() {
+		SwingUtilities.invokeLater(() -> {
+			// Establecer fuente y color.
+			labelUbicacion.setFont(Config.fuente);
+			labelPuntuacion.setFont(Config.fuente);
+			labelCursor.setFont(Config.fuente);
+			outputTexto.setFont(Config.fuente);
+			inputTexto.setFont(Config.fuente);
 
-		// Establecer fuente y color.
-		labelUbicacion.setFont(Config.fuente);
-		labelUbicacion.setForeground(Config.colorSecundario);
-		labelPuntuacion.setFont(Config.fuente);
-		labelPuntuacion.setForeground(Config.colorSecundario);
-		labelCursor.setFont(Config.fuente);
-		labelCursor.setForeground(Config.colorSecundario);
-		outputTexto.setFont(Config.fuente);
-		outputTexto.setForeground(Config.colorSecundario);
-		inputTexto.setFont(Config.fuente);
-		inputTexto.setForeground(Config.colorSecundario);
+			// Panel principal.
+			panelPrincipal.setLayout(new BorderLayout());
+			panelPrincipal.add(panelSuperior, BorderLayout.NORTH);
+			panelPrincipal.add(panelCentral, BorderLayout.CENTER);
+			panelPrincipal.add(panelInferior, BorderLayout.SOUTH);
 
-		// Panel principal.
-		panelPrincipal.setLayout(new BorderLayout());
-		panelPrincipal.add(panelSuperior, BorderLayout.NORTH);
-		panelPrincipal.add(panelCentral, BorderLayout.CENTER);
-		panelPrincipal.add(panelInferior, BorderLayout.SOUTH);
-		panelPrincipal.setBackground(Config.colorPrincipal);
+			// Panel superior.
+			panelSuperior.setLayout(new GridLayout(1, 2));
+			panelSuperior.add(labelUbicacion);
+			panelSuperior.add(labelPuntuacion);
+			labelPuntuacion.setHorizontalAlignment(SwingConstants.RIGHT);
+			panelSuperior.setBorder(Config.borde);
 
-		// Panel superior.
-		panelSuperior.setLayout(new GridLayout(1, 2));
-		panelSuperior.add(labelUbicacion);
-		panelSuperior.add(labelPuntuacion);
-		labelPuntuacion.setHorizontalAlignment(SwingConstants.RIGHT);
-		panelSuperior.setBorder(Config.borde);
-		panelSuperior.setBackground(Config.colorPrincipal);
+			// Panel central.
+			panelCentral.setLayout(new BorderLayout());
+			panelCentral.add(barraScrollOutput, BorderLayout.CENTER);
+			barraScrollOutput.setBorder(null);
+			outputTexto.setLineWrap(true);
+			outputTexto.setWrapStyleWord(true);
+			outputTexto.setBorder(Config.borde);
+			outputTexto.setHighlighter(null);
+			outputTexto.setEditable(false);
 
-		// Panel central.
-		panelCentral.setLayout(new BorderLayout());
-		panelCentral.add(barraScrollOutput, BorderLayout.CENTER);
-		panelCentral.setBackground(Config.colorPrincipal);
-		barraScrollOutput.setBorder(null);
-		outputTexto.setLineWrap(true);
-		outputTexto.setWrapStyleWord(true);
-		outputTexto.setBorder(Config.borde);
-		outputTexto.setHighlighter(null);
-		outputTexto.setEditable(false);
-		outputTexto.setBackground(Config.colorPrincipal);
+			// Panel inferior.
+			panelInferior.setLayout(new BorderLayout());
+			panelInferior.add(labelCursor, BorderLayout.WEST);
+			panelInferior.add(inputTexto, BorderLayout.CENTER);
+			labelCursor.setBorder(new EmptyBorder(0, 20, 0, 0));
+			inputTexto.setBorder(new EmptyBorder(20, 10, 20, 20));
+			inputTexto.setHighlighter(null);
 
-		// Panel inferior.
-		panelInferior.setLayout(new BorderLayout());
-		panelInferior.add(labelCursor, BorderLayout.WEST);
-		panelInferior.add(inputTexto, BorderLayout.CENTER);
-		panelInferior.setBackground(Config.colorPrincipal);
-		labelCursor.setBorder(new EmptyBorder(0, 20, 0, 0));
-		inputTexto.setBorder(new EmptyBorder(20, 10, 20, 20));
-		inputTexto.setHighlighter(null);
-		inputTexto.setBackground(Config.colorPrincipal);
+			// Añadir paneles a la juego.
+			getContentPane().add(panelPrincipal);
 
-		// Añadir paneles a la juego.
-		getContentPane().add(panelPrincipal);
-
+			// Aplicar el esquema de colores.
+			comandos.actualizarInterfazSegunTema();
+		});
 	}
 
 	// Método para mostrar mensajes en el outputTexto.
@@ -146,11 +149,11 @@ public class Juego extends JFrame {
 	// Método para iniciar la partida.
 	public void nuevaPartida() {
 		misionActiva = misiones.ejecutarMisiones();
-		
+
 		while (true) {
-			
+
 			ejecutarMision();
-			
+
 			// Verificar si has terminado todas las misiones.
 			if (misionActiva == null) {
 				outputTexto("¡Has completado todas las misiones! ¡Felicidades!");
@@ -167,7 +170,7 @@ public class Juego extends JFrame {
 			if (misionActiva.isCompletada()) {
 				procesarMisionCompletada();
 			}
-			
+
 			actualizarLabelPuntos();
 
 			esperarComando();
@@ -184,7 +187,7 @@ public class Juego extends JFrame {
 		if (!misionActiva.isMensajeMostrado()) {
 			String mensajeSistema = "- Nueva Misión: " + misionActiva.getNombre() + "\n\n" + misionActiva.getMensaje();
 			outputTexto(mensajeSistema);
-			
+
 			misionActiva.setMensajeMostrado(true);
 		}
 	}
@@ -192,17 +195,30 @@ public class Juego extends JFrame {
 	// Completar una misión.
 	private void procesarMisionCompletada() {
 		int recompensa = misionActiva.getRecompensa();
-		
+
 		String mensaje = String.format("- ¡Misión \"%s\" completada!\n- Recompensa: %d puntos.", misionActiva.getNombre(), recompensa);
 		outputTexto(mensaje);
-		
+
 		jugador.setPuntos(jugador.getPuntos() + recompensa);
 		actualizarLabelPuntos();
-		
+
 		// Avanzar a la siguiente misión.
 		avanzarASiguienteMision();
 	}
-	
+
+	// Método para avanzar a la siguiente misión al completar una.
+	private void avanzarASiguienteMision() {
+		misionActiva = misiones.ejecutarMisiones();
+
+		if (misionActiva != null && !misionActiva.isMensajeMostrado()) {
+			String mensajeSistema = "\nNueva Misión: " + misionActiva.getNombre() + "\n\n" + misionActiva.getMensaje();
+			outputTexto(mensajeSistema);
+			misionActiva.setMensajeMostrado(true);
+		}
+
+		notificarComandoIngresado();
+	}
+
 	// Actualizar label de puntos.
 	private void actualizarLabelPuntos() {
 		labelPuntuacion.setText("PUNTOS: " + jugador.getPuntos());
@@ -219,20 +235,6 @@ public class Juego extends JFrame {
 		}
 		outputTexto(obtenerComandoJugador());
 	}
-
-	// Método para avanzar a la siguiente misión al completar una.
-	private void avanzarASiguienteMision() {
-		misionActiva = misiones.ejecutarMisiones();
-
-		if (misionActiva != null && !misionActiva.isMensajeMostrado()) {
-			String mensajeSistema = "\nNueva Misión: " + misionActiva.getNombre() + "\n\n" + misionActiva.getMensaje();
-			outputTexto(mensajeSistema);
-			misionActiva.setMensajeMostrado(true);
-		}
-
-		notificarComandoIngresado();
-	}
-
 	// Método para notificar al hilo principal cuando se ha ingresado un comando.
 	public synchronized void notificarComandoIngresado() {
 		notify();

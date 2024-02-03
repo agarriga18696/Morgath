@@ -7,11 +7,11 @@ Estás listo para avanzar en tu misión. Explora, sumérgete en la fascinante hi
 Escribe 'AYUDA' en cualquier momento para ver los comandos.
 -Recompensa: 0
 
-# Encerrado
--Objetivo: Encuentra una salida.
+# Despertar
+-Objetivo: Sigue tu instinto.
 -Mensaje:
-Te encuentras encerrado en un sótano. No estás seguro de cómo has llegado hasta aquí, lo último que recuerdas un duro golpe en la cabeza.
-Deberías investigar cómo has llegado hasta aquí y encontrar una salida lo antes posible.
+Es de noche, y te encuentras en mitad de un camino. No estás seguro de cómo has llegado hasta aquí, lo último que recuerdas un duro golpe en la cabeza, y luego, oscuridad.
+Deberías seguir tu instinto y encontrar el camino de vuelta lo antes posible, la noche no es amigable en estos tiempos... 
 -Recompensa: 20
 
 # La torre
