@@ -12,16 +12,17 @@ import comandos.Comandos;
 import configuracion.Config;
 import localizaciones.Habitacion;
 import localizaciones.Mapa;
-import localizaciones.Mapa.Direccion;
 import misiones.Mision;
 import misiones.Misiones;
+import personajes.Jugador;
 
 public class Juego extends JFrame {
 
 	private static final long serialVersionUID = 1L;
 	public JPanel panelPrincipal, panelCentral, panelSuperior, panelInferior;
 	public JLabel labelUbicacion, labelPuntuacion, labelCursor;
-	public JScrollPane barraScrollOutput;
+	public JScrollPane barraScroll;
+	public JScrollBar barraScrollPersonalizada;
 	public JTextArea outputTexto;
 	public JTextField inputTexto;
 
@@ -30,7 +31,8 @@ public class Juego extends JFrame {
 	private Mapa mapa;
 	private Comandos comandos;
 	public Mision misionActiva;
-	private boolean empezarJuego = false;
+	public boolean empezarJuego;
+	public static String ultimoComandoUsado;
 
 	public Juego() {
 
@@ -62,6 +64,7 @@ public class Juego extends JFrame {
 				String comando = inputTexto.getText();
 				outputTexto(Config.CURSOR + " " + comando);
 				comandos.ejecutarComando(comando);
+				ultimoComandoUsado = comando;
 
 				// Limpiar el campo de texto después de obtener el texto.
 				inputTexto.setText("");
@@ -72,9 +75,11 @@ public class Juego extends JFrame {
 		});
 
 		// Barra Scroll.
-		barraScrollOutput = new JScrollPane(outputTexto);
-		barraScrollOutput.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
-		barraScrollOutput.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_NEVER);
+		barraScroll = new JScrollPane(outputTexto);
+		barraScrollPersonalizada = new JScrollBar(JScrollBar.VERTICAL);
+		//barraScroll.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
+		//barraScroll.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED);
+		barraScroll.setVerticalScrollBar(barraScrollPersonalizada);
 
 		// Etiquetas.
 		labelUbicacion = new JLabel("UBICACIÓN: " + jugador.getUbicacion().getNombre());
@@ -116,8 +121,8 @@ public class Juego extends JFrame {
 
 			// Panel central.
 			panelCentral.setLayout(new BorderLayout());
-			panelCentral.add(barraScrollOutput, BorderLayout.CENTER);
-			barraScrollOutput.setBorder(null);
+			panelCentral.add(barraScroll, BorderLayout.CENTER);
+			barraScroll.setBorder(null);
 			outputTexto.setLineWrap(true);
 			outputTexto.setWrapStyleWord(true);
 			outputTexto.setBorder(Config.borde);
@@ -140,50 +145,31 @@ public class Juego extends JFrame {
 		});
 	}
 
-	// Método para mostrar mensajes en el outputTexto.
+	// Método para mostrar mensajes en el outputTexto con espacio entre ellos.
 	public void outputTexto(String texto) {
-		outputTexto.append(texto + "\n");
-		outputTexto.setCaretPosition(outputTexto.getDocument().getLength());
+		SwingUtilities.invokeLater(() -> {
+			outputTexto.append(texto + "\n");  // Agrega dos líneas en blanco adicionales
+			outputTexto.setCaretPosition(outputTexto.getDocument().getLength());
+		});
 	}
 
 	// Método para iniciar la partida.
 	public void nuevaPartida() {
-		misionActiva = misiones.ejecutarMisiones();
-		mostrarMensajeDeMision();
-		empezarJuego = true;
-		
-		while(empezarJuego) {
-			ejecutarMision();
+		ejecutarMision();
 
-			// Verificar si has terminado todas las misiones.
-			if (misionActiva == null) {
-				outputTexto("¡Has completado todas las misiones! ¡Felicidades!");
-				break;
-			}
+		while (true) {
 			mostrarMensajeDeMision();
 
-			// Finalizar la misión inicial (introducción).
-			if (misionActiva.getNombre().equalsIgnoreCase("Iniciación")) {
-			    if (obtenerUltimoComando().equalsIgnoreCase("EXPLORAR")) {
-			        misionActiva.finalizarMision(misionActiva);
-			        // Obtener la habitación hacia el norte desde la habitación actual del jugador.
-			        mapa.agregarConexion(jugador.getUbicacion(), mapa.habitacion1, Direccion.ESTE);
-			    }
-			}
-
-
-			if(misionActiva.getNombre().equalsIgnoreCase("Despertar")) {
-				if(jugador.getInventario() != null && !jugador.getInventario().isEmpty() && jugador.getInventario().get(0).getNombre().equalsIgnoreCase("Espada")) {
-					misionActiva.finalizarMision(misionActiva);
-				}
-			}
-
-			if (misionActiva.isCompletada()) {
+			// Verificar condiciones específicas de finalización de la misión.
+			if (misionActiva != null && misionActiva.verificarCondicionesEspecificas(jugador)) {
+				misionActiva.finalizarMision();
 				procesarMisionCompletada();
 			}
 
 			actualizarLabelPuntos();
 			esperarComando();
+			//ultimoComandoUsado = obtenerUltimoComando();
+
 		}
 	}
 
@@ -194,7 +180,7 @@ public class Juego extends JFrame {
 
 	// Mostrar mensaje de la misión.
 	private void mostrarMensajeDeMision() {
-		if (!misionActiva.isMensajeMostrado()) {
+		if (misionActiva != null && !misionActiva.isCompletada() && !misionActiva.isMensajeMostrado()) {
 			String mensajeSistema = "- Nueva Misión: " + misionActiva.getNombre() + "\n\n" + misionActiva.getMensaje();
 			outputTexto(mensajeSistema);
 
@@ -213,24 +199,25 @@ public class Juego extends JFrame {
 		jugador.setPuntos(jugador.getPuntos() + recompensa);
 		actualizarLabelPuntos();
 
-		// Añadir misión a la lista de misiones completadas.
-		jugador.getMisionesCompletadas().add(misionActiva);
-
 		// Avanzar a la siguiente misión.
 		avanzarASiguienteMision();
 	}
 
 	// Método para avanzar a la siguiente misión al completar una.
 	private void avanzarASiguienteMision() {
-		misionActiva = misiones.ejecutarMisiones();
+	    if (misionActiva != null && misionActiva.isCompletada()) {
+	        misionActiva = misiones.ejecutarMisiones();
 
-		if (misionActiva != null && !misionActiva.isMensajeMostrado()) {
-			String mensajeSistema = "\nNueva Misión: " + misionActiva.getNombre() + "\n\n" + misionActiva.getMensaje();
-			outputTexto(mensajeSistema);
-			misionActiva.setMensajeMostrado(true);
-		}
+	        if (misionActiva != null) {
+	            if (!misionActiva.isMensajeMostrado()) {
+	                String mensajeSistema = "\nNueva Misión: " + misionActiva.getNombre() + "\n\n" + misionActiva.getMensaje();
+	                outputTexto(mensajeSistema);
+	                misionActiva.setMensajeMostrado(true);
+	            }
 
-		notificarComandoIngresado();
+	            notificarComandoIngresado();
+	        }
+	    }
 	}
 
 	// Actualizar label de puntos.
@@ -247,7 +234,7 @@ public class Juego extends JFrame {
 				e.printStackTrace();
 			}
 		}
-		
+
 		outputTexto(obtenerUltimoComando());
 	}
 
@@ -255,7 +242,6 @@ public class Juego extends JFrame {
 	public synchronized void notificarComandoIngresado() {
 		notify();
 	}
-
 
 	// Método para obtener el comando del jugador del inputTexto.
 	private String obtenerUltimoComando() {

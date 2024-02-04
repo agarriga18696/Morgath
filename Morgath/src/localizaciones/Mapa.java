@@ -8,69 +8,91 @@ import objetos.Objeto;
 
 public class Mapa {
 
-	public Habitacion habitacion0;
-	public Habitacion habitacion1;
-	public Habitacion habitacion2;
-	
+	public Habitacion habitacion_00;
+	public Habitacion habitacion_01;
+	public Habitacion habitacion_02;
+
 	public Map<Habitacion, Map<Direccion, Habitacion>> mapa;
 
-	public Mapa() {
-		this.mapa = new HashMap<>();
-		inicializarMapa();
-	}
+    public Mapa() {
+        this.mapa = new HashMap<>();
+        inicializarMapa();
+    }
 
 	public enum Direccion {
 		NORTE,
 		SUR,
 		OESTE,
-		ESTE
+		ESTE;
+
+		// Método para obtener la dirección opuesta.
+		public Direccion opuesta() {
+			switch (this) {
+			case NORTE:
+				return SUR;
+			case SUR:
+				return NORTE;
+			case OESTE:
+				return ESTE;
+			case ESTE:
+				return OESTE;
+			default:
+				throw new IllegalArgumentException("Dirección no válida");
+			}
+		}
 	}
 
-	// Crear las conexiones con todas las habitaciones del juego.
+
+	public Map<Habitacion, Map<Direccion, Habitacion>> getMapa(){
+		return mapa;
+	}
+
+	// Método para inicializar el mapa.
 	public void inicializarMapa() {
-		habitacion0 = new Habitacion(0, "Camino", "Estás en mitad de un camino pedregoso, es de noche y hace mucho frío, será mejor que te resguardes en algún sitio.");
-		habitacion1 = new Habitacion(1, "Sendero", "Estás en mitad de un camino pedregoso, es de noche y hace mucho frío, será mejor que te resguardes en algún sitio.");
-		habitacion2 = new Habitacion(2, "Casa", "Estás en la entrada principal de la casa, donde la luz es tenue, el ambiente se percibe húmedo y el distintivo olor a armario antiguo impregna el aire. A primera vista, no observas nada relevante, pero al concentrarte más, notas algo que destella entre la penumbra.");
+		habitacion_00 = new Habitacion(0, "Sendero sin Retorno", "Estás en mitad de un camino pedregoso, al este hay un sendero que parece ser seguro.");
+		habitacion_01 = new Habitacion(1, "Sendero", "El sendero es muy estrecho, parece llevar a una vieja casa de campo, parece abandonada. Tal vez sea un buen sitio para refugiarse.");
+		habitacion_02 = new Habitacion(2, "Casa: entrada", "Estás en la entrada principal de la casa, donde la luz es tenue, el ambiente se percibe húmedo y el distintivo olor a armario antiguo impregna el aire. A primera vista, no observas nada relevante, pero al concentrarte más, notas algo que destella entre la penumbra.");
+		
+		// Agregar conexiones.
+		conectar(habitacion_00, habitacion_01, Direccion.ESTE);
+		conectar(habitacion_01, habitacion_02, Direccion.NORTE);
+		
 		Objeto espada = FabricaObjetos.crearEspada();
-        habitacion1.agregarObjeto(espada);
-
-		agregarConexion(habitacion0, habitacion1, null);
-		agregarConexion(habitacion1, habitacion0, Mapa.Direccion.OESTE);
-		agregarConexion(habitacion1, habitacion2, Mapa.Direccion.NORTE);
-		agregarConexion(habitacion2, habitacion1, Mapa.Direccion.SUR);
+		habitacion_02.agregarObjeto(espada);
+		
 	}
 
-	// Método para obtener la habitación inicial del mapa
+	// Método para obtener la habitación inicial del mapa.
 	public Habitacion obtenerHabitacionInicial() {
-		// En este ejemplo, asumimos que la habitación inicial tiene el ID 0
 		return obtenerHabitacionPorId(0);
 	}
 
-	// Método para obtener una habitación del mapa por su ID
+	// Método para obtener una habitación del mapa por su ID.
 	public Habitacion obtenerHabitacionPorId(int id) {
 		for (Habitacion habitacion : mapa.keySet()) {
 			if (habitacion.getId() == id) {
 				return habitacion;
 			}
 		}
-		
+
 		return null; // Habitación no encontrada
 	}
 
-	public void agregarConexion(Habitacion habitacionActual, Habitacion habitacionEnDireccion, Mapa.Direccion direccion) {
-		Map<Mapa.Direccion, Habitacion> direcciones = new HashMap<>();
-		direcciones.put(direccion, habitacionEnDireccion);
-		mapa.put(habitacionActual, direcciones);
+	// Método para conectar las habitaciones entre ellas.
+	public void conectar(Habitacion habitacionOrigen, Habitacion habitacionDestino, Direccion direccion) {
+	    habitacionOrigen.setSalidas(mapa.computeIfAbsent(habitacionOrigen, k -> new HashMap<>()));
+	    habitacionDestino.setSalidas(mapa.computeIfAbsent(habitacionDestino, k -> new HashMap<>()));
+
+	    habitacionOrigen.getSalidas().put(direccion, habitacionDestino);
+	    habitacionDestino.getSalidas().put(direccion.opuesta(), habitacionOrigen);
 	}
 
-	public Habitacion moverse(Habitacion habitacionActual, Mapa.Direccion direccion) {
-		Map<Mapa.Direccion, Habitacion> direcciones = mapa.get(habitacionActual);
+	// Método para mover al jugador por las habitaciones.
+	public Habitacion moverJugador(Habitacion habitacionActual, Direccion direccion) {
+		Map<Direccion, Habitacion> direcciones = mapa.get(habitacionActual);
 		if (direcciones != null && direcciones.containsKey(direccion)) {
-			Habitacion nuevaHabitacion = direcciones.get(direccion);
-			//System.out.println("Te has movido en dirección " + direccion + " a la habitación " + nuevaHabitacion.getNombre());
-			return nuevaHabitacion;
+			return direcciones.get(direccion);
 		} else {
-			//System.out.println("No hay conexión en la dirección " + direccion + " desde la habitación actual.");
 			return habitacionActual;
 		}
 	}

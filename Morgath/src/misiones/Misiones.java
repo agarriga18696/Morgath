@@ -25,19 +25,18 @@ public class Misiones {
 
 	// Método para ejecutar las misiones.
 	public Mision ejecutarMisiones() {
-		for (Mision m : misiones) {
-			if (!m.isActivada() && !m.isCompletada()) {
-				//m.setActivada(true);
-				return m;
-			}
-		}
-		return null;
+	    for (Mision m : misiones) {
+	        if (!m.isActivada() && !m.isCompletada()) {
+	            m.setActivada(true);
+	            return m;
+	        }
+	    }
+	    return null;
 	}
 
 	// Leer mensaje del archivo de misiones
 	private String leerMensaje(BufferedReader bReader) throws IOException {
 		StringBuilder mensaje = new StringBuilder();
-
 		String linea = bReader.readLine();
 
 		// Leer las líneas de texto hasta encontrar '#' o 'Recompensa:'.
@@ -52,9 +51,6 @@ public class Misiones {
 			int recompensa = Integer.parseInt(recompensaString);
 			misionActual.setRecompensa(recompensa);
 
-		} else if (linea != null && !linea.startsWith("#")) {
-			// La línea no es 'Recompensa:' ni '#', así que es parte del mensaje
-			mensaje.append(linea.trim()).append("\n");
 		}
 
 		return mensaje.toString();

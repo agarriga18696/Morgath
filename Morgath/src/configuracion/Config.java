@@ -13,8 +13,8 @@ public class Config {
 	public static final String CURSOR = ">";
 
 	// RESOLUCION VENTANA
-	public static int anchoVentana = 1024;
-	public static int altoVentana = 768;
+	public static int anchoVentana = 1280;
+	public static int altoVentana = 800;
 
 	// PADDING
 	public static Border borde = new EmptyBorder(20, 20, 20, 20);

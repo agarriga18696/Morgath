@@ -1,20 +1,21 @@
-# Iniciación
+# 1, Iniciación
 -Objetivo: Empieza tu aventura.
 -Mensaje:
 Bienvenido, valeroso aventurero. Te encuentras en un mundo enigmático, repleto de desafíos y peligros que acechan en las sombras. El propósito fundamental de tu travesía es la derrota del Inquisidor, el astuto enemigo final que aguarda en la penumbra. No subestimes la magnitud de la tarea; enfrentarás obstáculos que pondrán a prueba tu astucia y valentía. Recolecta objetos esenciales para completar las misiones, pero, sobre todo, mantén la llama de la esperanza ardiendo en tu corazón.
 Te aguarda una misión épica. Explora cada rincón, sumérgete en la intrigante narrativa de este mundo y que la fortuna te acompañe, intrépido aventurero.
-Escribe 'AYUDA' en cualquier momento para ver los comandos.
--Recompensa: 0
-
-# Despertar
--Objetivo: Hazte con una espada.
--Mensaje:
-Es plena noche, te encuentras en mitad de un camino, dubitativo sobre cómo arribaste a este lugar. La última imagen que reposa en tu memoria es la de disfrutar de aguardiente en una celebración local.
-Frente a ti se despliega un angosto sendero que conduce a una casa vetusta. La noche, poco amigable en estos tiempos, presenta un riesgo inminente para alguien en tus condiciones; una presa fácil para los bandidos. La prudencia te sugiere hallar refugio y procurar una espada para asegurar tu defensa.
+Podrás obtener más información sobre los comandos del juego escribiendo 'AYUDA' en cualquier momento.
+Para empezar la partida y completar esta misión escribe 'EMPEZAR'.
 -Recompensa: 20
 
-# La torre
--Objetivo: Consigue la llave de la torre.
--Mensaje: 
-Debes poder acceder a la torre por la puerta secreta, pero necesitas encontrar la llave. Búscala para poder seguir con tu misión.
--Recompensa: 30
+# 2, Despertar
+-Objetivo: Recupera tus objetos.
+-Mensaje:
+Te despiertas en plena noche, tirado en el suelo en mitad de un sendero. Es un callejón sin salida. Dubitativo sobre cómo llegaste a este lugar intentas hacer memoria. La última imagen que reposa en tu memoria es la de disfrutar de aguardiente en una celebración local. De repente, empiezas a recordar algunos sucesos. Recuerdas estar bebiendo en la fiesta y sentir ganas de orinar, por lo que decidiste ir a un lugar apartado para hacerlo. Sin darte cuenta te alejaste más de la cuenta debido a tu embriaguez, que te hizo perder el sentido de la orientación. Estuviste caminando sin saber a dónde te dirigías, hasta llegar a este lugar. El último recuerdo que te viene la cabeza es oir unos murmullos entre la maleza, y de repente toda la luz se apagó de golpe. Al parecer, fuiste presa de unos bandidos, que te robaron todo cuanto portabas encima; la bolsa de monedas, tu espada, abalorios..., y además, parece que al final te orinaste encima.
+No ves ninguna salida a tu alrededor, excepto un angosto sendero que se despliega hacia el este, que parece conducir a una casa abandonada. La noche, poco amigable en estos tiempos, presenta un riesgo inminente para alguien en tus condiciones; una presa fácil para los bandidos. La prudencia te sugiere hallar refugio y procurar una espada para asegurar tu defensa.
+-Recompensa: 25
+
+# 3, Prueba
+-Objetivo: nose
+-Mensaje:
+uepaaa
+-Recompensa: 3000

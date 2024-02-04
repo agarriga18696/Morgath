@@ -1,8 +1,11 @@
 package localizaciones;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
+import localizaciones.Mapa.Direccion;
 import objetos.Objeto;
 
 public class Habitacion {
@@ -12,15 +15,15 @@ public class Habitacion {
 	private String nombre;
 	private String descripcion;
 	private List<Objeto> objetos;
+	private Map<Direccion, Habitacion> salidas;
 
 	// Constructor.
 	public Habitacion(int id, String nombre, String descripcion) {
-		
-		this.objetos = new ArrayList<>();
 		this.id = id;
 		this.nombre = nombre;	
 		this.descripcion = descripcion;
-
+		this.objetos = new ArrayList<>();
+		this.salidas = new HashMap<>();
 	}
 
 	// Getters i setters.
@@ -52,10 +55,17 @@ public class Habitacion {
         return objetos;
     }
 	
+	public Map<Direccion, Habitacion> getSalidas(){
+		return salidas;
+	}
+	
+	public void setSalidas(Map<Direccion, Habitacion> salidas) {
+        this.salidas = salidas;
+    }
+	
 	// Método para agregar un objeto a la habitación.
 	public void agregarObjeto(Objeto objeto) {
 		objetos.add(objeto);
 	}
-	
 
 }

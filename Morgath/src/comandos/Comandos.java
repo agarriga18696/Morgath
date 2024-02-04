@@ -1,52 +1,48 @@
 package comandos;
 
+import java.awt.Dimension;
+import java.awt.Graphics;
+import java.awt.Rectangle;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 
+import javax.swing.JButton;
+import javax.swing.JComponent;
 import javax.swing.SwingUtilities;
 import javax.swing.Timer;
+import javax.swing.plaf.basic.BasicScrollBarUI;
 
 import configuracion.Config;
 import configuracion.Tema;
 import juego.Juego;
-import juego.Jugador;
 import localizaciones.Habitacion;
 import localizaciones.Mapa;
+import localizaciones.Mapa.Direccion;
 import misiones.Mision;
 import objetos.Objeto;
+import personajes.Jugador;
 import utilidades.Aleatorio;
 
 public class Comandos {
 
 	// Atributos.
 	private List<String> comandos = new ArrayList<>();
+	private List<String> comandosActivados = new ArrayList<>();
 	private Jugador jugador;
 	private Juego juego;
 	private Mapa mapa;
 
 	// Constructor.
 	public Comandos(Jugador jugador, Juego juego, Mapa mapa) {
-
 		this.jugador = jugador;
 		this.juego = juego;
 		this.mapa = mapa;
 
 		inicializarComandos();
-
-	}
-
-	// Método para inicializar los comandos.
-	private void inicializarComandos() {
-
-		// Añadir todos los comandos de la lista enum a la lista de comandos.
-		for(ListaComandos comando : ListaComandos.values()){
-			comandos.add(comando.name());
-			comandos.addAll(Arrays.asList(comando.getAtajo()));
-		}
-
 	}
 
 	// Método para obtener la lista de comandos.
@@ -54,9 +50,15 @@ public class Comandos {
 		return comandos;
 	}
 
+	// Método para obtener la lista de comandos activados.
+	public List<String> getComandosActivados() {
+		return comandosActivados;
+	}
+
 	// Lista de comandos.
 	public enum ListaComandos {
 
+		EMPEZAR,
 		NORTE("N"),
 		SUR("S"),
 		ESTE("E"),
@@ -67,6 +69,7 @@ public class Comandos {
 		INVENTARIO("I"),
 		MISION("M"),
 		DIARIO,
+		EXPLORAR,
 		TERMINAR("T"),
 		AYUDA("A"),
 		CREDITOS,
@@ -88,7 +91,6 @@ public class Comandos {
 
 		// Método para obtener el atajo del comando.
 		public static ListaComandos obtenerAtajo(String atajo) {
-
 			for(ListaComandos comando : values()) {
 				if(comando.name().equalsIgnoreCase(atajo) || Arrays.asList(comando.atajo).contains(atajo.toUpperCase())) {
 					return comando;
@@ -96,25 +98,54 @@ public class Comandos {
 			}
 
 			throw new IllegalArgumentException("Error, atajo " + atajo + " no encontrado.");
-
 		}
+	}
 
+	// Método para inicializar los comandos.
+	private void inicializarComandos() {
+		// Añadir todos los comandos de la lista enum a la lista de comandos.
+		for(ListaComandos comando : ListaComandos.values()){
+			comandos.add(comando.name());
+			comandos.addAll(Arrays.asList(comando.getAtajo()));
+		}
+		// Inicializar comando EMPEZAR a la lista de comandos activados.
+		setComandoActivado(ListaComandos.EMPEZAR, true);
+	}
+
+	// Activar o desactivar un comando.
+	public void setComandoActivado(ListaComandos comando, boolean activado) {
+		String nombreComando = comando.name();
+
+		if (activado) {
+			comandosActivados.add(nombreComando);
+		} else {
+			comandosActivados.remove(nombreComando);
+		}
+	}
+
+	// Verificar si un comando está activado.
+	public boolean esComandoActivado(ListaComandos comando) {
+		return comandosActivados.contains(comando.name());
 	}
 
 	// Método para validar los comandos.
 	public void ejecutarComando(String comando) {
 		// Eliminar espacios en blanco alrededor del comando.
-		comando = comando.trim();
+		comando = comando.trim().toUpperCase();
 
 		// Verificar que el comando no esté vacío después de quitar los espacios.
-		if (!comando.isEmpty() || !comando.isBlank()) {
+		if (!(comando.isEmpty() || comando.isBlank()) && comando != null) {
 			String[] partesComando = comando.split("\\s+");
 			String verbo = partesComando[0];
 			String argumento = partesComando.length > 1 ? partesComando[1] : null;
 
 			// Comprobar que el comando exista en la lista enum.
-			if (comandos.contains(verbo.toUpperCase())) {
+			ListaComandos comandoEnum = obtenerComandoEnum(verbo);
+			if (comandoEnum != null && esComandoActivado(comandoEnum)) {
 				switch (ListaComandos.obtenerAtajo(verbo)) {
+				case EMPEZAR:
+					comandoEmpezar();
+					break;
 				case NORTE:
 					comandoNorte();
 					break;
@@ -145,6 +176,9 @@ public class Comandos {
 				case DIARIO:
 					comandoDiario();
 					break;
+				case EXPLORAR:
+					comandoExplorar();
+					break;
 				case TERMINAR:
 					comandoTerminar();
 					break;
@@ -174,14 +208,42 @@ public class Comandos {
 		}
 	}
 
-	// MOVIMIENTO
-	// En la clase Juego
+	// Método para obtener el comando de la lista de enum de comandos.
+	private ListaComandos obtenerComandoEnum(String verbo) {
+		for (ListaComandos comando : ListaComandos.values()) {
+			if (comando.name().equalsIgnoreCase(verbo) || Arrays.asList(comando.atajo).contains(verbo.toUpperCase())) {
+				return comando;
+			}
+		}
+		return null;
+	}
+
+	// EMPEZAR
+	private void comandoEmpezar() {
+		if(!juego.empezarJuego && comandosActivados.contains(ListaComandos.EMPEZAR.name())) {
+			juego.empezarJuego = true;
+			juego.outputTexto("¡Comienza tu aventura!");
+
+			// Inicializar lista de comandos activados.
+			comandosActivados.clear();
+			for(ListaComandos comando : ListaComandos.values()) {
+				comandosActivados.add(comando.name());
+				setComandoActivado(comando, true);
+			}
+
+		} else {
+			juego.outputTexto("Ya has empezado tu aventura!");
+		}
+	}
+
+	// Método para obtener la ubicación actual del jugador.
 	private Habitacion obtenerHabitacionActualDelJugador() {
 		return jugador.getUbicacion();
 	}
 
+	// Método para moverse entre habitaciones.
 	private Habitacion obtenerHabitacionEnDireccion(Habitacion habitacionActual, Mapa.Direccion direccion) {
-		return mapa.moverse(habitacionActual, direccion);
+		return mapa.moverJugador(habitacionActual, direccion);
 	}
 
 	// NORTE
@@ -293,7 +355,11 @@ public class Comandos {
 				}
 			}
 
-			if (!encontrado) {
+			if(arg == null && objetosEnHabitacion != null && !objetosEnHabitacion.isEmpty()) {
+				mensaje.append("¿Qué objeto quieres coger?");
+			}
+
+			if (!encontrado && arg != null) {
 				mensaje.append("El objeto '" + arg + "' no se encuentra en este lugar.");
 			}
 		} else {
@@ -366,24 +432,56 @@ public class Comandos {
 	private void comandoMision() {
 		juego.outputTexto("\nMisión actual: " + juego.misionActiva.getNombre() + "\nObjetivo: " + juego.misionActiva.getObjetivo());
 	}
-	
+
 	// DIARIO
 	private void comandoDiario() {
 		// Muestra las misiones completadas.
 		StringBuilder mensaje = new StringBuilder();
-		List<Mision> misionesCompletadas = jugador.getMisionesCompletadas();
-		
+		List<Mision> misionesCompletadas = jugador.getDiario();
+
 		if(misionesCompletadas != null && !misionesCompletadas.isEmpty()) {
 			mensaje.append("Diario de misiones:\n");
 			for(Mision mision : misionesCompletadas) {
-				mensaje.append("- ").append(mision.getNombre());
+				if(mision.isCompletada() && !mision.isActivada()) {
+					mensaje.append("- ").append(mision.getNombre());
+				}
 			}
 		} else {
 			mensaje.append("Todavía no has completado ninguna misión.");
 		}
-		
+
 		juego.outputTexto(mensaje.toString());
-		
+
+	}
+
+	// EXPLORAR
+	private void comandoExplorar() {
+		// Muestra todas las conexiones (salidas) que tiene la habitación actual.
+		Habitacion habitacionActual = jugador.getUbicacion();
+		StringBuilder mensaje = new StringBuilder();
+
+		if(habitacionActual != null) {
+			Map<Direccion, Habitacion> salidas = habitacionActual.getSalidas();
+
+			if(!salidas.isEmpty()) {
+				mensaje.append("Exploras el lugar y encuentras varias salidas:");
+
+				for(Map.Entry<Direccion, Habitacion> entry : salidas.entrySet()) {
+					Direccion direccion = entry.getKey();
+					Habitacion habitacionConectada = entry.getValue();
+
+					mensaje.append("\n" + direccion + ": " + habitacionConectada.getNombre());
+				}
+
+			} else {
+				mensaje.append("No encuentras ninguna salida.");
+			}
+		} else {
+			mensaje.append("No puedes explorar en este momento.");
+		}
+
+		juego.outputTexto(mensaje.toString());
+
 	}
 
 	// TERMINAR
@@ -466,28 +564,28 @@ public class Comandos {
 			switch(arg.toUpperCase()) {
 			case "OSCURO", "1":
 				Config.temaActual = Config.TEMA_1;
-				break;
+			break;
 			case "CLARO", "2":
 				Config.temaActual = Config.TEMA_2;
-				break;
+			break;
 			case "AQUA", "3":
 				Config.temaActual = Config.TEMA_3;
-				break;
+			break;
 			case "VINTAGE", "4":
 				Config.temaActual = Config.TEMA_4;
-				break;
+			break;
 			case "MATRIX", "5":
 				Config.temaActual = Config.TEMA_5;
-				break;
+			break;
 			case "CLASICO", "6":
 				Config.temaActual = Config.TEMA_6;
-				break;
+			break;
 			case "ORO", "7":
 				Config.temaActual = Config.TEMA_7;
-				break;
+			break;
 			case "FANTASIA", "8":
 				Config.temaActual = Config.TEMA_8;
-				break;
+			break;
 			default:
 				mensaje = "No reconozco el tema '" + arg + "'.\n"
 						+ "Los temas disponibles son:\n"
@@ -526,6 +624,53 @@ public class Comandos {
 		juego.labelCursor.setForeground(tema.colorSecundario);
 		juego.labelUbicacion.setForeground(tema.colorEnfasis);
 		juego.labelPuntuacion.setForeground(tema.colorEnfasis);
+		
+		juego.barraScrollPersonalizada.setUI(new BasicScrollBarUI() {
+			@Override
+		    protected JButton createDecreaseButton(int orientation) {
+		        return new JButton() {
+		            /**
+					 * 
+					 */
+					private static final long serialVersionUID = 7651203160930268408L;
+
+					@Override
+		            public Dimension getPreferredSize() {
+		                return new Dimension(0, 0);
+		            }
+		        };
+		    }
+
+		    @Override
+		    protected JButton createIncreaseButton(int orientation) {
+		        return new JButton() {
+		            /**
+					 * 
+					 */
+					private static final long serialVersionUID = 8708726999982587006L;
+
+					@Override
+		            public Dimension getPreferredSize() {
+		                return new Dimension(0, 0);
+		            }
+		        };
+		    }
+
+		    @Override
+		    protected void paintTrack(Graphics g, JComponent c, Rectangle trackBounds) {
+		        g.setColor(tema.colorPrincipal);  // Cambiar el color de la barra de desplazamiento
+		        g.fillRect(trackBounds.x, trackBounds.y, trackBounds.width, trackBounds.height);
+		    }
+
+		    @Override
+		    protected void paintThumb(Graphics g, JComponent c, Rectangle thumbBounds) {
+		        g.setColor(tema.colorSecundario);  // Cambiar el color del pulgar de la barra de desplazamiento
+		        g.fillRect(thumbBounds.x, thumbBounds.y, thumbBounds.width, thumbBounds.height);
+		    }
+		});
+
+
 	}
+	
 
 }
