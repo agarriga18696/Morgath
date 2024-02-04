@@ -13,9 +13,8 @@ public class Jugador extends Personaje {
 	private List<Mision> diario; // lista de misiones.
 	
 	// Constructor.
-	public Jugador(Habitacion ubicacion) {
-		super(ubicacion);
-		this.ubicacion = ubicacion;
+	public Jugador(String nombre, Habitacion ubicacion, int vidas) {
+		super(nombre, ubicacion, vidas);
 		this.puntos = 0;
 		this.inventario = new ArrayList<>();
 		this.diario = new ArrayList<>();

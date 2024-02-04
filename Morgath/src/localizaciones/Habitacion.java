@@ -7,6 +7,8 @@ import java.util.Map;
 
 import localizaciones.Mapa.Direccion;
 import objetos.Objeto;
+import personajes.Enemigo;
+import personajes.NPC;
 
 public class Habitacion {
 
@@ -14,16 +16,21 @@ public class Habitacion {
 	private int id;
 	private String nombre;
 	private String descripcion;
-	private List<Objeto> objetos;
 	private Map<Direccion, Habitacion> salidas;
+	private List<Objeto> objetos;
+	
+	private List<NPC> npcs;
+	private List<Enemigo> enemigos;
 
 	// Constructor.
 	public Habitacion(int id, String nombre, String descripcion) {
 		this.id = id;
 		this.nombre = nombre;	
 		this.descripcion = descripcion;
-		this.objetos = new ArrayList<>();
 		this.salidas = new HashMap<>();
+		this.objetos = new ArrayList<>();
+		this.npcs = new ArrayList<>();
+		this.enemigos = new ArrayList<>();
 	}
 
 	// Getters i setters.

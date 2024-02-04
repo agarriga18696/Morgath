@@ -81,19 +81,19 @@ public class Mision {
 	}
 
 	// Método para finalizar una mision.
-	public void finalizarMision() {
+	public void finalizarMision(Jugador jugador) {
 		this.setCompletada(true);
 		this.setActivada(false);
+		// Agregar la misión al diario de misiones.
+		jugador.setDiario(this);
 	}
 
 	// Método para verificar las condiciones específicas de finalización de la misión.
 	public boolean verificarCondicionesEspecificas(Jugador jugador) {
 		switch (nombre.toUpperCase()) {
 		case "1, INICIACIÓN":
-			System.out.println("Intenta verificar mision 1");
 			return condicionesMision1();
 		case "2, DESPERTAR":
-			System.out.println("Intenta verificar mision 2");
 			return condicionesMision2(jugador);
 			// Resto de misiones.
 		default:
@@ -102,32 +102,41 @@ public class Mision {
 	}
 
 	public boolean condicionesMision1() {
-	    if (Juego.ultimoComandoUsado != null && Juego.ultimoComandoUsado.equalsIgnoreCase("empezar")) {
-	        // Resto del código
-	    	System.out.println("Completada mision 1");
-	        return true;
-	    }
-	    return false;
+		// Condición: escribir el comando 'EMPEZAR'.
+
+		if (Juego.ultimoComandoUsado != null && Juego.ultimoComandoUsado.equalsIgnoreCase("empezar")) {
+			return true;
+		}
+
+		return false;
 	}
 
 	private boolean condicionesMision2(Jugador jugador) {
-		// Condición de finalización: coger espada de la habitación "Casa: entrada".
+		// Condición: coger espada de la habitación "Casa: entrada".
 		// - Objeto: espada
+		// - Objeto: bolsa
 		// - Habitación: Casa: entrada
 
-		String nombreHabitacionMision = "Casa: entrada";
-		String nombreObjetoMision = "Espada";
+		String habitacionMision = "casa: entrada";
+		String objetosMision[] = {"espada", "bolsa"};
 
 		// Obtener la ubicación actual del jugador y su inventario.
 		Habitacion ubicacionJugador = jugador.getUbicacion();
 		List<Objeto> inventarioJugador = jugador.getInventario();
+		int contadorObjetos = 0;
 
 		// Verificar que el jugador está en la habitación "Casa: entrada".
-		if (ubicacionJugador != null && ubicacionJugador.getNombre().equalsIgnoreCase("casa: entrada")) {
+		if (ubicacionJugador != null && ubicacionJugador.getNombre().equalsIgnoreCase(habitacionMision)) {
 			// Verificar que el jugador tiene la espada específica en su inventario.
 			for (Objeto objetoJugador : inventarioJugador) {
-				if (objetoJugador != null && objetoJugador.getNombre().equalsIgnoreCase("espada")) {
-					return true;
+				for(int i = 0; i < objetosMision.length; i++) {
+					// Verificar que haya encontrado todos los objetos de la misión.
+					if (objetoJugador != null && objetoJugador.getNombre().equalsIgnoreCase(objetosMision[i])) {
+						contadorObjetos++;			
+						if(contadorObjetos == objetosMision.length) {
+							return true;
+						}
+					}
 				}
 			}
 		}

@@ -18,6 +18,10 @@ public class Mapa {
         this.mapa = new HashMap<>();
         inicializarMapa();
     }
+    
+    public Map<Habitacion, Map<Direccion, Habitacion>> getMapa(){
+		return mapa;
+	}
 
 	public enum Direccion {
 		NORTE,
@@ -37,27 +41,29 @@ public class Mapa {
 			case ESTE:
 				return OESTE;
 			default:
-				throw new IllegalArgumentException("Dirección no válida");
+				throw new IllegalArgumentException("Dirección no válida :(");
 			}
 		}
 	}
 
-
-	public Map<Habitacion, Map<Direccion, Habitacion>> getMapa(){
-		return mapa;
-	}
-
 	// Método para inicializar el mapa.
 	public void inicializarMapa() {
-		habitacion_00 = new Habitacion(0, "Sendero sin Retorno", "Estás en mitad de un camino pedregoso, al este hay un sendero que parece ser seguro.");
-		habitacion_01 = new Habitacion(1, "Sendero", "El sendero es muy estrecho, parece llevar a una vieja casa de campo, parece abandonada. Tal vez sea un buen sitio para refugiarse.");
+		// Crear habitaciones.
+		habitacion_00 = new Habitacion(0, "Callejón sin salida", "Estás en mitad de un sendero sin salida, al este hay un sendero que parece ser la única ruta de escape.");
+		habitacion_01 = new Habitacion(1, "Sendero", "El sendero es muy estrecho, parece desviarse al norte hacia una vieja casa de campo. ¿Estará abandonada? Tal vez sea un buen sitio para empezar a buscar.");
 		habitacion_02 = new Habitacion(2, "Casa: entrada", "Estás en la entrada principal de la casa, donde la luz es tenue, el ambiente se percibe húmedo y el distintivo olor a armario antiguo impregna el aire. A primera vista, no observas nada relevante, pero al concentrarte más, notas algo que destella entre la penumbra.");
 		
 		// Agregar conexiones.
 		conectar(habitacion_00, habitacion_01, Direccion.ESTE);
 		conectar(habitacion_01, habitacion_02, Direccion.NORTE);
 		
+		// Agregar objetos a las habitaciones.
 		Objeto espada = FabricaObjetos.crearEspada();
+		Objeto lampara = FabricaObjetos.crearLampara();
+		Objeto bolsaMonedas = FabricaObjetos.crearBolsaMonedas();
+		
+		habitacion_00.agregarObjeto(lampara);
+		habitacion_02.agregarObjeto(bolsaMonedas);
 		habitacion_02.agregarObjeto(espada);
 		
 	}

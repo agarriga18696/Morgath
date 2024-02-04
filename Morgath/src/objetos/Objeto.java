@@ -6,11 +6,9 @@ public class Objeto {
 	private String descripcion;
 	private boolean objetoDeMision;
 	
-	public Objeto(String nombre, String descripcion, boolean objetoDeMision) {
+	public Objeto(String nombre, String descripcion) {
 		this.nombre = nombre;
 		this.descripcion = descripcion;
-		this.objetoDeMision = objetoDeMision;
-		
 	}
 
 	public String getNombre() {

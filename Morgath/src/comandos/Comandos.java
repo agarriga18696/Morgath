@@ -26,6 +26,7 @@ import misiones.Mision;
 import objetos.Objeto;
 import personajes.Jugador;
 import utilidades.Aleatorio;
+import utilidades.NormalizarCadena;
 
 public class Comandos {
 
@@ -63,7 +64,7 @@ public class Comandos {
 		SUR("S"),
 		ESTE("E"),
 		OESTE("O"),
-		MIRAR,
+		BUSCAR,
 		COGER,
 		SOLTAR,
 		INVENTARIO("I"),
@@ -108,8 +109,10 @@ public class Comandos {
 			comandos.add(comando.name());
 			comandos.addAll(Arrays.asList(comando.getAtajo()));
 		}
-		// Inicializar comando EMPEZAR a la lista de comandos activados.
+		// Agregar comandos iniciales a la lista de comandos activados.
 		setComandoActivado(ListaComandos.EMPEZAR, true);
+		setComandoActivado(ListaComandos.TERMINAR, true);
+		setComandoActivado(ListaComandos.AYUDA, true);
 	}
 
 	// Activar o desactivar un comando.
@@ -129,9 +132,10 @@ public class Comandos {
 	}
 
 	// Método para validar los comandos.
-	public void ejecutarComando(String comando) {
-		// Eliminar espacios en blanco alrededor del comando.
-		comando = comando.trim().toUpperCase();
+	public void ejecutarComando(String c) {
+		// Normalizar comando.
+		c = c.trim().toUpperCase();
+		String comando = NormalizarCadena.quitarAcentos(c);
 
 		// Verificar que el comando no esté vacío después de quitar los espacios.
 		if (!(comando.isEmpty() || comando.isBlank()) && comando != null) {
@@ -158,8 +162,8 @@ public class Comandos {
 				case OESTE:
 					comandoOeste();
 					break;
-				case MIRAR:
-					comandoMirar();
+				case BUSCAR:
+					comandoBuscar();
 					break;
 				case COGER:
 					comandoCoger(argumento);
@@ -311,8 +315,8 @@ public class Comandos {
 
 	}
 
-	// MIRAR
-	private void comandoMirar() {
+	// BUSCAR
+	private void comandoBuscar() {
 		// Comprueba si hay objetos en la habitación actual.
 		Habitacion habitacionActual = obtenerHabitacionActualDelJugador();
 		List<Objeto> objetosEnHabitacion = habitacionActual.getObjetos();
@@ -342,9 +346,11 @@ public class Comandos {
 		if (objetosEnHabitacion != null && !objetosEnHabitacion.isEmpty()) {
 			boolean encontrado = false;
 
-			// Comprobar si el objeto está en la habitación.
 			for (Objeto objeto : objetosEnHabitacion) {
-				if (arg != null && arg.equalsIgnoreCase(objeto.getNombre())) {
+				// Normalizar nombre del objeto.
+				StringBuilder objetoNormalizado = new StringBuilder(NormalizarCadena.quitarAcentos(objeto.getNombre()));
+				// Comprobar si el objeto está en la habitación.
+				if (arg != null && arg.equalsIgnoreCase(objetoNormalizado.toString())) {
 					// Añadir objeto al inventario del jugador.
 					jugador.agregarObjetoAlInventario(objeto);
 					mensaje.append("Has cogido " + objeto.getNombre() + ".");
@@ -381,8 +387,10 @@ public class Comandos {
 			boolean encontrado = false;
 
 			for(Objeto objeto : inventarioJugador) {
+				// Normalizar nombre del objeto.
+				StringBuilder objetoNormalizado = new StringBuilder(NormalizarCadena.quitarAcentos(objeto.getNombre()));
 				// Comprobar si el objeto está en el inventario del jugador.
-				if(arg != null && arg.equalsIgnoreCase(objeto.getNombre())) {
+				if(arg != null && arg.equalsIgnoreCase(objetoNormalizado.toString())) {
 					// Quitar objeto de tu inventario.
 					inventarioJugador.remove(objeto);
 					mensaje.append("Has tirado '" + objeto.getNombre() + "' al suelo.");
@@ -441,9 +449,11 @@ public class Comandos {
 
 		if(misionesCompletadas != null && !misionesCompletadas.isEmpty()) {
 			mensaje.append("Diario de misiones:\n");
+			// Mostrar la misión activa la primera de todas.
+			mensaje.append("- ").append(juego.misionActiva.getNombre()).append(" (En curso)\n");
 			for(Mision mision : misionesCompletadas) {
 				if(mision.isCompletada() && !mision.isActivada()) {
-					mensaje.append("- ").append(mision.getNombre());
+					mensaje.append("- ").append(mision.getNombre()).append(" (Completada)\n");
 				}
 			}
 		} else {
@@ -464,7 +474,11 @@ public class Comandos {
 			Map<Direccion, Habitacion> salidas = habitacionActual.getSalidas();
 
 			if(!salidas.isEmpty()) {
-				mensaje.append("Exploras el lugar y encuentras varias salidas:");
+				if(salidas.size() == 1) {
+					mensaje.append("Exploras el lugar y encuentras una única salida:");
+				} else {
+					mensaje.append("Exploras el lugar y encuentras varias salidas:");
+				}
 
 				for(Map.Entry<Direccion, Habitacion> entry : salidas.entrySet()) {
 					Direccion direccion = entry.getKey();
@@ -507,12 +521,13 @@ public class Comandos {
 				+ "- SUR: Te mueves en dirección sur.\n"
 				+ "- ESTE: Te mueves en dirección este.\n"
 				+ "- OESTE: Te mueves en dirección oeste.\n"
-				+ "- MIRAR: Miras a tu alrededor en busca de objetos.\n"
+				+ "- EXPLORAR: Echas un vistazo al lugar para buscar más rutas.\n"
+				+ "- BUSCAR: Miras a tu alrededor en busca de objetos.\n"
 				+ "- COGER <OBJETO>: Coges un objeto y lo guardas en tu inventario.\n"
-				+ "- SOLTAR <OBJETO>: Tiras un objeto de tu inventario y al suelo.\n"
+				+ "- SOLTAR <OBJETO>: Tiras un objeto de tu inventario al suelo.\n"
 				+ "- INVENTARIO: Muestra una lista de los objetos que posees.\n"
 				+ "- MISION: Muestra la misión actual.\n"
-				+ "- DIARIO: Muestra las misiones que has completado."
+				+ "- DIARIO: Muestra las misiones que has completado.\n"
 				+ "- TERMINAR: Terminar la partida y salir del juego.\n"
 				+ "- TEMA <TEMA>: Cambia el esquema de color de la interfaz.\n"
 				+ "- CREDITOS: Muestra información sobre el creador del juego.\n"
@@ -603,14 +618,14 @@ public class Comandos {
 
 			if(temaValido) {
 				mensaje = "Se ha cambiado el tema a 'TEMA " + arg + "'.";
-				actualizarInterfazSegunTema();
+				actualizarTemaInterfaz();
 			}
 		}
 
 		juego.outputTexto(mensaje);
 	}
 
-	public void actualizarInterfazSegunTema() {
+	public void actualizarTemaInterfaz() {
 		Tema tema = Config.temaActual;
 
 		juego.panelPrincipal.setBackground(tema.colorPrincipal);
@@ -624,53 +639,52 @@ public class Comandos {
 		juego.labelCursor.setForeground(tema.colorSecundario);
 		juego.labelUbicacion.setForeground(tema.colorEnfasis);
 		juego.labelPuntuacion.setForeground(tema.colorEnfasis);
-		
+
 		juego.barraScrollPersonalizada.setUI(new BasicScrollBarUI() {
 			@Override
-		    protected JButton createDecreaseButton(int orientation) {
-		        return new JButton() {
-		            /**
+			protected JButton createDecreaseButton(int orientation) {
+				return new JButton() {
+					/**
 					 * 
 					 */
 					private static final long serialVersionUID = 7651203160930268408L;
 
 					@Override
-		            public Dimension getPreferredSize() {
-		                return new Dimension(0, 0);
-		            }
-		        };
-		    }
+					public Dimension getPreferredSize() {
+						return new Dimension(0, 0);
+					}
+				};
+			}
 
-		    @Override
-		    protected JButton createIncreaseButton(int orientation) {
-		        return new JButton() {
-		            /**
+			@Override
+			protected JButton createIncreaseButton(int orientation) {
+				return new JButton() {
+					/**
 					 * 
 					 */
 					private static final long serialVersionUID = 8708726999982587006L;
 
 					@Override
-		            public Dimension getPreferredSize() {
-		                return new Dimension(0, 0);
-		            }
-		        };
-		    }
+					public Dimension getPreferredSize() {
+						return new Dimension(0, 0);
+					}
+				};
+			}
 
-		    @Override
-		    protected void paintTrack(Graphics g, JComponent c, Rectangle trackBounds) {
-		        g.setColor(tema.colorPrincipal);  // Cambiar el color de la barra de desplazamiento
-		        g.fillRect(trackBounds.x, trackBounds.y, trackBounds.width, trackBounds.height);
-		    }
+			@Override
+			protected void paintTrack(Graphics g, JComponent c, Rectangle trackBounds) {
+				g.setColor(tema.colorPrincipal);  // Cambiar el color de la barra de desplazamiento
+				g.fillRect(trackBounds.x, trackBounds.y, trackBounds.width, trackBounds.height);
+			}
 
-		    @Override
-		    protected void paintThumb(Graphics g, JComponent c, Rectangle thumbBounds) {
-		        g.setColor(tema.colorSecundario);  // Cambiar el color del pulgar de la barra de desplazamiento
-		        g.fillRect(thumbBounds.x, thumbBounds.y, thumbBounds.width, thumbBounds.height);
-		    }
+			@Override
+			protected void paintThumb(Graphics g, JComponent c, Rectangle thumbBounds) {
+				g.setColor(tema.colorSecundario);  // Cambiar el color del pulgar de la barra de desplazamiento
+				g.fillRect(thumbBounds.x, thumbBounds.y, thumbBounds.width, thumbBounds.height);
+			}
 		});
-
-
-	}
 	
-
+	}	
+	
 }
+

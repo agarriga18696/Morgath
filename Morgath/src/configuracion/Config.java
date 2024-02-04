@@ -35,8 +35,8 @@ public class Config {
 
 	// TEMAS
 	public static final Tema TEMA_1 = new Tema(new Color(9, 3, 4), new Color(190, 190, 190), new Color(241, 195, 80));
-	public static final Tema TEMA_2 = new Tema(new Color(240, 240, 240), new Color(36, 41, 57), new Color(83, 68, 228));
-	public static final Tema TEMA_3 = new Tema(new Color(13, 43, 53), new Color(247, 251, 255), new Color(109, 227, 192));
+	public static final Tema TEMA_2 = new Tema(new Color(240, 240, 243), new Color(36, 41, 57), new Color(83, 68, 228));
+	public static final Tema TEMA_3 = new Tema(new Color(13, 43, 53), new Color(207, 211, 215), new Color(109, 227, 192));
 	public static final Tema TEMA_4 = new Tema(new Color(54, 44, 37), new Color(240, 224, 152), new Color(122, 224, 249));
 	public static final Tema TEMA_5 = new Tema(new Color(0, 0, 0), new Color(104, 225, 27), new Color(104, 225, 27));
 	public static final Tema TEMA_6 = new Tema(new Color(0, 0, 0), new Color(255, 255, 255), new Color(255, 255, 255));

@@ -33,12 +33,13 @@ public class Juego extends JFrame {
 	public Mision misionActiva;
 	public boolean empezarJuego;
 	public static String ultimoComandoUsado;
+	private String nombreJugador;
 
 	public Juego() {
 
 		mapa = new Mapa();
 		Habitacion ubicacionInicial = mapa.obtenerHabitacionInicial();
-		jugador = new Jugador(ubicacionInicial);
+		jugador = new Jugador(nombreJugador, ubicacionInicial, 3);
 		misiones = new Misiones();
 		comandos = new Comandos(jugador, this, mapa);
 
@@ -141,7 +142,7 @@ public class Juego extends JFrame {
 			getContentPane().add(panelPrincipal);
 
 			// Aplicar el esquema de colores.
-			comandos.actualizarInterfazSegunTema();
+			comandos.actualizarTemaInterfaz();
 		});
 	}
 
@@ -155,21 +156,20 @@ public class Juego extends JFrame {
 
 	// Método para iniciar la partida.
 	public void nuevaPartida() {
+		ultimoComandoUsado = "";
 		ejecutarMision();
-
-		while (true) {
+		
+		while (!ultimoComandoUsado.equalsIgnoreCase("terminar")) {
 			mostrarMensajeDeMision();
 
 			// Verificar condiciones específicas de finalización de la misión.
 			if (misionActiva != null && misionActiva.verificarCondicionesEspecificas(jugador)) {
-				misionActiva.finalizarMision();
+				misionActiva.finalizarMision(jugador);
 				procesarMisionCompletada();
 			}
 
 			actualizarLabelPuntos();
 			esperarComando();
-			//ultimoComandoUsado = obtenerUltimoComando();
-
 		}
 	}
 
