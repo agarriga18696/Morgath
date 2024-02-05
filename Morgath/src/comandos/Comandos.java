@@ -20,11 +20,13 @@ import configuracion.Config;
 import configuracion.Tema;
 import juego.Juego;
 import localizaciones.Habitacion;
-import localizaciones.Mapa;
-import localizaciones.Mapa.Direccion;
+import localizaciones.ConectorHabitaciones;
+import localizaciones.ConectorHabitaciones.Direccion;
 import misiones.Mision;
 import objetos.Objeto;
 import personajes.Jugador;
+import personajes.PNJ;
+import personajes.Enemigo;
 import utilidades.Aleatorio;
 import utilidades.NormalizarCadena;
 
@@ -35,10 +37,11 @@ public class Comandos {
 	private List<String> comandosActivados = new ArrayList<>();
 	private Jugador jugador;
 	private Juego juego;
-	private Mapa mapa;
+	private ConectorHabitaciones mapa;
+	private Direccion ultimaDireccionUsada;
 
 	// Constructor.
-	public Comandos(Jugador jugador, Juego juego, Mapa mapa) {
+	public Comandos(Jugador jugador, Juego juego, ConectorHabitaciones mapa) {
 		this.jugador = jugador;
 		this.juego = juego;
 		this.mapa = mapa;
@@ -60,13 +63,14 @@ public class Comandos {
 	public enum ListaComandos {
 
 		EMPEZAR,
-		NORTE("N"),
-		SUR("S"),
-		ESTE("E"),
-		OESTE("O"),
+		IR,
+		VOLVER,
+		MIRAR,
 		BUSCAR,
 		COGER,
-		SOLTAR,
+		GUARDAR,
+		SOLTAR("TIRAR"),
+		DESTRUIR,
 		INVENTARIO("I"),
 		MISION("M"),
 		DIARIO,
@@ -100,6 +104,7 @@ public class Comandos {
 
 			throw new IllegalArgumentException("Error, atajo " + atajo + " no encontrado.");
 		}
+
 	}
 
 	// Método para inicializar los comandos.
@@ -113,6 +118,7 @@ public class Comandos {
 		setComandoActivado(ListaComandos.EMPEZAR, true);
 		setComandoActivado(ListaComandos.TERMINAR, true);
 		setComandoActivado(ListaComandos.AYUDA, true);
+		setComandoActivado(ListaComandos.TEMA, true);
 	}
 
 	// Activar o desactivar un comando.
@@ -131,7 +137,20 @@ public class Comandos {
 		return comandosActivados.contains(comando.name());
 	}
 
-	// Método para validar los comandos.
+
+
+	/*
+	 * 
+	 *  
+	 *  
+	 *  
+	 *  EJECUCCIÓN DE LOS COMANDOS
+	 *  
+	 *  
+	 *  
+	 *  
+	 */
+
 	public void ejecutarComando(String c) {
 		// Normalizar comando.
 		c = c.trim().toUpperCase();
@@ -140,36 +159,43 @@ public class Comandos {
 		// Verificar que el comando no esté vacío después de quitar los espacios.
 		if (!(comando.isEmpty() || comando.isBlank()) && comando != null) {
 			String[] partesComando = comando.split("\\s+");
-			String verbo = partesComando[0];
+			String accion = partesComando[0];
 			String argumento = partesComando.length > 1 ? partesComando[1] : null;
+			String argumento_2 = partesComando.length > 2 ? partesComando[2] : null;
 
 			// Comprobar que el comando exista en la lista enum.
-			ListaComandos comandoEnum = obtenerComandoEnum(verbo);
+			ListaComandos comandoEnum = obtenerComandoEnum(accion);
 			if (comandoEnum != null && esComandoActivado(comandoEnum)) {
-				switch (ListaComandos.obtenerAtajo(verbo)) {
+				switch (ListaComandos.obtenerAtajo(accion)) {
 				case EMPEZAR:
 					comandoEmpezar();
 					break;
-				case NORTE:
-					comandoNorte();
+				case IR:
+					comandoIr(argumento);
 					break;
-				case SUR:
-					comandoSur();
+				case VOLVER:
+					comandoVolver();
 					break;
-				case ESTE:
-					comandoEste();
+				case EXPLORAR:
+					comandoExplorar();
 					break;
-				case OESTE:
-					comandoOeste();
+				case MIRAR:
+					comandoMirar();
 					break;
 				case BUSCAR:
-					comandoBuscar();
+					comandoBuscar(argumento);
 					break;
 				case COGER:
 					comandoCoger(argumento);
 					break;
+				case GUARDAR:
+					comandoGuardar(argumento, argumento_2);
+					break;
 				case SOLTAR:
 					comandoSoltar(argumento);
+					break;
+				case DESTRUIR:
+					comandoDestruir(argumento);
 					break;
 				case INVENTARIO:
 					comandoInventario();
@@ -179,9 +205,6 @@ public class Comandos {
 					break;
 				case DIARIO:
 					comandoDiario();
-					break;
-				case EXPLORAR:
-					comandoExplorar();
 					break;
 				case TERMINAR:
 					comandoTerminar();
@@ -213,16 +236,36 @@ public class Comandos {
 	}
 
 	// Método para obtener el comando de la lista de enum de comandos.
-	private ListaComandos obtenerComandoEnum(String verbo) {
+	private ListaComandos obtenerComandoEnum(String accion) {
 		for (ListaComandos comando : ListaComandos.values()) {
-			if (comando.name().equalsIgnoreCase(verbo) || Arrays.asList(comando.atajo).contains(verbo.toUpperCase())) {
+			if (comando.name().equalsIgnoreCase(accion) || Arrays.asList(comando.atajo).contains(accion.toUpperCase())) {
 				return comando;
 			}
 		}
 		return null;
 	}
 
-	// EMPEZAR
+
+
+	/*
+	 * 
+	 * 
+	 * 
+	 * 
+	 * DEFINICIÓN DE TODOS LOS COMANDOS DEL JUEGO
+	 * 
+	 * 
+	 * 
+	 * 
+	 */
+
+	/*
+	 * 
+	 * 
+	 *  EMPEZAR
+	 *  
+	 *  
+	 */
 	private void comandoEmpezar() {
 		if(!juego.empezarJuego && comandosActivados.contains(ListaComandos.EMPEZAR.name())) {
 			juego.empezarJuego = true;
@@ -240,83 +283,249 @@ public class Comandos {
 		}
 	}
 
+
+
+	/*
+	 * 
+	 * 
+	 *  MÉTODOS DE DIRECCIÓN Y MOVIMIENTO DEL PERSONAJE
+	 *  
+	 *  
+	 */
+
 	// Método para obtener la ubicación actual del jugador.
 	private Habitacion obtenerHabitacionActualDelJugador() {
 		return jugador.getUbicacion();
 	}
 
 	// Método para moverse entre habitaciones.
-	private Habitacion obtenerHabitacionEnDireccion(Habitacion habitacionActual, Mapa.Direccion direccion) {
+	private Habitacion obtenerHabitacionEnDireccion(Habitacion habitacionActual, ConectorHabitaciones.Direccion direccion) {
 		return mapa.moverJugador(habitacionActual, direccion);
 	}
 
-	// NORTE
-	private void comandoNorte() {
-		Habitacion habitacionActual = obtenerHabitacionActualDelJugador();
-		Habitacion nuevaHabitacion = obtenerHabitacionEnDireccion(habitacionActual, Mapa.Direccion.NORTE);
 
-		// Actualizar la ubicación del jugador y mostrar mensaje
-		if (nuevaHabitacion != habitacionActual) {
-			jugador.setUbicacion(nuevaHabitacion);
-			juego.outputTexto("Te mueves en dirección NORTE\n" + nuevaHabitacion.getNombre() + 
-					"\n" + nuevaHabitacion.getDescripcion());
-			juego.labelUbicacion.setText("UBICACIÓN: " + nuevaHabitacion.getNombre());
+
+	/*
+	 * 
+	 * 
+	 *  IR
+	 *  
+	 *  
+	 */
+	private void comandoIr(String arg) {
+		Habitacion habitacionActual = obtenerHabitacionActualDelJugador();
+		Habitacion nuevaHabitacion = null;
+		StringBuilder mensaje = new StringBuilder();
+		boolean teMueves = false;
+		Direccion direccionPermitida = null;
+
+		if(arg != null && !arg.isEmpty()) {
+			switch(Direccion.obtenerAtajo(arg)) {
+			case NORTE:
+				nuevaHabitacion = obtenerHabitacionEnDireccion(habitacionActual, Direccion.NORTE);
+				teMueves = true;
+				direccionPermitida = Direccion.NORTE;
+				break;
+			case NORESTE:
+				nuevaHabitacion = obtenerHabitacionEnDireccion(habitacionActual, Direccion.NORESTE);
+				teMueves = true;
+				direccionPermitida = Direccion.NORESTE;
+				break;
+			case NOROESTE:
+				nuevaHabitacion = obtenerHabitacionEnDireccion(habitacionActual, Direccion.NOROESTE);
+				teMueves = true;
+				direccionPermitida = Direccion.NOROESTE;
+				break;
+			case SUR:
+				nuevaHabitacion = obtenerHabitacionEnDireccion(habitacionActual, Direccion.SUR);
+				teMueves = true;
+				direccionPermitida = Direccion.SUR;
+				break;
+			case SUDESTE:
+				nuevaHabitacion = obtenerHabitacionEnDireccion(habitacionActual, Direccion.SUDESTE);
+				teMueves = true;
+				direccionPermitida = Direccion.SUDESTE;
+				break;
+			case SUDOESTE:
+				nuevaHabitacion = obtenerHabitacionEnDireccion(habitacionActual, Direccion.SUDOESTE);
+				teMueves = true;
+				direccionPermitida = Direccion.SUDOESTE;
+				break;
+			case ESTE:
+				nuevaHabitacion = obtenerHabitacionEnDireccion(habitacionActual, Direccion.ESTE);
+				teMueves = true;
+				direccionPermitida = Direccion.ESTE;
+				break;
+			case OESTE:
+				nuevaHabitacion = obtenerHabitacionEnDireccion(habitacionActual, Direccion.OESTE);
+				teMueves = true;
+				direccionPermitida = Direccion.OESTE;
+				break;
+			case ARRIBA:
+				nuevaHabitacion = obtenerHabitacionEnDireccion(habitacionActual, Direccion.ARRIBA);
+				teMueves = true;
+				direccionPermitida = Direccion.ARRIBA;
+				break;
+			case ABAJO:
+				nuevaHabitacion = obtenerHabitacionEnDireccion(habitacionActual, Direccion.ABAJO);
+				teMueves = true;
+				direccionPermitida = Direccion.ABAJO;
+				break;
+			default:
+				break;
+			}
+
+
+			// Actualizar la ubicación del jugador y mostrar mensaje.
+			if(teMueves && nuevaHabitacion != null && nuevaHabitacion != habitacionActual) {
+				jugador.setUbicacion(nuevaHabitacion);
+				mensaje.append("Te mueves en dirección " + direccionPermitida.name().toLowerCase() + ".\n" + nuevaHabitacion.getNombre() + 
+						"\n" + nuevaHabitacion.getDescripcion());
+				juego.labelUbicacion.setText("UBICACIÓN: " + nuevaHabitacion.getNombre());
+				// Guardar dirección para el comando 'VOLVER'.
+				ultimaDireccionUsada = direccionPermitida;
+			} else if(!teMueves) {
+				mensaje.append("No reconozco la dirección '" + arg + "'.");
+			} else {
+				mensaje.append("No puedes ir en esa dirección desde aquí.");
+			}
+
 		} else {
-			juego.outputTexto("No puedes ir al NORTE desde aquí.");
+			mensaje.append("¿En qué dirección quieres ir?");
 		}
+
+		juego.outputTexto(mensaje.toString());
+
 	}
 
-	// SUR
-	private void comandoSur() {
+	/*
+	 * 
+	 * 
+	 *  VOLVER
+	 *  
+	 *  
+	 */
+	private void comandoVolver() {
+		// Regresa a la dirección opuesta.
 		Habitacion habitacionActual = obtenerHabitacionActualDelJugador();
-		Habitacion nuevaHabitacion = obtenerHabitacionEnDireccion(habitacionActual, Mapa.Direccion.SUR);
+		Habitacion nuevaHabitacion;
+		StringBuilder mensaje = new StringBuilder();
 
-		// Actualizar la ubicación del jugador y mostrar mensaje
-		if (nuevaHabitacion != habitacionActual) {
-			jugador.setUbicacion(nuevaHabitacion);
-			juego.outputTexto("Te mueves en dirección SUR.\n" + nuevaHabitacion.getNombre() + 
-					"\n" + nuevaHabitacion.getDescripcion());
-			juego.labelUbicacion.setText("UBICACIÓN: " + nuevaHabitacion.getNombre());
+		if(ultimaDireccionUsada != null) {
+			nuevaHabitacion = obtenerHabitacionEnDireccion(habitacionActual, ultimaDireccionUsada.opuesta());
+			if(nuevaHabitacion != null && nuevaHabitacion != habitacionActual) {
+				jugador.setUbicacion(nuevaHabitacion);
+				mensaje.append("Regresas en dirección " + ultimaDireccionUsada.opuesta().toString().toLowerCase() + ".\n" + nuevaHabitacion.getNombre() + 
+						"\n" + nuevaHabitacion.getDescripcion());
+				juego.labelUbicacion.setText("UBICACIÓN: " + nuevaHabitacion.getNombre());
+
+			} else {
+				nuevaHabitacion = obtenerHabitacionEnDireccion(habitacionActual, ultimaDireccionUsada);
+				jugador.setUbicacion(nuevaHabitacion);
+				mensaje.append("Vuelves en dirección " + ultimaDireccionUsada.toString().toLowerCase() + ".\n" + nuevaHabitacion.getNombre() + 
+						"\n" + nuevaHabitacion.getDescripcion());
+				juego.labelUbicacion.setText("UBICACIÓN: " + nuevaHabitacion.getNombre());
+			}
+
 		} else {
-			juego.outputTexto("No puedes ir al SUR desde aquí.");
+			mensaje.append("No puedes retroceder sin explorar nuevas ubicaciones previamente.");
 		}
-	}
 
-	// ESTE
-	private void comandoEste() {
-		Habitacion habitacionActual = obtenerHabitacionActualDelJugador();
-		Habitacion nuevaHabitacion = obtenerHabitacionEnDireccion(habitacionActual, Mapa.Direccion.ESTE);
-
-		// Actualizar la ubicación del jugador y mostrar mensaje
-		if (nuevaHabitacion != habitacionActual) {
-			jugador.setUbicacion(nuevaHabitacion);
-			juego.outputTexto("Te mueves en dirección ESTE.\n" + nuevaHabitacion.getNombre() + 
-					"\n" + nuevaHabitacion.getDescripcion());
-			juego.labelUbicacion.setText("UBICACIÓN: " + nuevaHabitacion.getNombre());
-		} else {
-			juego.outputTexto("No puedes ir al ESTE desde aquí.");
-		}
-	}
-
-	// OESTE
-	private void comandoOeste() {
-		Habitacion habitacionActual = obtenerHabitacionActualDelJugador();
-		Habitacion nuevaHabitacion = obtenerHabitacionEnDireccion(habitacionActual, Mapa.Direccion.OESTE);
-
-		// Actualizar la ubicación del jugador y mostrar mensaje
-		if (nuevaHabitacion != habitacionActual) {
-			jugador.setUbicacion(nuevaHabitacion);
-			juego.outputTexto("Te mueves en dirección OESTE.\n" + nuevaHabitacion.getNombre() + 
-					"\n" + nuevaHabitacion.getDescripcion());
-			juego.labelUbicacion.setText("UBICACIÓN: " + nuevaHabitacion.getNombre());
-		} else {
-			juego.outputTexto("No puedes ir al OESTE desde aquí.");
-		}
+		juego.outputTexto(mensaje.toString());
 
 	}
 
-	// BUSCAR
-	private void comandoBuscar() {
+	/*
+	 * 
+	 * 
+	 *  EXPLORAR
+	 *  
+	 *  
+	 */
+	private void comandoExplorar() {
+		// Muestra todas las conexiones (salidas) que tiene la habitación actual.
+		Habitacion habitacionActual = jugador.getUbicacion();
+		StringBuilder mensaje = new StringBuilder();
+
+		if(habitacionActual != null) {
+			Map<Direccion, Habitacion> salidas = habitacionActual.getSalidas();
+
+			if(!salidas.isEmpty()) {
+				if(salidas.size() == 1) {
+					mensaje.append("Exploras el lugar y encuentras una única salida:");
+				} else {
+					mensaje.append("Exploras el lugar y encuentras varias salidas:");
+				}
+
+				for(Map.Entry<Direccion, Habitacion> entry : salidas.entrySet()) {
+					Direccion direccion = entry.getKey();
+					Habitacion habitacionConectada = entry.getValue();
+
+					mensaje.append("\n" + direccion + ": " + habitacionConectada.getNombre());
+				}
+
+			} else {
+				mensaje.append("No encuentras ninguna salida.");
+			}
+		} else {
+			mensaje.append("No puedes explorar en este momento.");
+		}
+
+		juego.outputTexto(mensaje.toString());
+
+	}
+
+	/*
+	 * 
+	 * 
+	 *  MIRAR
+	 *  
+	 *  
+	 */
+	private void comandoMirar() {
+		// Comprueba si hay Pnjs o enemigos en la habitación actual.
+		StringBuilder mensaje = new StringBuilder();
+		Habitacion habitacionActual = obtenerHabitacionActualDelJugador();
+		List<PNJ> pnjsEnHabitacion = habitacionActual.getPnjs();
+		List<Enemigo> enemigosEnHabitacion = habitacionActual.getEnemigos();
+
+		if (pnjsEnHabitacion != null && !pnjsEnHabitacion.isEmpty() || enemigosEnHabitacion != null && !enemigosEnHabitacion.isEmpty()) {
+			boolean hayPnj = false;
+
+			// Caso PNJ.
+			if(pnjsEnHabitacion != null && !pnjsEnHabitacion.isEmpty()) {
+				hayPnj = true;
+				mensaje.append("Has visto " + (pnjsEnHabitacion.size() > 1 ? "varios personajes:" : "un personaje:"));
+				for (PNJ pnj : pnjsEnHabitacion) {
+					mensaje.append("\n- ").append(pnj.getNombre());
+				}
+			}
+
+			// Caso Enemigo.
+			if(enemigosEnHabitacion != null && !enemigosEnHabitacion.isEmpty()) {
+				if(hayPnj) mensaje.append("\n\n");
+				mensaje.append("Has encontrado " + (enemigosEnHabitacion.size() > 1 ? "varios enemigos:" : "un enemigo:"));
+				for (Enemigo enemigo : enemigosEnHabitacion) {
+					mensaje.append("\n- ").append(enemigo.getNombre());
+				}
+			}
+
+		} else {
+			juego.outputTexto("No ves a nadie en este lugar.");
+		}
+
+		juego.outputTexto(mensaje.toString());
+
+	}
+
+	/*
+	 * 
+	 * 
+	 *  BUSCAR
+	 *  
+	 *  
+	 */
+	private void comandoBuscar(String arg) {
 		// Comprueba si hay objetos en la habitación actual.
 		Habitacion habitacionActual = obtenerHabitacionActualDelJugador();
 		List<Objeto> objetosEnHabitacion = habitacionActual.getObjetos();
@@ -336,7 +545,13 @@ public class Comandos {
 
 	}
 
-	// COGER
+	/*
+	 * 
+	 * 
+	 *  COGER
+	 *  
+	 *  
+	 */
 	private void comandoCoger(String arg) {
 		StringBuilder mensaje = new StringBuilder();
 		Habitacion habitacionActual = obtenerHabitacionActualDelJugador();
@@ -346,6 +561,7 @@ public class Comandos {
 		if (objetosEnHabitacion != null && !objetosEnHabitacion.isEmpty()) {
 			boolean encontrado = false;
 
+			// Coger solo un objeto.
 			for (Objeto objeto : objetosEnHabitacion) {
 				// Normalizar nombre del objeto.
 				StringBuilder objetoNormalizado = new StringBuilder(NormalizarCadena.quitarAcentos(objeto.getNombre()));
@@ -354,11 +570,23 @@ public class Comandos {
 					// Añadir objeto al inventario del jugador.
 					jugador.agregarObjetoAlInventario(objeto);
 					mensaje.append("Has cogido " + objeto.getNombre() + ".");
-					// Eliminar objeto de la habitación (cogido).
+					// Eliminar el objeto de la habitación.
 					objetosEnHabitacion.remove(objeto);
 					encontrado = true;
 					break;
+
 				}
+			}
+
+			// Coger todos los objetos.
+			if(arg != null && arg.equalsIgnoreCase("todo")) {
+				for(Objeto objeto : objetosEnHabitacion) {
+					jugador.agregarObjetoAlInventario(objeto);
+					mensaje.append("Has cogido " + objeto.getNombre() + ".\n");
+					encontrado = true;
+				}
+				// Eliminar todos los objetos de la habitación.
+				objetosEnHabitacion.clear();;
 			}
 
 			if(arg == null && objetosEnHabitacion != null && !objetosEnHabitacion.isEmpty()) {
@@ -375,7 +603,26 @@ public class Comandos {
 		juego.outputTexto(mensaje.toString());
 	}
 
-	// SOLTAR
+	/*
+	 * 
+	 * 
+	 *  GUARDAR
+	 *  
+	 *  
+	 */
+	private void comandoGuardar(String... args) {
+		// Guarda objetos en un objeto contenedor (del inventario).
+
+
+	}
+
+	/*
+	 * 
+	 * 
+	 *  SOLTAR
+	 *  
+	 *  
+	 */
 	private void comandoSoltar(String arg) {
 		StringBuilder mensaje = new StringBuilder();
 		List<Objeto> inventarioJugador = jugador.getInventario();
@@ -416,7 +663,57 @@ public class Comandos {
 		juego.outputTexto(mensaje.toString());
 	}
 
-	// INVENTARIO
+	/*
+	 * 
+	 * 
+	 *  DESTRUIR
+	 *  
+	 *  
+	 */
+	private void comandoDestruir(String arg) {
+		// Destruye un objeto de tu inventario para siempre.
+		// No se podrán destruir objetos de misión.
+		StringBuilder mensaje = new StringBuilder();
+		List<Objeto> inventarioJugador = jugador.getInventario();
+
+		if(inventarioJugador != null && !inventarioJugador.isEmpty()) {
+			for(Objeto objeto : inventarioJugador) {
+				// Normalizar nombre del objeto.
+				StringBuilder objetoNormalizado = new StringBuilder(NormalizarCadena.quitarAcentos(objeto.getNombre()));
+				if(arg != null && arg.equalsIgnoreCase(objetoNormalizado.toString())){
+					// Si es un objeto de misión denegar su destrucción.
+					if(objeto.isObjetoDeMision()) {
+						mensaje.append("No puedes destruir objetos de misión.");
+						break;
+
+					} else {
+						inventarioJugador.remove(objeto);
+						mensaje.append("Has destruido el objeto '" + objeto.getNombre() + "'.");
+						break;
+					}
+				}
+			}
+
+		} else {
+			mensaje.append("No portas ningún objeto.");
+		}
+
+		if(arg == null && inventarioJugador != null && !inventarioJugador.isEmpty()) {
+			mensaje.append("¿Qué objeto quieres destruir?");
+		}
+
+		juego.outputTexto(mensaje.toString());
+
+	}
+
+
+	/*
+	 * 
+	 * 
+	 *  INVENTARIO
+	 *  
+	 *  
+	 */
 	private void comandoInventario() {
 		// Comprueba si hay objetos en la habitación actual.
 		StringBuilder mensaje = new StringBuilder();
@@ -436,12 +733,24 @@ public class Comandos {
 
 	}
 
-	// MISION
+	/*
+	 * 
+	 * 
+	 *  MISION
+	 *  
+	 *  
+	 */
 	private void comandoMision() {
 		juego.outputTexto("\nMisión actual: " + juego.misionActiva.getNombre() + "\nObjetivo: " + juego.misionActiva.getObjetivo());
 	}
 
-	// DIARIO
+	/*
+	 * 
+	 * 
+	 *  DIARIO
+	 *  
+	 *  
+	 */
 	private void comandoDiario() {
 		// Muestra las misiones completadas.
 		StringBuilder mensaje = new StringBuilder();
@@ -464,41 +773,13 @@ public class Comandos {
 
 	}
 
-	// EXPLORAR
-	private void comandoExplorar() {
-		// Muestra todas las conexiones (salidas) que tiene la habitación actual.
-		Habitacion habitacionActual = jugador.getUbicacion();
-		StringBuilder mensaje = new StringBuilder();
-
-		if(habitacionActual != null) {
-			Map<Direccion, Habitacion> salidas = habitacionActual.getSalidas();
-
-			if(!salidas.isEmpty()) {
-				if(salidas.size() == 1) {
-					mensaje.append("Exploras el lugar y encuentras una única salida:");
-				} else {
-					mensaje.append("Exploras el lugar y encuentras varias salidas:");
-				}
-
-				for(Map.Entry<Direccion, Habitacion> entry : salidas.entrySet()) {
-					Direccion direccion = entry.getKey();
-					Habitacion habitacionConectada = entry.getValue();
-
-					mensaje.append("\n" + direccion + ": " + habitacionConectada.getNombre());
-				}
-
-			} else {
-				mensaje.append("No encuentras ninguna salida.");
-			}
-		} else {
-			mensaje.append("No puedes explorar en este momento.");
-		}
-
-		juego.outputTexto(mensaje.toString());
-
-	}
-
-	// TERMINAR
+	/*
+	 * 
+	 * 
+	 *  TERMINAR
+	 *  
+	 *  
+	 */
 	private void comandoTerminar() {
 		SwingUtilities.invokeLater(() -> {
 			juego.outputTexto("¡Hasta la próxima, aventurero!");
@@ -514,13 +795,25 @@ public class Comandos {
 		});
 	}
 
-	// AYUDA
+	/*
+	 * 
+	 * 
+	 *  AYUDA
+	 *  
+	 *  
+	 */
 	private void comandoAyuda() {
 		String mensaje = "LISTA DE COMANDOS:\n"
 				+ "- NORTE: Te mueves en dirección norte.\n"
 				+ "- SUR: Te mueves en dirección sur.\n"
 				+ "- ESTE: Te mueves en dirección este.\n"
 				+ "- OESTE: Te mueves en dirección oeste.\n"
+				+ "- NORESTE: Te mueves en dirección noreste.\n"
+				+ "- NOROESTE: Te mueves en dirección noroeste.\n"
+				+ "- SUDESTE: Te mueves en dirección sudeste.\n"
+				+ "- SUDOESTE: Te mueves en dirección sudoeste.\n"
+				+ "- ARRIBA: Te diriges arriba.\n"
+				+ "- ABAJO: Te diriges abajo.\n"
 				+ "- EXPLORAR: Echas un vistazo al lugar para buscar más rutas.\n"
 				+ "- BUSCAR: Miras a tu alrededor en busca de objetos.\n"
 				+ "- COGER <OBJETO>: Coges un objeto y lo guardas en tu inventario.\n"
@@ -536,7 +829,13 @@ public class Comandos {
 		juego.outputTexto(mensaje);
 	}
 
-	// CREDITOS
+	/*
+	 * 
+	 * 
+	 *  CREDITOS
+	 *  
+	 *  
+	 */
 	private void comandoCreditos() {
 		String mensaje = "(C) 2024 MORGATH I\n"
 				+ "Desarrollado por: ANDREU GARRIGA CENDÁN\n"
@@ -546,7 +845,13 @@ public class Comandos {
 		juego.outputTexto(mensaje);
 	}
 
-	// TOC-TOC
+	/*
+	 * 
+	 * 
+	 *  TOC-TOC
+	 *  
+	 *  
+	 */
 	private void comandoToc(String arg) {
 		String mensaje = "";
 		String[] respuesta = {"¿Si?", "Adelante", "¿Quién es?", "¿Penny?"}; 
@@ -563,12 +868,24 @@ public class Comandos {
 
 	}
 
-	// JUEGO
+	/*
+	 * 
+	 * 
+	 *  JUEGO
+	 *  
+	 *  
+	 */
 	private void comandoJuego() {
 		juego.outputTexto("Estás jugando MORGATH I (v.1.0.3).");
 	}
 
-	// TEMA
+	/*
+	 * 
+	 * 
+	 *  TEMA
+	 *  
+	 *  
+	 */
 	private void comandoTema(String arg) {
 		String mensaje = "";
 
@@ -576,17 +893,18 @@ public class Comandos {
 			mensaje = "Para cambiar el tema debes usar el comando 'TEMA [tema]', por ejemplo 'TEMA 2'.";
 		} else {
 			boolean temaValido = true;
-			switch(arg.toUpperCase()) {
+
+			switch(arg) {
 			case "OSCURO", "1":
 				Config.temaActual = Config.TEMA_1;
 			break;
 			case "CLARO", "2":
 				Config.temaActual = Config.TEMA_2;
 			break;
-			case "AQUA", "3":
+			case "AGUA", "3":
 				Config.temaActual = Config.TEMA_3;
 			break;
-			case "VINTAGE", "4":
+			case "BRONCE", "4":
 				Config.temaActual = Config.TEMA_4;
 			break;
 			case "MATRIX", "5":
@@ -601,17 +919,21 @@ public class Comandos {
 			case "FANTASIA", "8":
 				Config.temaActual = Config.TEMA_8;
 			break;
+			case "MENTA", "9":
+				Config.temaActual = Config.TEMA_9;
+			break;
 			default:
 				mensaje = "No reconozco el tema '" + arg + "'.\n"
 						+ "Los temas disponibles son:\n"
 						+ "- TEMA 1: OSCURO\n"
 						+ "- TEMA 2: CLARO\n"
-						+ "- TEMA 3: AQUA\n"
-						+ "- TEMA 4: VINTAGE\n"
+						+ "- TEMA 3: AGUA\n"
+						+ "- TEMA 4: BRONCE\n"
 						+ "- TEMA 5: MATRIX\n"
-						+ "- TEMA 6: CLASICO\n"
+						+ "- TEMA 6: CLÁSICO\n"
 						+ "- TEMA 7: ORO\n"
-						+ "- TEMA 8: FANTASIA\n";
+						+ "- TEMA 8: FANTASÍA\n"
+						+ "- TEMA 9: MENTA";
 				temaValido = false;
 				break;
 			}
@@ -683,8 +1005,8 @@ public class Comandos {
 				g.fillRect(thumbBounds.x, thumbBounds.y, thumbBounds.width, thumbBounds.height);
 			}
 		});
-	
+
 	}	
-	
+
 }
 

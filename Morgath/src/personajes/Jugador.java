@@ -9,12 +9,14 @@ import misiones.Mision;
 public class Jugador extends Personaje {
 
 	// Atributos.
+	Habitacion ubicacion;
 	private int puntos;
 	private List<Mision> diario; // lista de misiones.
 	
 	// Constructor.
 	public Jugador(String nombre, Habitacion ubicacion, int vidas) {
-		super(nombre, ubicacion, vidas);
+		super(nombre, vidas);
+		this.ubicacion = ubicacion;
 		this.puntos = 0;
 		this.inventario = new ArrayList<>();
 		this.diario = new ArrayList<>();
@@ -39,6 +41,10 @@ public class Jugador extends Personaje {
 	
 	public Habitacion getUbicacion() {
 		return ubicacion;
+	}
+	
+	public void setUbicacion(Habitacion ubicacion) {
+		this.ubicacion = ubicacion;
 	}
     
 }

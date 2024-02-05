@@ -11,7 +11,7 @@ import javax.swing.border.EmptyBorder;
 import comandos.Comandos;
 import configuracion.Config;
 import localizaciones.Habitacion;
-import localizaciones.Mapa;
+import localizaciones.ConectorHabitaciones;
 import misiones.Mision;
 import misiones.Misiones;
 import personajes.Jugador;
@@ -28,16 +28,29 @@ public class Juego extends JFrame {
 
 	private Jugador jugador;
 	private Misiones misiones;
-	private Mapa mapa;
+	private ConectorHabitaciones mapa;
 	private Comandos comandos;
 	public Mision misionActiva;
 	public boolean empezarJuego;
 	public static String ultimoComandoUsado;
 	private String nombreJugador;
 
+	
+	
+	/*
+	 * 
+	 *  
+	 *  
+	 *  INICIALIZACIÓN DE JUEGO
+	 *  
+	 *  
+	 *  
+	 *  
+	 */
+	
 	public Juego() {
 
-		mapa = new Mapa();
+		mapa = new ConectorHabitaciones();
 		Habitacion ubicacionInicial = mapa.obtenerHabitacionInicial();
 		jugador = new Jugador(nombreJugador, ubicacionInicial, 3);
 		misiones = new Misiones();
@@ -98,6 +111,20 @@ public class Juego extends JFrame {
 
 	}
 
+	
+	
+	/*
+	 * 
+	 *  
+	 *  
+	 *  
+	 *  CONFIGURACIÓN DE LA VENTANA DEL JUEGO (INTERFAZ)
+	 *  
+	 *  
+	 *  
+	 *  
+	 */
+	
 	private void configurarVentana() {
 		SwingUtilities.invokeLater(() -> {
 			// Establecer fuente y color.
@@ -154,8 +181,21 @@ public class Juego extends JFrame {
 		});
 	}
 
-	// Método para iniciar la partida.
-	public void nuevaPartida() {
+	
+	
+	/*
+	 * 
+	 *  
+	 *  
+	 *  
+	 *  INICIAR PARTIDA
+	 *  
+	 *  
+	 *  
+	 *  
+	 */
+	
+	public void iniciarPartida() {
 		ultimoComandoUsado = "";
 		ejecutarMision();
 		
@@ -172,6 +212,20 @@ public class Juego extends JFrame {
 			esperarComando();
 		}
 	}
+	
+	
+	
+	/*
+	 * 
+	 *  
+	 *  
+	 *  
+	 *  MÉTODOS AUXILIARES
+	 *  
+	 *  
+	 *  
+	 *  
+	 */
 
 	// Método para ejecutar la misión.
 	private void ejecutarMision() {

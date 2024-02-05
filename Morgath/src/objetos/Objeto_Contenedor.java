@@ -3,20 +3,21 @@ package objetos;
 import java.util.ArrayList;
 import java.util.List;
 
-public class Contenedor extends Objeto {
+public class Objeto_Contenedor extends Objeto {
 
 	private List<Objeto> objetosContenidos;
-	private Tipo tipo;
+	private Capacidad capacidad;
 	
-	public Contenedor(String nombre, String descripcion) {
+	public Objeto_Contenedor(String nombre, String descripcion, Capacidad capacidad) {
 		super(nombre, descripcion);
 		
 		this.objetosContenidos = new ArrayList<>();
+		this.capacidad = capacidad;
 	}
 	
 	// Tamaño del contenedor.
-	public enum Tipo {
-		PEQUENO, MEDIANO, GRANDE;
+	public enum Capacidad {
+		BAJA, MEDIA, ALTA;
 	}
 
 	public List<Objeto> getObjetosContenidos() {

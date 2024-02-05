@@ -1,9 +1,10 @@
 package objetos;
 
-public class Objeto {
+public abstract class Objeto {
 	
 	private String nombre;
 	private String descripcion;
+	private int valorVenta;
 	private boolean objetoDeMision;
 	
 	public Objeto(String nombre, String descripcion) {
@@ -12,7 +13,7 @@ public class Objeto {
 	}
 
 	public String getNombre() {
-		return nombre;
+		return nombre.toUpperCase();
 	}
 
 	public void setNombre(String nombre) {
@@ -22,9 +23,22 @@ public class Objeto {
 	public String getDescripcion() {
 		return descripcion;
 	}
+	
+	public int getValorVenta() {
+		return valorVenta;
+	}
+
+	public void setValorVenta(int valorVenta) {
+		this.valorVenta = valorVenta;
+	}
 
 	public boolean isObjetoDeMision() {
 		return objetoDeMision;
 	}
+
+	public void setObjetoDeMision(boolean objetoDeMision) {
+		this.objetoDeMision = objetoDeMision;
+	}
+	
 
 }

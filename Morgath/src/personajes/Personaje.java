@@ -10,16 +10,14 @@ public abstract class Personaje {
 
 	protected String nombre;
 	protected List<Objeto> inventario;
-	protected Habitacion ubicacion;
 	protected int vidas;
 	protected boolean muerto;
 	protected boolean inmortal;
 	
 	// Constructor
-	public Personaje(String nombre, Habitacion ubicacion, int vidas) {
+	public Personaje(String nombre, int vidas) {
 		this.nombre = nombre;
 		this.inventario = new ArrayList<>();
-		this.ubicacion = ubicacion;
 		this.vidas = vidas;
 		this.muerto = false;
 		this.inmortal = false;
@@ -27,7 +25,7 @@ public abstract class Personaje {
 	
 	// Getters.
 	public String getNombre() {
-		return nombre;
+		return nombre.toUpperCase();
 	}
 	
 	public void setNombre(String nombre) {
@@ -37,14 +35,6 @@ public abstract class Personaje {
 	public List<Objeto> getInventario() {
         return inventario;
     }
-	
-	public Habitacion getUbicacion() {
-		return ubicacion;
-	}
-	
-	public void setUbicacion(Habitacion ubicacion) {
-		this.ubicacion = ubicacion;
-	}
 	
 	public int getVidas() {
 		return vidas;
