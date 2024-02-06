@@ -96,7 +96,7 @@ public class ListaObjetos {
 		nombre.setLength(0);
 		descripcion.setLength(0);
 		nombre.append("Moneda");
-		descripcion.append("Moneda de plata tallada a mano en forma hexagonal");
+		descripcion.append("Reluciente y tallada a mano en forma hexagonal");
 
 		return new Objeto_Dinero(nombre.toString(), descripcion.toString());
 	}
@@ -155,24 +155,44 @@ public class ListaObjetos {
 	 * 
 	 */
 
+	/*
+	 * 
+	 * CAPACIDAD BAJA
+	 * 
+	 */
+
 	// BOLSA
 	public static Objeto crearBolsa() {
 		nombre.setLength(0);
 		descripcion.setLength(0);
 		nombre.append("Bolsa");
-		descripcion.append("Una práctica bolsa de piel de gato.");
+		descripcion.append("Una pequeña bolsa de piel de gato.");
 		capacidad = Capacidad.BAJA;
 		//objetosContenidos.add(MONEDA);
 
 		return new Objeto_Contenedor(nombre.toString(), descripcion.toString(), capacidad, objetosContenidos);
 	}
 
+
+	/*
+	 * 
+	 * CAPACIDAD MEDIA
+	 * 
+	 */
+
+
+	/*
+	 * 
+	 * CAPACIDAD ALTA
+	 * 
+	 */
+
 	// MOCHILA
 	public static Objeto crearMochila() {
 		nombre.setLength(0);
 		descripcion.setLength(0);
 		nombre.append("Mochila");
-		descripcion.append("Una elegante mochila de cuero de vaca.");
+		descripcion.append("Una práctica mochila de cuero de vaca.");
 		capacidad = Capacidad.ALTA;
 		//objetosContenidos.add(MONEDA);
 

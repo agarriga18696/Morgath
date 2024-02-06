@@ -24,7 +24,8 @@ public class Habitaciones {
 						ListaObjetos.ESPADA, 
 						ListaObjetos.BOLSA,
 						ListaObjetos.MONEDA,
-						ListaObjetos.LAMPARA}, 
+						ListaObjetos.LAMPARA,
+						ListaObjetos.MOCHILA}, 
 				
 				new PNJ[]{
 						ListaPNJS.COMERCIANTE}, 

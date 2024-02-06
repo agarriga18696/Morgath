@@ -73,8 +73,9 @@ public class Comandos {
 		MIRAR,
 		BUSCAR,
 		COGER,
-		GUARDAR,
 		SOLTAR("TIRAR"),
+		GUARDAR,
+		SACAR,
 		DESTRUIR,
 		INVENTARIO("I"),
 		MISION("M"),
@@ -193,11 +194,14 @@ public class Comandos {
 				case COGER:
 					comandoCoger(argumento);
 					break;
+				case SOLTAR:
+					comandoSoltar(argumento);
+					break;	
 				case GUARDAR:
 					comandoGuardar(argumento, argumento_2);
 					break;
-				case SOLTAR:
-					comandoSoltar(argumento);
+				case SACAR:
+					comandoSacar(argumento, argumento_2);
 					break;
 				case DESTRUIR:
 					comandoDestruir(argumento);
@@ -573,6 +577,14 @@ public class Comandos {
 				StringBuilder objetoNormalizado = new StringBuilder(NormalizarCadena.quitarAcentos(objeto.getNombre()));
 				// Comprobar si el objeto está en la habitación.
 				if (inventarioJugador.size() < jugador.getMaxObjetosInventario() && arg != null && arg.equalsIgnoreCase(objetoNormalizado.toString())) {
+					// Comprobar que el jugador no tenga ya 1 objeto contenedor (solo puedes tener 1).
+					/*for(Objeto objetoJugador : inventarioJugador) {
+						if(objeto instanceof Objeto_Contenedor && objetoJugador instanceof Objeto_Contenedor) {
+							mensaje.append("No has cogido '" + objeto.getNombre() + "' por que ya posees un objeto contenedor.");
+							juego.outputTexto(mensaje.toString());
+							return;
+						}
+					}*/
 					// Añadir objeto al inventario del jugador.
 					jugador.agregarObjetoAlInventario(objeto);
 					mensaje.append("Has cogido " + objeto.getNombre() + ".");
@@ -580,7 +592,6 @@ public class Comandos {
 					objetosHabitacion.remove(objeto);
 					encontrado = true;
 					break;
-
 				}
 			}
 
@@ -588,6 +599,15 @@ public class Comandos {
 			if(arg != null && arg.equalsIgnoreCase("todo")) {
 				for(Objeto objeto : objetosHabitacion) {
 					if(inventarioJugador.size() < jugador.getMaxObjetosInventario()) {
+						// Comprobar que el jugador no tenga ya 1 objeto contenedor (solo puedes tener 1).
+						/*for(Objeto objetoJugador : inventarioJugador) {
+							if(objeto instanceof Objeto_Contenedor && objetoJugador instanceof Objeto_Contenedor) {
+								mensaje.append("No puedes coger '" + objeto.getNombre() + "' si ya posees otro objeto contenedor.");
+								juego.outputTexto(mensaje.toString());
+								return;
+							}
+						}*/
+						
 						jugador.agregarObjetoAlInventario(objeto);
 						mensaje.append("Has cogido " + objeto.getNombre() + ".\n");
 						encontrado = true;
@@ -628,84 +648,137 @@ public class Comandos {
 
 		// Comprobar que el jugador tiene objetos en el inventario.
 		if (inventarioJugador != null && !inventarioJugador.isEmpty()) {
-			// Verificar si se proporcionaron ambos argumentos.
+			// Comprobar que los argumentos no sean nulos.
 			if (args[0] != null && args[1] != null) {
 				// Buscar el objeto a guardar en el inventario del jugador.
 				Objeto objetoAGuardar = null;
 				for (Objeto objeto : inventarioJugador) {
-					if (objeto.getNombre().equalsIgnoreCase(args[0])) {
+					StringBuilder objetoNormalizado = new StringBuilder(NormalizarCadena.quitarAcentos(objeto.getNombre()));
+					if (args[0].equalsIgnoreCase(objetoNormalizado.toString())) {
 						objetoAGuardar = objeto;
 						break;
 					}
 				}
 
-				// Verificar si se encontró el objeto a guardar.
+				// Comprobar si se encontró el objeto a guardar.
 				if (objetoAGuardar != null) {
 					// Buscar el contenedor en el inventario del jugador.
 					for (Objeto objetoContenedor : inventarioJugador) {
 						if (objetoContenedor instanceof Objeto_Contenedor &&
 								objetoContenedor.getNombre().equalsIgnoreCase(args[1])) {
 							Objeto_Contenedor contenedor = (Objeto_Contenedor) objetoContenedor;
-							
-							// Verificar si el objeto a guardar es el mismo que el contenedor.
-	                        if (objetoAGuardar.equals(contenedor)) {
-	                            mensaje.append("\nNo puedes guardar un objeto dentro de sí mismo.");
-	                            juego.outputTexto(mensaje.toString());
-	                            return;
-	                        }
 
-							// Verificar si el contenedor tiene espacio suficiente.
+							// Comprobar si el objeto a guardar es el mismo que el contenedor.
+							if (objetoAGuardar.equals(contenedor)) {
+								mensaje.append("No puedes guardar un objeto dentro de sí mismo.");
+								juego.outputTexto(mensaje.toString());
+								return;
+							}
+
+							// Comprobar si el contenedor tiene espacio suficiente.
 							if (contenedor.getObjetosContenidos().size() < contenedor.getMaxObjetosContenidos()) {
-								// Verificar si el objeto a guardar es un contenedor.
+								// Comprobar si el objeto a guardar es un contenedor.
 								if (!(objetoAGuardar instanceof Objeto_Contenedor) && args[1] != null) {
-									// Guardar objeto en el contenedor.
-									contenedor.getObjetosContenidos().add(objetoAGuardar);
-									// Eliminar el objeto del inventario, ya que realmente lo duplicas.
-									inventarioJugador.remove(objetoAGuardar);
-									mensaje.append("\n'" + objetoAGuardar.getNombre() + "' guardado en '"
-											+ contenedor.getNombre() + "'.");
+									switch(contenedor.getCapacidad()) {
+									case BAJA:
+										if(objetoAGuardar instanceof Objeto_Arma || objetoAGuardar instanceof Objeto_Comun) {
+											String[] mensajeAleatorio = {
+													"¿No te das cuenta que '" + objetoAGuardar.getNombre() + "' no cabe en '"
+															+ contenedor.getNombre() + "'? No eres Sally Bobbins.",
+															"Eso no cabe ahí...",
+															"¿En serio creíste que '" + objetoAGuardar.getNombre() + "' cabía en '"
+																	+ contenedor.getNombre() + "'?"};
+
+											mensaje.append(mensajeAleatorio[Aleatorio.Int(0, mensajeAleatorio.length - 1)]);
+										} else {
+											// Guardar objeto en el contenedor.
+											contenedor.getObjetosContenidos().add(objetoAGuardar);
+											// Eliminar el objeto del inventario, ya que realmente lo duplicas.
+											inventarioJugador.remove(objetoAGuardar);
+											mensaje.append("'" + objetoAGuardar.getNombre() + "' guardado en '"
+													+ contenedor.getNombre() + "'.");
+										}
+										break;
+									case MEDIA:
+										if(objetoAGuardar instanceof Objeto_Arma) {
+											mensaje.append("'" + objetoAGuardar.getNombre() + "' no cabe en '"
+													+ contenedor.getNombre() + "', no es tan grande como pensabas.");
+										} else {
+											// Guardar objeto en el contenedor.
+											contenedor.getObjetosContenidos().add(objetoAGuardar);
+											// Eliminar el objeto del inventario, ya que realmente lo duplicas.
+											inventarioJugador.remove(objetoAGuardar);
+											mensaje.append("'" + objetoAGuardar.getNombre() + "' guardado en '"
+													+ contenedor.getNombre() + "'.");
+										}
+										break;
+									case ALTA:
+										// Guardar objeto en el contenedor.
+										contenedor.getObjetosContenidos().add(objetoAGuardar);
+										// Eliminar el objeto del inventario, ya que realmente lo duplicas.
+										inventarioJugador.remove(objetoAGuardar);
+										mensaje.append("'" + objetoAGuardar.getNombre() + "' guardado en '"
+												+ contenedor.getNombre() + "'.");
+										break;
+									default:
+										break;
+									}
+
 									juego.outputTexto(mensaje.toString());
 									return;
 								} else {
-									mensaje.append("\nNo puedes guardar un contenedor dentro de otro, ¿esperabas "
-											+ "que implosionara y creara un agujero negro o algo así?");
+									mensaje.append("No puedes guardar un contenedor dentro de otro, ¿esperabas "
+											+ "crear un agujero negro o algo así?");
 									juego.outputTexto(mensaje.toString());
 									return;
 								}
 							} else {
-								mensaje.append("\nEl contenedor '" + contenedor.getNombre() + "' está lleno.");
+								mensaje.append("El contenedor '" + contenedor.getNombre() + "' está lleno.");
 								juego.outputTexto(mensaje.toString());
 								return;
 							}
 						}
 					}
-					
+
+					// Comprobar que el arg[1] (contenedor) no sea un objeto-no-contenedor.
+					boolean objetoNoContenedor = false;
+
+					for(Objeto objeto : inventarioJugador) {
+						if(!(objeto instanceof Objeto_Contenedor) && objeto.getNombre().equalsIgnoreCase(args[1])) {
+							objetoNoContenedor = true;
+						}
+					}
+
+					if(objetoNoContenedor) {
+						mensaje.append("¿Cómo pretendes guardar '" + args[0] + "' en '" + args[1] + "'?");
+					}
+
 					// Comprobar que el contenedor seleccionado esté en tu inventario o exista en el juego.
 					boolean contenedorEnInventario = false;
 					boolean contenedorEnJuego = false;
 
-					for (Objeto objetoContenedor : inventarioJugador) {
-					    if (objetoContenedor instanceof Objeto_Contenedor && 
-					        objetoContenedor.getNombre().equalsIgnoreCase(args[1])) {
-					        contenedorEnInventario = true;
-					        break;
-					    }
-
-					    if (objetoContenedor instanceof Objeto_Contenedor && 
-					        objetoContenedor.getNombre().equalsIgnoreCase(args[1])) {
-					        contenedorEnJuego = true;
-					        break;
-					    }
+					for(Objeto objetoContenedor : inventarioJugador) {
+						if (objetoContenedor instanceof Objeto_Contenedor && objetoContenedor.getNombre().equalsIgnoreCase(args[1])) {
+							contenedorEnInventario = true;
+							break;
+						}
 					}
 
-					if (!contenedorEnInventario && contenedorEnJuego) {
-					    mensaje.append("\nNo dispones del contenedor '" + args[1] + "'.");
-					} else if (!contenedorEnJuego) {
-					    mensaje.append("\nNo reconozco el contenedor '" + args[1] + "'.");
+					for(Objeto objetoContenedor: ListaObjetos.listaTodosLosObjetos) {
+						if (objetoContenedor instanceof Objeto_Contenedor && objetoContenedor.getNombre().equalsIgnoreCase(args[1])) {
+							contenedorEnJuego = true;
+							break;
+						}
 					}
-					
+
+					if (!contenedorEnInventario && contenedorEnJuego && !objetoNoContenedor) {
+						mensaje.append("No dispones del contenedor '" + args[1] + "'.");
+					} else if (!contenedorEnJuego && !objetoNoContenedor) {
+						mensaje.append("No reconozco el contenedor '" + args[1] + "'.");
+					}
+
 				} else {
-					
+
 					// Comprobar que el objeto exista en la lista de todos los objetos del juego.
 					boolean objetoEnJuego = false;
 					for (Objeto objeto : ListaObjetos.listaTodosLosObjetos) {
@@ -714,16 +787,16 @@ public class Comandos {
 							break;
 						}
 					}
-					
+
 					if(!objetoEnJuego) {
-						mensaje.append("\nNo reconozco el objeto '" + args[0] + "'.");
+						mensaje.append("No reconozco el objeto '" + args[0] + "'.");
 					} else {
-						mensaje.append("\n¿Dónde quieres guardar el objeto '" + args[0] + "'?");
+						mensaje.append("¿Dónde quieres guardar el objeto '" + args[0] + "'?");
 					}		
 				}
-				
-			} else if(args[1] == null) {
-				
+
+			} else if(args[0] != null && args[1] == null) {
+
 				// Comprobar que el objeto exista en la lista de todos los objetos del juego.
 				boolean objetoEnJuego = false;
 				for (Objeto objeto : ListaObjetos.listaTodosLosObjetos) {
@@ -732,23 +805,126 @@ public class Comandos {
 						break;
 					}
 				}
-				
+
 				if(!objetoEnJuego) {
-					mensaje.append("\nEl objeto '" + args[0] + "' no se encuentra en este mundo.");
+					mensaje.append("El objeto '" + args[0] + "' no se encuentra en este mundo.");
 				} else {
-					mensaje.append("\n¿Dónde quieres almacenar el objeto '" + args[0] + "'?");
+					mensaje.append("¿Dónde quieres almacenar el objeto '" + args[0] + "'?");
 				}
-				
+
 			} else {
-				mensaje.append("\n¿Qué quieres guardar, y dónde?");
+				mensaje.append("¿Qué objeto quieres guardar y dónde?");
 			}
 		} else {
-			mensaje.append("\nNo llevas ningún objeto para guardar.");
+			mensaje.append("No llevas ningún objeto para guardar.");
 		}
 
 		juego.outputTexto(mensaje.toString());
 	}
 
+	/*
+	 * 
+	 * 
+	 *  SACAR
+	 *  
+	 *  
+	 */
+	private void comandoSacar(String... args) {
+		StringBuilder mensaje = new StringBuilder();
+		List<Objeto> inventarioJugador = jugador.getInventario();
+
+		// Comprobar que el jugador tiene objetos en el inventario.
+		if (inventarioJugador != null && !inventarioJugador.isEmpty()) {
+			// Comprobar que los argumentos no sean nulos.
+			if (args[0] != null) {
+				// Normalizar el nombre del objeto a sacar.
+				String nombreObjeto = NormalizarCadena.quitarAcentos(args[0]);
+
+				// Comprobar si el objeto a sacar se encuentra dentro de un contenedor en el inventario del jugador.
+				Objeto_Contenedor objetoContenedor = null;
+				for (Objeto objeto : inventarioJugador) {
+					String objetoNormalizado = NormalizarCadena.quitarAcentos(objeto.getNombre());
+					if (objeto instanceof Objeto_Contenedor && args[1].equalsIgnoreCase(objetoNormalizado)) {
+						Objeto_Contenedor contenedor = (Objeto_Contenedor) objeto;
+						// Utilizar el nombre normalizado para la comparación.
+						if (contenedor.getObjetosContenidos().stream().anyMatch(obj -> NormalizarCadena.quitarAcentos(obj.getNombre()).equalsIgnoreCase(nombreObjeto))) {
+							objetoContenedor = contenedor;
+							break;
+						}
+					}
+				}
+
+				if (objetoContenedor != null) {
+					Objeto objetoASacar = null;
+					for (Objeto obj : objetoContenedor.getObjetosContenidos()) {
+						if (NormalizarCadena.quitarAcentos(obj.getNombre()).equalsIgnoreCase(nombreObjeto)) {
+							objetoASacar = obj;
+							break;
+						}
+					}
+
+					// Comprobar si encontraste el objeto a sacar.
+					if (objetoASacar != null) {
+						// Comprobar si tienes espacio en el inventario para guardar el objeto sacado.
+						if (inventarioJugador.size() < jugador.getMaxObjetosInventario()) {
+							// Añadir objeto al inventario.
+							inventarioJugador.add(objetoASacar);
+							// Eliminar objeto de dentro del contenedor.
+							objetoContenedor.getObjetosContenidos().remove(objetoASacar);
+							mensaje.append("Has sacado '" + objetoASacar.getNombre() + "' de '" + objetoContenedor.getNombre() + "'.");
+						} else {
+							mensaje.append("No tienes espacio suficiente en tu inventario para sacar '" + objetoASacar.getNombre() + "'.");
+						}
+					} else {
+						mensaje.append("'" + args[0] + "' no está dentro de '" + objetoContenedor.getNombre() + "'.");
+					}
+				} else {
+					// Comprobar que el objeto a sacar exista en el inventario del jugador.
+					Objeto objetoASacar = null;
+					for (Objeto obj : inventarioJugador) {
+						if (NormalizarCadena.quitarAcentos(obj.getNombre()).equalsIgnoreCase(nombreObjeto)) {
+							objetoASacar = obj;
+							break;
+						}
+					}
+
+					if (objetoASacar != null) {
+						// Si el objeto a sacar no es un contenedor, mostrar mensaje de error.
+						if (objetoASacar instanceof Objeto_Contenedor) {
+							mensaje.append("No puedes sacar un contenedor de dentro de otro, no quieras creerte más inteligente que yo.");
+						}else {
+							// Comprobar que el objeto exista en la lista de todos los objetos del juego.
+							boolean objetoEnJuego = false;
+							for (Objeto objeto : ListaObjetos.listaTodosLosObjetos) {
+								if (objeto.getNombre().equalsIgnoreCase(args[1])) {
+									objetoEnJuego = true;
+									break;
+								}
+							}
+
+							if(!objetoEnJuego) {
+								mensaje.append("No reconozco el objeto '" + args[1] + "'.");
+							} else {
+								mensaje.append("¿Dónde quieres guardar '" + args[0] + "'?");
+							}
+						}
+					} else {
+						if(args[0] != null && args[1] == null) {
+							mensaje.append("'" + args[0] + "' no se encuentra en tu inventario.");
+						} else {
+							mensaje.append("'" + args[0] + "' no se encuentra en '" + args[1] + "'.");
+						}
+					}
+				}
+			} else {
+				mensaje.append("¿Qué objeto quieres sacar?");
+			}
+		} else {
+			mensaje.append("Tu inventario está vacío.");
+		}
+
+		juego.outputTexto(mensaje.toString());
+	}
 
 	/*
 	 * 
