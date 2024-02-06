@@ -2,6 +2,12 @@ package personajes;
 
 
 public class ListaEnemigos {
+	
+	private static StringBuilder nombre = new StringBuilder();
+	private static StringBuilder conversacion = new StringBuilder();
+	private static boolean esJefe = false;
+	private static int recompensa = 0;
+	private static int vidas = 1;
 
 	/*
 	 * 
@@ -9,8 +15,9 @@ public class ListaEnemigos {
 	 * 
 	 */
 
-	public static Enemigo LADRON = crearLadron();
-	public static Enemigo MUTANTE = crearMutante();
+	// Enemigos normales.
+	public static final Enemigo LADRON = crearLadron();
+	public static final Enemigo MUTANTE = crearMutante();
 
 
 	/* ----------------------------------------------------------------------------------------------------------
@@ -20,7 +27,7 @@ public class ListaEnemigos {
 	 * 
 	 * ENEMIGOS
 	 * 
-	 * (nombre, esJefe, recompensaPorMatar, vida)
+	 * (nombre, vidas, conversacion, esJefe, recompensaPorMatar)
 	 * 
 	 * 
 	 * 
@@ -28,12 +35,28 @@ public class ListaEnemigos {
 
 	// LADRON
 	public static Enemigo crearLadron() {
-		return new Enemigo("Ladrón", false, 5, 2);
+		nombre.setLength(0);
+		conversacion.setLength(0);
+		nombre.append("Ladrón");
+		conversacion.append("¡Dame todo lo que lleves encima o morirás!");
+		vidas = 2;
+		esJefe = false;
+		recompensa = 5;
+		
+		return new Enemigo(nombre.toString(), vidas, conversacion.toString(), esJefe, recompensa);
 	}
 
 	// MUTANTE
 	public static Enemigo crearMutante() {
-		return new Enemigo("Mutante", false, 8, 3);
+		nombre.setLength(0);
+		conversacion.setLength(0);
+		nombre.append("Mutante");
+		conversacion.append("(Sonidos irreconocibles)");
+		vidas = 3;
+		esJefe = false;
+		recompensa = 8;
+		
+		return new Enemigo(nombre.toString(), vidas, conversacion.toString(), esJefe, recompensa);
 	}
 
 

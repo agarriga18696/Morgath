@@ -149,18 +149,12 @@ public class ConectorHabitaciones {
 		 * 
 		 */
 
-		// Callejón sin salida.
-		habitacion_00 = new Habitacion(0, Habitaciones.h_00(NOMBRE), Habitaciones.h_00(DESC), new Objeto[]{ListaObjetos.ESPADA, ListaObjetos.BOLSA}, new PNJ[]{ListaPNJS.COMERCIANTE}, new Enemigo[]{ListaEnemigos.LADRON});
-		// Sendero
-		habitacion_01 = new Habitacion(1, Habitaciones.h_01(NOMBRE), Habitaciones.h_01(DESC), new Objeto[]{}, new PNJ[]{}, new Enemigo[]{});
-		// Casa, exterior
-		habitacion_02 = new Habitacion(2, Habitaciones.h_02(NOMBRE), Habitaciones.h_02(DESC), new Objeto[]{},new PNJ[]{}, new Enemigo[]{});
-		// Casa, entrada
-		habitacion_02_01 = new Habitacion(2.1, Habitaciones.h_02_01(NOMBRE), Habitaciones.h_02_01(DESC), new Objeto[]{}, new PNJ[]{}, new Enemigo[]{});
-		// Casa, ático
-		habitacion_02_02 = new Habitacion(2.2, Habitaciones.h_02_02(NOMBRE), Habitaciones.h_02_02(DESC), new Objeto[]{}, new PNJ[]{}, new Enemigo[]{});
-		// Casa, sótano
-		habitacion_02_03 = new Habitacion(2.3, Habitaciones.h_02_03(NOMBRE), Habitaciones.h_02_03(DESC), new Objeto[]{}, new PNJ[]{}, new Enemigo[]{});
+		habitacion_00 = Habitaciones.h_00(); // Callejón sin salida.
+		habitacion_01 = Habitaciones.h_01(); // Sendero
+		habitacion_02 = Habitaciones.h_02(); // Casa, exterior
+		habitacion_02_01 = Habitaciones.h_02_01(); // Casa, entrada
+		habitacion_02_02 = Habitaciones.h_02_02(); // Casa, ático
+		habitacion_02_03 = Habitaciones.h_02_03(); // Casa, sótano
 
 
 

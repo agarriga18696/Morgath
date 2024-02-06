@@ -2,12 +2,28 @@ package objetos;
 
 public class Objeto_Comun extends Objeto {
 	
-	public Objeto_Comun(String nombre, String descripcion, int valorVenta, boolean objetoDeMision) {
+	private int valorVenta;
+	
+	public Objeto_Comun(String nombre, String descripcion, boolean objetoDeMision, int valorVenta) {
 		super(nombre, descripcion);
 		
-		setValorVenta(valorVenta);
 		setObjetoDeMision(objetoDeMision);
+		this.valorVenta = valorVenta;
+	}
+
+	public int getValorVenta() {
+		return valorVenta;
 	}
 	
-
+/*
+ * 
+ * 
+ * 
+ * 
+ * 
+ * 
+ */
+	
+	
 }
+

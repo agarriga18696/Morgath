@@ -1,11 +1,13 @@
 package juego;
 
 import java.awt.BorderLayout;
+import java.awt.Color;
 import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
 import javax.swing.*;
+import javax.swing.text.*;
 import javax.swing.border.EmptyBorder;
 
 import comandos.Comandos;
@@ -23,7 +25,7 @@ public class Juego extends JFrame {
 	public JLabel labelUbicacion, labelPuntuacion, labelCursor;
 	public JScrollPane barraScroll;
 	public JScrollBar barraScrollPersonalizada;
-	public JTextArea outputTexto;
+	public JTextPane outputTexto;
 	public JTextField inputTexto;
 
 	private Jugador jugador;
@@ -35,8 +37,12 @@ public class Juego extends JFrame {
 	public static String ultimoComandoUsado;
 	private String nombreJugador;
 
-	
-	
+
+
+	public JLabel labelObjeto = new JLabel();
+
+
+
 	/*
 	 * 
 	 *  
@@ -47,20 +53,22 @@ public class Juego extends JFrame {
 	 *  
 	 *  
 	 */
-	
+
 	public Juego() {
 
+		// Juego
 		mapa = new ConectorHabitaciones();
 		Habitacion ubicacionInicial = mapa.obtenerHabitacionInicial();
 		jugador = new Jugador(nombreJugador, ubicacionInicial, 3);
 		misiones = new Misiones();
 		comandos = new Comandos(jugador, this, mapa);
 
+		// Ventana
 		setSize(Config.anchoVentana, Config.altoVentana);
 		setResizable(false);
 		setDefaultCloseOperation(EXIT_ON_CLOSE);
 		setLocationRelativeTo(null);
-		setTitle("MORGATH I");
+		setTitle("MORGATH");
 
 		// Paneles.
 		panelPrincipal = new JPanel();
@@ -69,9 +77,22 @@ public class Juego extends JFrame {
 		panelInferior = new JPanel();
 
 		// Area Texto.
-		outputTexto = new JTextArea();
+		outputTexto = new JTextPane();
 		inputTexto = new JTextField();
 
+		// Barra Scroll del área de texto.
+		barraScroll = new JScrollPane(outputTexto);
+		barraScrollPersonalizada = new JScrollBar(JScrollBar.VERTICAL);
+		barraScroll.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
+		barraScroll.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED);
+		barraScroll.setVerticalScrollBar(barraScrollPersonalizada);
+
+		// Etiquetas del panel superior.
+		labelUbicacion = new JLabel("UBICACIÓN: " + jugador.getUbicacion().getNombre());
+		labelPuntuacion = new JLabel("PUNTOS: " + jugador.getPuntos());
+		labelCursor = new JLabel(Config.CURSOR);
+
+		// Action Listener para el input de texto.
 		inputTexto.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent e) {
@@ -88,20 +109,7 @@ public class Juego extends JFrame {
 			}
 		});
 
-		// Barra Scroll.
-		barraScroll = new JScrollPane(outputTexto);
-		barraScrollPersonalizada = new JScrollBar(JScrollBar.VERTICAL);
-		//barraScroll.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
-		//barraScroll.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED);
-		barraScroll.setVerticalScrollBar(barraScrollPersonalizada);
-
-		// Etiquetas.
-		labelUbicacion = new JLabel("UBICACIÓN: " + jugador.getUbicacion().getNombre());
-		labelPuntuacion = new JLabel("PUNTOS: " + jugador.getPuntos());
-		labelCursor = new JLabel(Config.CURSOR);
-
-		configurarVentana();
-		setVisible(true);
+		SwingUtilities.invokeLater(() -> configurarVentana());
 
 		SwingUtilities.invokeLater(() -> {
 			// Hacer autofocus en la ventana y en el inputTexto.
@@ -109,10 +117,11 @@ public class Juego extends JFrame {
 			inputTexto.requestFocus();
 		});
 
+		setVisible(true);
 	}
 
-	
-	
+
+
 	/*
 	 * 
 	 *  
@@ -124,7 +133,7 @@ public class Juego extends JFrame {
 	 *  
 	 *  
 	 */
-	
+
 	private void configurarVentana() {
 		SwingUtilities.invokeLater(() -> {
 			// Establecer fuente y color.
@@ -133,6 +142,8 @@ public class Juego extends JFrame {
 			labelCursor.setFont(Config.fuente);
 			outputTexto.setFont(Config.fuente);
 			inputTexto.setFont(Config.fuente);
+
+			labelObjeto.setFont(Config.fuente);
 
 			// Panel principal.
 			panelPrincipal.setLayout(new BorderLayout());
@@ -151,8 +162,8 @@ public class Juego extends JFrame {
 			panelCentral.setLayout(new BorderLayout());
 			panelCentral.add(barraScroll, BorderLayout.CENTER);
 			barraScroll.setBorder(null);
-			outputTexto.setLineWrap(true);
-			outputTexto.setWrapStyleWord(true);
+			//outputTexto.setLineWrap(true);
+			//outputTexto.setWrapStyleWord(true);
 			outputTexto.setBorder(Config.borde);
 			outputTexto.setHighlighter(null);
 			outputTexto.setEditable(false);
@@ -173,16 +184,7 @@ public class Juego extends JFrame {
 		});
 	}
 
-	// Método para mostrar mensajes en el outputTexto con espacio entre ellos.
-	public void outputTexto(String texto) {
-		SwingUtilities.invokeLater(() -> {
-			outputTexto.append(texto + "\n");  // Agrega dos líneas en blanco adicionales
-			outputTexto.setCaretPosition(outputTexto.getDocument().getLength());
-		});
-	}
 
-	
-	
 	/*
 	 * 
 	 *  
@@ -194,11 +196,11 @@ public class Juego extends JFrame {
 	 *  
 	 *  
 	 */
-	
+
 	public void iniciarPartida() {
 		ultimoComandoUsado = "";
 		ejecutarMision();
-		
+
 		while (!ultimoComandoUsado.equalsIgnoreCase("terminar")) {
 			mostrarMensajeDeMision();
 
@@ -212,9 +214,9 @@ public class Juego extends JFrame {
 			esperarComando();
 		}
 	}
-	
-	
-	
+
+
+
 	/*
 	 * 
 	 *  
@@ -226,6 +228,28 @@ public class Juego extends JFrame {
 	 *  
 	 *  
 	 */
+
+	// Método para mostrar mensajes en el outputTexto (JTextPane).
+	public void outputTexto(String texto) {
+		SwingUtilities.invokeLater(() -> {
+			SimpleAttributeSet atributos = new SimpleAttributeSet();
+			StyledDocument doc = outputTexto.getStyledDocument();
+
+			outputTexto.setCaretPosition(outputTexto.getDocument().getLength());
+
+			try {
+				doc.insertString(doc.getLength(), texto + "\n", atributos);
+			} catch (BadLocationException e) {
+				e.printStackTrace();
+			}
+		});
+	}
+
+	// Método para mostrar mensajes en el outputTexto (JTextArea).
+	/*public void outputTexto(String texto) {
+		outputTexto.append(texto + "\n");
+		outputTexto.setCaretPosition(outputTexto.getDocument().getLength());
+	}*/
 
 	// Método para ejecutar la misión.
 	private void ejecutarMision() {
@@ -259,19 +283,19 @@ public class Juego extends JFrame {
 
 	// Método para avanzar a la siguiente misión al completar una.
 	private void avanzarASiguienteMision() {
-	    if (misionActiva != null && misionActiva.isCompletada()) {
-	        misionActiva = misiones.ejecutarMisiones();
+		if (misionActiva != null && misionActiva.isCompletada()) {
+			misionActiva = misiones.ejecutarMisiones();
 
-	        if (misionActiva != null) {
-	            if (!misionActiva.isMensajeMostrado()) {
-	                String mensajeSistema = "\nNueva Misión: " + misionActiva.getNombre() + "\n\n" + misionActiva.getMensaje();
-	                outputTexto(mensajeSistema);
-	                misionActiva.setMensajeMostrado(true);
-	            }
+			if (misionActiva != null) {
+				if (!misionActiva.isMensajeMostrado()) {
+					String mensajeSistema = "\nNueva Misión: " + misionActiva.getNombre() + "\n\n" + misionActiva.getMensaje();
+					outputTexto(mensajeSistema);
+					misionActiva.setMensajeMostrado(true);
+				}
 
-	            notificarComandoIngresado();
-	        }
-	    }
+				notificarComandoIngresado();
+			}
+		}
 	}
 
 	// Actualizar label de puntos.

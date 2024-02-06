@@ -2,22 +2,23 @@ package objetos;
 
 public class Objeto_Arma extends Objeto {
 	
+	private int valorVenta;
 	private int ataque;
 
-	public Objeto_Arma(String nombre, String descripcion, int valorVenta, boolean objetoDeMision, int ataque) {
+	public Objeto_Arma(String nombre, String descripcion, boolean objetoDeMision, int valorVenta, int ataque) {
 		super(nombre, descripcion);
 		
-		setValorVenta(valorVenta);
 		setObjetoDeMision(objetoDeMision);
+		this.valorVenta = valorVenta;
 		this.ataque = ataque;
 	}
 
 	public int getAtaque() {
 		return ataque;
 	}
-
-	public void setAtaque(int ataque) {
-		this.ataque = ataque;
+	
+	public int getValorVenta() {
+		return valorVenta;
 	}
 	
 

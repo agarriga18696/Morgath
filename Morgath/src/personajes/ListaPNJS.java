@@ -3,6 +3,10 @@ package personajes;
 import objetos.ListaObjetos;
 
 public class ListaPNJS {
+	
+	private static StringBuilder nombre = new StringBuilder();
+	private static StringBuilder conversacion = new StringBuilder();
+	private static int vidas = 1;
 
 	/*
 	 * 
@@ -10,8 +14,8 @@ public class ListaPNJS {
 	 * 
 	 */
 
-	public static PNJ ALDEANO = crearAldeano();
-	public static PNJ COMERCIANTE = crearComerciante();
+	public static final PNJ ALDEANO = crearAldeano();
+	public static final PNJ COMERCIANTE = crearComerciante();
 
 
 	/* ----------------------------------------------------------------------------------------------------------
@@ -29,12 +33,27 @@ public class ListaPNJS {
 
 	// ALDEANO
 	public static PNJ crearAldeano() {
-		return new PNJ("Aldeano", "", 2);
+		nombre.setLength(0);
+		conversacion.setLength(0);
+		nombre.append("Aldeano");
+		conversacion.append("");
+		vidas = 1;
+		
+		return new PNJ(nombre.toString(), conversacion.toString(), vidas);
 	}
 
 	// COMERCIANTE
 	public static PNJ crearComerciante() {
-		return new PNJ("Comerciante", "", 2, ListaObjetos.ESPADA, ListaObjetos.BOLSA, ListaObjetos.LAMPARA);
+		nombre.setLength(0);
+		conversacion.setLength(0);
+		nombre.append("Comerciante");
+		conversacion.append("");
+		vidas = 2;
+		
+		return new PNJ(nombre.toString(), conversacion.toString(), vidas,
+				ListaObjetos.ESPADA,
+				ListaObjetos.LAMPARA,
+				ListaObjetos.BOLSA);
 	}
 
 

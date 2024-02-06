@@ -6,10 +6,10 @@ import java.util.Arrays;
 import objetos.Objeto;
 
 
-public class PNJ extends Personaje {
+public class PNJ extends Personaje implements Conversar {
 
 	private String conversacion;
-
+	
 	public PNJ(String nombre, String conversacion, int vidas, Objeto... objeto) {
 		super(nombre, vidas);
 		
@@ -17,14 +17,16 @@ public class PNJ extends Personaje {
 		this.conversacion = conversacion;
 		this.inventario = new ArrayList<>(Arrays.asList(objeto));
 	}
+
 	
-	// Getters i setters.
-	public String getConversacion() {
-		return conversacion;
+	@Override
+	public String obtenerConversacion() {
+		return this.conversacion;
 	}
 
-	public void setConversacion(String conversacion) {
-		this.conversacion = conversacion;
+	@Override
+	public void establecerConversacion(String nuevaConversacion) {
+		this.conversacion = nuevaConversacion;
 	}
 
 }
