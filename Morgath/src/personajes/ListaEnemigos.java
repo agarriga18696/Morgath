@@ -1,13 +1,22 @@
 package personajes;
 
+import java.util.ArrayList;
+import java.util.List;
+
 
 public class ListaEnemigos {
-	
+
 	private static StringBuilder nombre = new StringBuilder();
 	private static StringBuilder conversacion = new StringBuilder();
 	private static boolean esJefe = false;
 	private static int recompensa = 0;
 	private static int vidas = 1;
+	
+	public static List<Enemigo> listaTodosLosEnemigos = new ArrayList<>();
+	
+	public ListaEnemigos() {
+		inicializarListaEnemigos();
+	}
 
 	/*
 	 * 
@@ -18,6 +27,13 @@ public class ListaEnemigos {
 	// Enemigos normales.
 	public static final Enemigo LADRON = crearLadron();
 	public static final Enemigo MUTANTE = crearMutante();
+
+	// Añadir todos los objetos creados a la lista.
+	public static void inicializarListaEnemigos() {
+		listaTodosLosEnemigos.clear();
+		listaTodosLosEnemigos.add(LADRON);
+		listaTodosLosEnemigos.add(MUTANTE);
+	}
 
 
 	/* ----------------------------------------------------------------------------------------------------------
@@ -42,7 +58,7 @@ public class ListaEnemigos {
 		vidas = 2;
 		esJefe = false;
 		recompensa = 5;
-		
+
 		return new Enemigo(nombre.toString(), vidas, conversacion.toString(), esJefe, recompensa);
 	}
 
@@ -55,7 +71,7 @@ public class ListaEnemigos {
 		vidas = 3;
 		esJefe = false;
 		recompensa = 8;
-		
+
 		return new Enemigo(nombre.toString(), vidas, conversacion.toString(), esJefe, recompensa);
 	}
 

@@ -6,7 +6,7 @@ Te aguarda una misión épica. Explora cada rincón, sumérgete en la intrigante
 Podrás obtener más información sobre los comandos del juego escribiendo 'AYUDA' en cualquier momento.
 
 Escribe 'EMPEZAR' para iniciar tu aventura y completar esta misión.
--Recompensa: 5
+-Recompensa: 0
 
 # 2, Despertar
 -Objetivo: Recupera tus objetos.

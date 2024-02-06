@@ -4,19 +4,7 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 
-import comandos.Comandos.ListaComandos;
-import objetos.ListaObjetos;
-import objetos.Objeto;
-import personajes.Enemigo;
-import personajes.ListaEnemigos;
-import personajes.ListaPNJS;
-import personajes.PNJ;
-
 public class ConectorHabitaciones {
-
-	// Variables final para solicitar el Nombre o Descripción de cada habitación.
-	private static final String NOMBRE = "nombre";
-	private static final String DESC = "desc";
 
 	/*
 	 * 
@@ -34,17 +22,17 @@ public class ConectorHabitaciones {
 	public Habitacion habitacion_02_03;
 
 	// Declarar mapa.
-	public final Map<Habitacion, Map<Direccion, Habitacion>> conectorHabitaciones;
+	public final Map<Habitacion, Map<Direccion, Habitacion>> habitaciones;
 
 	// Constructor
 	public ConectorHabitaciones() {
-		this.conectorHabitaciones = new HashMap<>();
+		this.habitaciones = new HashMap<>();
 		inicializarHabitaciones();
 	}
 
 	// Getter.
 	public Map<Habitacion, Map<Direccion, Habitacion>> getConectorHabitaciones(){
-		return conectorHabitaciones;
+		return habitaciones;
 	}
 
 
@@ -180,7 +168,7 @@ public class ConectorHabitaciones {
 
 	// Método para obtener una habitación del mapa por su ID.
 	public Habitacion obtenerHabitacionPorId(int id) {
-		for (Habitacion habitacion : conectorHabitaciones.keySet()) {
+		for (Habitacion habitacion : habitaciones.keySet()) {
 			if (habitacion.getId() == id) {
 				return habitacion;
 			}
@@ -191,8 +179,8 @@ public class ConectorHabitaciones {
 
 	// Método para conectar las habitaciones entre ellas.
 	public void conectar(Habitacion habitacionOrigen, Habitacion habitacionDestino, Direccion direccion) {
-		habitacionOrigen.setSalidas(conectorHabitaciones.computeIfAbsent(habitacionOrigen, k -> new HashMap<>()));
-		habitacionDestino.setSalidas(conectorHabitaciones.computeIfAbsent(habitacionDestino, k -> new HashMap<>()));
+		habitacionOrigen.setSalidas(habitaciones.computeIfAbsent(habitacionOrigen, k -> new HashMap<>()));
+		habitacionDestino.setSalidas(habitaciones.computeIfAbsent(habitacionDestino, k -> new HashMap<>()));
 
 		habitacionOrigen.getSalidas().put(direccion, habitacionDestino);
 		habitacionDestino.getSalidas().put(direccion.opuesta(), habitacionOrigen);
@@ -200,7 +188,7 @@ public class ConectorHabitaciones {
 
 	// Método para mover al jugador por las habitaciones.
 	public Habitacion moverJugador(Habitacion habitacionActual, Direccion direccion) {
-		Map<Direccion, Habitacion> direcciones = conectorHabitaciones.get(habitacionActual);
+		Map<Direccion, Habitacion> direcciones = habitaciones.get(habitacionActual);
 		if (direcciones != null && direcciones.containsKey(direccion)) {
 			return direcciones.get(direccion);
 		} else {

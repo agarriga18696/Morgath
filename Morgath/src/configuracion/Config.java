@@ -38,10 +38,10 @@ public class Config {
 	public static final Tema TEMA_2 = new Tema(Color.decode("#f9fcfc"), Color.decode("#192c53"), Color.decode("#5433fb"));
 	public static final Tema TEMA_3 = new Tema(Color.decode("#112544"), Color.decode("#edecf4"), Color.decode("#23acc9"));
 	public static final Tema TEMA_4 = new Tema(Color.decode("#383735"), Color.decode("#dbd4ca"), Color.decode("#fecaa7"));
-	public static final Tema TEMA_5 = new Tema(Color.decode("#000000"), Color.decode("#21e379"), Color.decode("#21e379"));
-	public static final Tema TEMA_6 = new Tema(Color.decode("#000000"), Color.decode("#ffffff"), Color.decode("#ffffff"));
+	public static final Tema TEMA_5 = new Tema(Color.decode("#f6bce6"), Color.decode("#472a74"), Color.decode("#924eb7"));
+	public static final Tema TEMA_6 = new Tema(Color.decode("#326257"), Color.decode("#d1d3d4"), Color.decode("#14e0af"));
 	public static final Tema TEMA_7 = new Tema(Color.decode("#d0a407"), Color.decode("#46494a"), Color.decode("#322c13"));
-	public static final Tema TEMA_8 = new Tema(Color.decode("#f6bce6"), Color.decode("#472a74"), Color.decode("#924eb7"));
-	public static final Tema TEMA_9 = new Tema(Color.decode("#303232"), Color.decode("#d1d3d4"), Color.decode("#14e0af"));
+	public static final Tema TEMA_8 = new Tema(Color.decode("#000000"), Color.decode("#21e379"), Color.decode("#21e379"));
+	public static final Tema TEMA_9 = new Tema(Color.decode("#000000"), Color.decode("#ffffff"), Color.decode("#ffffff"));
 	public static Tema temaActual = TEMA_1;
 }

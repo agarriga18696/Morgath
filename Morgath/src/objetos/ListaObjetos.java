@@ -17,6 +17,12 @@ public class ListaObjetos {
 
 	public static List<Objeto> listaTodosLosObjetos = new ArrayList<>();
 
+	
+	public ListaObjetos() {
+		inicializarListaObjetos();
+	}
+	
+	
 	/*
 	 * 
 	 * DEFINICIÓN DE LOS OBJETOS
@@ -38,6 +44,7 @@ public class ListaObjetos {
 
 	// Añadir todos los objetos creados a la lista.
 	public static void inicializarListaObjetos() {
+		listaTodosLosObjetos.clear();
 		listaTodosLosObjetos.add(LAMPARA);
 		listaTodosLosObjetos.add(MONEDA);
 		listaTodosLosObjetos.add(ESPADA);

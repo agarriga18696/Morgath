@@ -5,26 +5,24 @@ import java.util.List;
 
 import localizaciones.Habitacion;
 import misiones.Mision;
-import objetos.ListaObjetos;
 
 public class Jugador extends Personaje {
 
 	// Atributos.
 	Habitacion ubicacion;
 	private int puntos;
-	private List<Mision> diario; // lista de misiones.
+	public List<Mision> diario; // lista de misiones.
 	private int maxObjetosInventario;
 	
 	// Constructor.
 	public Jugador(String nombre, Habitacion ubicacion, int vidas) {
 		super(nombre, vidas);
+		this.setVidas(4);
 		this.ubicacion = ubicacion;
 		this.puntos = 0;
 		this.inventario = new ArrayList<>();
 		this.diario = new ArrayList<>();
-		this.maxObjetosInventario = 10;
-		
-		ListaObjetos.inicializarListaObjetos();
+		this.maxObjetosInventario = 6;
 	}
 
 	// Getters i setters.

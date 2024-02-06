@@ -1,7 +1,6 @@
 package juego;
 
 import java.awt.BorderLayout;
-import java.awt.Color;
 import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -16,7 +15,9 @@ import localizaciones.Habitacion;
 import localizaciones.ConectorHabitaciones;
 import misiones.Mision;
 import misiones.Misiones;
+import objetos.ListaObjetos;
 import personajes.Jugador;
+import personajes.ListaEnemigos;
 
 public class Juego extends JFrame {
 
@@ -29,8 +30,11 @@ public class Juego extends JFrame {
 	public JTextField inputTexto;
 
 	private Jugador jugador;
-	private Misiones misiones;
-	private ConectorHabitaciones mapa;
+	public static Misiones misiones;
+	public static ConectorHabitaciones habitaciones;
+	public static Habitacion ubicacionInicial;
+	public static ListaObjetos listaObjetos;
+	public static ListaEnemigos listaEnemigos;
 	private Comandos comandos;
 	public Mision misionActiva;
 	public boolean empezarJuego;
@@ -57,11 +61,13 @@ public class Juego extends JFrame {
 	public Juego() {
 
 		// Juego
-		mapa = new ConectorHabitaciones();
-		Habitacion ubicacionInicial = mapa.obtenerHabitacionInicial();
-		jugador = new Jugador(nombreJugador, ubicacionInicial, 3);
+		listaObjetos = new ListaObjetos();
+		habitaciones = new ConectorHabitaciones();
+		ubicacionInicial = habitaciones.obtenerHabitacionInicial();
+		jugador = new Jugador(nombreJugador, ubicacionInicial, 4);
+		comandos = new Comandos(jugador, this, habitaciones);
 		misiones = new Misiones();
-		comandos = new Comandos(jugador, this, mapa);
+		listaEnemigos = new ListaEnemigos();
 
 		// Ventana
 		setSize(Config.anchoVentana, Config.altoVentana);
@@ -88,8 +94,8 @@ public class Juego extends JFrame {
 		barraScroll.setVerticalScrollBar(barraScrollPersonalizada);
 
 		// Etiquetas del panel superior.
-		labelUbicacion = new JLabel("UBICACIÓN: " + jugador.getUbicacion().getNombre());
-		labelPuntuacion = new JLabel("PUNTOS: " + jugador.getPuntos());
+		labelUbicacion = new JLabel();
+		labelPuntuacion = new JLabel();
 		labelCursor = new JLabel(Config.CURSOR);
 
 		// Action Listener para el input de texto.
@@ -209,7 +215,8 @@ public class Juego extends JFrame {
 				misionActiva.finalizarMision(jugador);
 				procesarMisionCompletada();
 			}
-
+			
+			actualizarLabelUbicacion();
 			actualizarLabelPuntos();
 			esperarComando();
 		}
@@ -244,12 +251,6 @@ public class Juego extends JFrame {
 			}
 		});
 	}
-
-	// Método para mostrar mensajes en el outputTexto (JTextArea).
-	/*public void outputTexto(String texto) {
-		outputTexto.append(texto + "\n");
-		outputTexto.setCaretPosition(outputTexto.getDocument().getLength());
-	}*/
 
 	// Método para ejecutar la misión.
 	private void ejecutarMision() {
@@ -299,8 +300,12 @@ public class Juego extends JFrame {
 	}
 
 	// Actualizar label de puntos.
-	private void actualizarLabelPuntos() {
+	public void actualizarLabelPuntos() {
 		labelPuntuacion.setText("PUNTOS: " + jugador.getPuntos());
+	}
+
+	public void actualizarLabelUbicacion() {
+		labelUbicacion.setText("UBICACIÓN: " + jugador.getUbicacion().getNombre());
 	}
 
 	// Método para esperar a que el jugador introduzca un comando.

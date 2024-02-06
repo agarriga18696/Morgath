@@ -33,6 +33,15 @@ public class Misiones {
 	    }
 	    return null;
 	}
+	
+	// Método para reiniciar las misiones.
+	public void reiniciarMisiones() {
+		for(Mision m : misiones) {
+			m.setActivada(false);
+			m.setCompletada(false);
+			m.setMensajeMostrado(false);
+		}
+	}
 
 	// Leer mensaje del archivo de misiones
 	private String leerMensaje(BufferedReader bReader) throws IOException {
@@ -48,7 +57,12 @@ public class Misiones {
 		// Obtener el valor de la recompensa si la línea comienza con 'Recompensa:'.
 		if (linea != null && linea.trim().startsWith("-Recompensa:")) {
 			String recompensaString = linea.substring(12).trim();
-			int recompensa = Integer.parseInt(recompensaString);
+			int recompensa;
+			if(recompensaString != null && !recompensaString.isEmpty()) {
+				recompensa = Integer.parseInt(recompensaString);
+			} else {
+				recompensa = 0;
+			}
 			misionActual.setRecompensa(recompensa);
 
 		}

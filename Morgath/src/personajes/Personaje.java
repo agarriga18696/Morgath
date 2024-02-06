@@ -3,7 +3,6 @@ package personajes;
 import java.util.ArrayList;
 import java.util.List;
 
-import localizaciones.Habitacion;
 import objetos.Objeto;
 
 public abstract class Personaje {
@@ -36,6 +35,10 @@ public abstract class Personaje {
         return inventario;
     }
 	
+	public void setInventario(List<Objeto> inventario) {
+		this.inventario = inventario;
+	}
+
 	public int getVidas() {
 		return vidas;
 	}
