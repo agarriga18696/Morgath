@@ -329,7 +329,7 @@ public class Juego extends JFrame {
 	}
 
 	// Método para obtener el comando del jugador del inputTexto.
-	private String obtenerUltimoComando() {
+	public String obtenerUltimoComando() {
 		return inputTexto.getText().trim();
 	}
 

@@ -1,22 +1,22 @@
 package personajes;
 
 
-public class Enemigo extends Personaje implements Conversar {
+public class Enemigo extends Personaje /*implements Conversar*/ {
 
-	private String conversacion;
+	//private String conversacion;
 	private boolean esJefe;
 	private int recompensaPorMatar;
 	
 	public Enemigo(String nombre, int vidas, String conversacion, boolean esJefe, int recompensaPorMatar) {
 		super(nombre, vidas);
 		
-		this.conversacion = conversacion;;
+		//this.conversacion = conversacion;;
 		this.esJefe = esJefe;
 		this.recompensaPorMatar = recompensaPorMatar;
 	}
 
 	
-	@Override
+	/*@Override
 	public String obtenerConversacion() {
 		return this.conversacion;
 	}
@@ -24,7 +24,7 @@ public class Enemigo extends Personaje implements Conversar {
 	@Override
 	public void establecerConversacion(String nuevaConversacion) {
 		this.conversacion = nuevaConversacion;
-	}
+	}*/
 
 	public boolean isEsJefe() {
 		return esJefe;

@@ -1,9 +1,11 @@
 package personajes;
 
-public interface Conversar {	
+public interface Conversar {
 	
 	String obtenerConversacion();
-
-    void establecerConversacion(String nuevaConversacion);
+	
+	String saludoNormal();
+	String saludoGrosero();
+	String saludoAmigable();
     
 }

@@ -35,8 +35,8 @@ public class ListaPNJS {
 	public static PNJ crearAldeano() {
 		nombre.setLength(0);
 		conversacion.setLength(0);
-		nombre.append("Aldeano");
-		conversacion.append("Saludos, viajero. Mi nombre es Eydran.");
+		nombre.append("Eydran");
+		conversacion.append("Mi nombre es " + nombre + ". ¿En qué puedo ayudarte?");
 		vidas = 1;
 		
 		return new PNJ(nombre.toString(), conversacion.toString(), vidas);

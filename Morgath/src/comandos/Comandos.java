@@ -33,6 +33,7 @@ import objetos.Objeto_Dinero;
 import personajes.Jugador;
 import personajes.ListaEnemigos;
 import personajes.PNJ;
+import personajes.Personaje;
 import personajes.Enemigo;
 import utilidades.Aleatorio;
 import utilidades.NormalizarCadena;
@@ -40,12 +41,13 @@ import utilidades.NormalizarCadena;
 public class Comandos {
 
 	// Atributos.
-	private List<String> comandos = new ArrayList<>();
-	private List<String> comandosActivados = new ArrayList<>();
+	private List<String> listaComandos = new ArrayList<>();
+	private List<String> listaComandosActivados = new ArrayList<>();
 	private Jugador jugador;
 	private Juego juego;
 	private Mapa mapa;
 	private Direccion ultimaDireccionUsada;
+	private PNJ ultimoPersonajeHablado;
 
 	private int contadorEspaciosVacios = 0;
 
@@ -54,39 +56,60 @@ public class Comandos {
 		this.jugador = jugador;
 		this.juego = juego;
 		this.mapa = mapa;
+		this.ultimaDireccionUsada = null;
+		this.ultimoPersonajeHablado = null;
 
 		inicializarComandos();
-		//inicializarComandosActivados();
 	}
 
 	// Método para obtener la lista de comandos.
-	public List<String> getComandos() {
-		return comandos;
+	public List<String> getListaComandos() {
+		return listaComandos;
 	}
 
 	// Método para obtener la lista de comandos activados.
-	public List<String> getComandosActivados() {
-		return comandosActivados;
+	public List<String> getListaComandosActivados() {
+		return listaComandosActivados;
 	}
 
 	// Lista de comandos.
 	public enum ListaComandos {
 
+		// MOVIMIENTO
 		LEVANTARSE("INCORPORARSE"),
 		IR("AVANZAR", "DIRIGIRSE", "CAMINAR"),
 		VOLVER("ATRAS"),
+
+		// EXPLORACIÓN
 		LUGAR("SITIO", "HABITACION"),
 		EXPLORAR,
 		MIRAR,
 		BUSCAR,
 		COGER,
 		SOLTAR("TIRAR"),
+
+		// INVENTARIO
 		GUARDAR("METER", "INTRODUCIR", "INSERTAR"),
 		SACAR("QUITAR"),
 		DESTRUIR,
 		INVENTARIO("I"),
+
+		// MISIONES
 		MISION("M", "OBJETIVO", "COMETIDO"),
 		DIARIO("D", "MISIONES"),
+
+		// SOCIAL
+		HABLAR,
+		PREGUNTAR,
+		INTIMIDAR,
+		PERSUADIR,
+		HALAGAR,
+		SOBORNAR,
+		TRASFONDO,
+		COMERCIAR,
+		ADIOS,
+
+		// JUEGO
 		TERMINAR,
 		REINICIAR,
 		AYUDA("A"),
@@ -124,8 +147,8 @@ public class Comandos {
 	private void inicializarComandos() {
 		// Añadir todos los comandos de la lista enum a la lista de comandos.
 		for(ListaComandos comando : ListaComandos.values()){
-			comandos.add(comando.name());
-			comandos.addAll(Arrays.asList(comando.getAtajo()));
+			listaComandos.add(comando.name());
+			listaComandos.addAll(Arrays.asList(comando.getAtajo()));
 		}
 		// Agregar comandos iniciales a la lista de comandos activados.
 		setComandoActivado(ListaComandos.LEVANTARSE, true);
@@ -137,27 +160,57 @@ public class Comandos {
 
 	// Inicializar lista de comandos Activados.
 	private void inicializarComandosActivados() {
-		comandosActivados.clear();
+		listaComandosActivados.clear();
 		for(ListaComandos comando : ListaComandos.values()) {
-			comandosActivados.add(comando.name());
+			listaComandosActivados.add(comando.name());
 			setComandoActivado(comando, true);
+		}
+
+		desactivarComandosSociales();
+	}
+
+	// Desactivar los comandos excepto...
+	private void desactivarComandosExcepto(ListaComandos... comandos) {
+		// Desactiva todos los comandos.
+		for (ListaComandos comandoLista : ListaComandos.values()) {
+			setComandoActivado(comandoLista, false);
+		}
+
+		// Activa solo los comandos especificados.
+		for (ListaComandos comandoJugador : comandos) {
+			setComandoActivado(comandoJugador, true);
 		}
 	}
 
-	// Activar o desactivar un comando.
+	// Desactivar comandos sociales (excepto HABLAR).
+	private void desactivarComandosSociales() {
+		setComandoActivado(ListaComandos.PREGUNTAR, false);
+		setComandoActivado(ListaComandos.INTIMIDAR, false);
+		setComandoActivado(ListaComandos.PERSUADIR, false);
+		setComandoActivado(ListaComandos.HALAGAR, false);
+		setComandoActivado(ListaComandos.SOBORNAR, false);
+		setComandoActivado(ListaComandos.TRASFONDO, false);
+		setComandoActivado(ListaComandos.COMERCIAR, false);
+		setComandoActivado(ListaComandos.ADIOS, false);
+	}
+
+	// Setter para activar o desactivar un comando.
 	public void setComandoActivado(ListaComandos comando, boolean activado) {
 		String nombreComando = comando.name();
 
 		if (activado) {
-			comandosActivados.add(nombreComando);
+			if(!listaComandosActivados.contains(comando.name())){
+				listaComandosActivados.add(nombreComando);
+			}
+
 		} else {
-			comandosActivados.remove(nombreComando);
+			listaComandosActivados.remove(nombreComando);
 		}
 	}
 
 	// Verificar si un comando está activado.
 	public boolean esComandoActivado(ListaComandos comando) {
-		return comandosActivados.contains(comando.name());
+		return listaComandosActivados.contains(comando.name());
 	}
 
 
@@ -234,6 +287,12 @@ public class Comandos {
 				case DIARIO:
 					comandoDiario();
 					break;
+				case HABLAR:
+					comandoHablar(argumento);
+					break;
+				case ADIOS:
+					comandoAdios();
+					break;
 				case TERMINAR:
 					comandoTerminar();
 					break;
@@ -264,7 +323,7 @@ public class Comandos {
 				// Comprobar que el comando exista y se haya desactivado.
 				boolean comandoExistenteEncontrado = false;
 
-				for(String comandoExistente : comandos) {
+				for(String comandoExistente : listaComandos) {
 					if(NormalizarCadena.quitarAcentos(accion).equalsIgnoreCase(comandoExistente)) {
 						comandoExistenteEncontrado = true;
 						break;
@@ -276,8 +335,75 @@ public class Comandos {
 
 				} else if(!jugador.isDePie()) {
 					juego.outputTexto("No puedes hacer eso mientras estás en el suelo.");
+
 				} else {
-					juego.outputTexto("En este momento no puedes realizar esa acción.");
+
+					if (comandoEnum != null && !esComandoActivado(comandoEnum)) {
+						StringBuilder mensaje = new StringBuilder();
+
+						switch (ListaComandos.obtenerAtajo(accion)) {
+						case LEVANTARSE:
+							mensaje.append(jugador.isDePie() ? "Ya estás de pie." : "Ahora no puedes levantarte.");
+							break;
+						case IR:
+							mensaje.append("En este momento no puedes ir a ningún sitio.");
+							break;
+						case VOLVER:
+							mensaje.append("En estos momentos no puedes volver a ningún lugar.");
+							break;
+						case EXPLORAR:
+							mensaje.append("En este momento no puedes explorar el lugar.");
+							break;
+						case MIRAR:
+							mensaje.append("En este momento no puedes echar un vistazo.");
+							break;
+						case BUSCAR:
+							mensaje.append("En estos momentos no puedes buscar ningún objeto.");
+							break;
+						case COGER:
+							mensaje.append("En este momento no puedes coger ningún objeto del lugar.");
+							break;
+						case SOLTAR:
+							mensaje.append("En este momento no puedes soltar ningún objeto.");
+							break;	
+						case GUARDAR:
+							mensaje.append("En estos momentos no puedes guardar ningún objeto a un contendor.");
+							break;
+						case SACAR:
+							mensaje.append("En este momento no puedes sacar ningún objeto de un contendor.");
+							break;
+						case DESTRUIR:
+							mensaje.append("En este momento no puedes destruir ningún objeto.");
+							break;
+						case INVENTARIO:
+							mensaje.append("En este momento no puedes ver tu inventario.");
+							break;
+						case HABLAR:
+							if(listaComandosActivados.contains(ListaComandos.HABLAR.name())) {
+								mensaje.append("En este momento no puedes hablar con ningún personaje.");
+							} else {
+								mensaje.append("Ya estás hablando con un personaje.");
+							}
+							break;
+						case ADIOS:
+							mensaje.append("En este momento no te puedes despedir de ningún personaje.");
+							break;
+						case TERMINAR:
+							mensaje.append("En este momento no puedes salir de la partida.");
+							break;
+						case REINICIAR:
+							mensaje.append("En este momento no puedes reiniciar la partida.");
+							break;
+						case TEMA:
+							mensaje.append("En este momento no puedes cambiar el tema de la interfaz.");
+							break;
+						default:
+							mensaje.append("En este momento no puedes usar ese comando");
+							break;
+						}
+
+						juego.outputTexto(mensaje.toString());
+					}
 				}
 			}
 
@@ -347,13 +473,11 @@ public class Comandos {
 		}
 	}*/
 
-	/*
-	 * 
-	 * 
-	 *  MÉTODOS DE DIRECCIÓN Y MOVIMIENTO DEL PERSONAJE
-	 *  
-	 *  
-	 */
+	//////////////////////
+	// 					//
+	//	  MOVIMIENTO	//
+	//					//
+	//////////////////////
 
 	// Método para obtener la ubicación actual del jugador.
 	private Habitacion obtenerHabitacionActual() {
@@ -378,13 +502,8 @@ public class Comandos {
 
 		if(!jugador.isDePie()) {
 			jugador.setDePie(true);
-
 			// Volver a activar comandos.
-			comandosActivados.clear();
-			for(ListaComandos comando : ListaComandos.values()) {
-				comandosActivados.add(comando.name());
-				setComandoActivado(comando, true);
-			}
+			inicializarComandosActivados();
 
 			mensaje.append("Te has puesto de pie.");
 
@@ -476,7 +595,7 @@ public class Comandos {
 				} else {
 					mensaje.append("Te diriges hacia " + direccionPermitida.name().toLowerCase() + ".\n" + nuevaHabitacion.getNombre());
 				}
-				
+
 				// Mostrar descripción de la habitación solamente cuando es la primera vez que la visitas.
 				if(!nuevaHabitacion.isVisitada()) {
 					mensaje.append("\n" + nuevaHabitacion.getDescripcion());
@@ -555,6 +674,15 @@ public class Comandos {
 		juego.outputTexto(mensaje.toString());
 
 	}
+
+
+
+
+	//////////////////////
+	// 					//
+	//	  EXPLORACIÓN	//
+	//					//
+	//////////////////////
 
 	/*
 	 * 
@@ -760,6 +888,15 @@ public class Comandos {
 
 		juego.outputTexto(mensaje.toString());
 	}
+
+
+
+
+	//////////////////////
+	// 					//
+	//	  INVENTARIO	//
+	//					//
+	//////////////////////
 
 	/*
 	 * 
@@ -1112,7 +1249,7 @@ public class Comandos {
 		StringBuilder mensaje = new StringBuilder();
 		List<Objeto> inventarioJugador = jugador.getInventario();
 		boolean objetoEncontrado = false;
-		
+
 		if(arg != null && inventarioJugador != null && !inventarioJugador.isEmpty()) {
 			for(Objeto objeto : inventarioJugador) {
 				// Normalizar nombre del objeto.
@@ -1143,18 +1280,18 @@ public class Comandos {
 					}
 				}
 			}
-			
+
 			if(!objetoEncontrado) {
 				mensaje.append("No tienes el objeto '" + arg + "' en tu inventario.");
 			}
-			
+
 		} else if(arg == null && inventarioJugador != null && !inventarioJugador.isEmpty()) {
 			mensaje.append("¿Qué objeto quieres destruir?");
-			
+
 		} else {
 			mensaje.append("No llevas ningún objeto.");
 		}
-		
+
 		juego.outputTexto(mensaje.toString());
 	}
 
@@ -1219,6 +1356,15 @@ public class Comandos {
 		}
 	}
 
+
+
+
+	//////////////////////
+	// 					//
+	//		MISION		//
+	//					//
+	//////////////////////
+
 	/*
 	 * 
 	 * 
@@ -1259,10 +1405,120 @@ public class Comandos {
 
 	}
 
+
+	//////////////////////
+	// 					//
+	//		SOCIAL		//
+	//					//
+	//////////////////////
+
+	/*
+	 * 
+	 * 
+	 * HABLAR
+	 * 
+	 * 
+	 * 
+	 */
+	private void comandoHablar(String arg) {
+	    Habitacion habitacionActual = jugador.getUbicacion();
+	    StringBuilder mensaje = new StringBuilder();
+	    PNJ personaje = null;
+
+	    if (arg != null && !arg.isEmpty()) {
+	        String argNormalizado = NormalizarCadena.quitarAcentos(arg);
+	        boolean hayPnj = false;
+	        
+	        // Buscar al personaje en la habitación.
+	        for (PNJ pnj : habitacionActual.getPnjs()) {
+	            if (pnj.getNombre().equalsIgnoreCase(argNormalizado)) {
+	                hayPnj = true;
+	                personaje = pnj;
+	                ultimoPersonajeHablado = pnj;
+	                break;
+	            }
+	        }
+
+	        // Buscar si el nombre coincide con un enemigo
+	        boolean esEnemigo = false;
+	        boolean enemigoEncontrado = false;
+	        for (Personaje enemigo : habitacionActual.getEnemigos()) {
+	            if (NormalizarCadena.quitarAcentos(enemigo.getNombre()).equalsIgnoreCase(argNormalizado)) {
+	                esEnemigo = true;
+	                enemigoEncontrado = true;
+	                break;
+	            }
+	        }
+
+	        // Comprobar si existe un personaje con una conversación disponible.
+	        if (hayPnj && personaje != null && personaje.obtenerConversacion() != null && !personaje.obtenerConversacion().isEmpty() && !esEnemigo) {
+	            desactivarComandosExcepto(
+	                    ListaComandos.PREGUNTAR,
+	                    ListaComandos.INTIMIDAR,
+	                    ListaComandos.PERSUADIR,
+	                    ListaComandos.HALAGAR,
+	                    ListaComandos.SOBORNAR,
+	                    ListaComandos.TRASFONDO,
+	                    ListaComandos.COMERCIAR,
+	                    ListaComandos.ADIOS
+	            );
+	            mensaje.append(personaje.saludoNormal());
+	            mensaje.append(personaje.obtenerConversacion());
+	            
+	        } else {
+	            if (!hayPnj && !enemigoEncontrado) {
+	                mensaje.append("No se ha encontrado a '" + arg + "'.");
+	                
+	            } else if (!hayPnj && esEnemigo && enemigoEncontrado) {
+	                mensaje.append("No puedes hablar con un enemigo.");
+	                
+	            } else if(!hayPnj) {
+	                mensaje.append("'" + personaje.getNombre() + "' no tiene nada que decirte.");
+	                return;
+	            }
+	        }
+	    } else {
+	        mensaje.append("¿Con quién quieres hablar?");
+	    }
+
+	    juego.outputTexto(mensaje.toString());
+	}
+
+
+	/*
+	 * 
+	 * 
+	 *  ADIOS
+	 *  
+	 *  Termina la conversación con un personaje.
+	 *  
+	 *  
+	 */
+	private void comandoAdios() {
+		if(ultimoPersonajeHablado != null) {
+			juego.outputTexto(ultimoPersonajeHablado.getNombre() + ": " + "¡Hasta pronto!");
+		}
+
+		// Volver a activar los comandos del juego.
+		inicializarComandosActivados();
+		// Desactivar comandos sociales excepto HABLAR.
+		desactivarComandosSociales();
+	}
+
+
+
+	//////////////////////
+	// 					//
+	//		SISTEMA		//
+	//					//
+	//////////////////////
+
 	/*
 	 * 
 	 * 
 	 *  TERMINAR
+	 *  
+	 *  Salir del juego.
 	 *  
 	 *  
 	 */
