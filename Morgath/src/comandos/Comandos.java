@@ -20,8 +20,8 @@ import configuracion.Config;
 import configuracion.Tema;
 import juego.Juego;
 import localizaciones.Habitacion;
-import localizaciones.ConectorHabitaciones;
-import localizaciones.ConectorHabitaciones.Direccion;
+import localizaciones.Mapa;
+import localizaciones.Mapa.Direccion;
 import misiones.Mision;
 import misiones.Misiones;
 import objetos.ListaObjetos;
@@ -44,18 +44,19 @@ public class Comandos {
 	private List<String> comandosActivados = new ArrayList<>();
 	private Jugador jugador;
 	private Juego juego;
-	private ConectorHabitaciones mapa;
+	private Mapa mapa;
 	private Direccion ultimaDireccionUsada;
 
 	private int contadorEspaciosVacios = 0;
 
 	// Constructor.
-	public Comandos(Jugador jugador, Juego juego, ConectorHabitaciones mapa) {
+	public Comandos(Jugador jugador, Juego juego, Mapa mapa) {
 		this.jugador = jugador;
 		this.juego = juego;
 		this.mapa = mapa;
 
 		inicializarComandos();
+		//inicializarComandosActivados();
 	}
 
 	// Método para obtener la lista de comandos.
@@ -71,24 +72,25 @@ public class Comandos {
 	// Lista de comandos.
 	public enum ListaComandos {
 
-		EMPEZAR,
-		IR(""),
+		LEVANTARSE("INCORPORARSE"),
+		IR("AVANZAR", "DIRIGIRSE", "CAMINAR"),
 		VOLVER("ATRAS"),
+		LUGAR("SITIO", "HABITACION"),
+		EXPLORAR,
 		MIRAR,
 		BUSCAR,
 		COGER,
 		SOLTAR("TIRAR"),
-		GUARDAR,
-		SACAR,
+		GUARDAR("METER", "INTRODUCIR", "INSERTAR"),
+		SACAR("QUITAR"),
 		DESTRUIR,
 		INVENTARIO("I"),
-		MISION("M"),
-		DIARIO("D"),
-		EXPLORAR,
+		MISION("M", "OBJETIVO", "COMETIDO"),
+		DIARIO("D", "MISIONES"),
 		TERMINAR,
 		REINICIAR,
 		AYUDA("A"),
-		CREDITOS,
+		CREDITOS("CREADOR", "JUEGO"),
 		TOC,
 		VERSION,
 		TEMA;
@@ -126,10 +128,20 @@ public class Comandos {
 			comandos.addAll(Arrays.asList(comando.getAtajo()));
 		}
 		// Agregar comandos iniciales a la lista de comandos activados.
-		setComandoActivado(ListaComandos.EMPEZAR, true);
+		setComandoActivado(ListaComandos.LEVANTARSE, true);
 		setComandoActivado(ListaComandos.TERMINAR, true);
 		setComandoActivado(ListaComandos.AYUDA, true);
+		setComandoActivado(ListaComandos.VERSION, true);
 		setComandoActivado(ListaComandos.TEMA, true);
+	}
+
+	// Inicializar lista de comandos Activados.
+	private void inicializarComandosActivados() {
+		comandosActivados.clear();
+		for(ListaComandos comando : ListaComandos.values()) {
+			comandosActivados.add(comando.name());
+			setComandoActivado(comando, true);
+		}
 	}
 
 	// Activar o desactivar un comando.
@@ -147,7 +159,6 @@ public class Comandos {
 	public boolean esComandoActivado(ListaComandos comando) {
 		return comandosActivados.contains(comando.name());
 	}
-
 
 
 	/*
@@ -178,14 +189,17 @@ public class Comandos {
 			ListaComandos comandoEnum = obtenerComandoEnum(accion);
 			if (comandoEnum != null && esComandoActivado(comandoEnum)) {
 				switch (ListaComandos.obtenerAtajo(accion)) {
-				case EMPEZAR:
-					comandoEmpezar();
+				case LEVANTARSE:
+					comandoLevantarse();
 					break;
 				case IR:
 					comandoIr(argumento);
 					break;
 				case VOLVER:
 					comandoVolver();
+					break;
+				case LUGAR:
+					comandoLugar();
 					break;
 				case EXPLORAR:
 					comandoExplorar();
@@ -247,7 +261,24 @@ public class Comandos {
 				}
 
 			} else {
-				juego.outputTexto("No conozco el comando '" + comando + "'.");
+				// Comprobar que el comando exista y se haya desactivado.
+				boolean comandoExistenteEncontrado = false;
+
+				for(String comandoExistente : comandos) {
+					if(NormalizarCadena.quitarAcentos(accion).equalsIgnoreCase(comandoExistente)) {
+						comandoExistenteEncontrado = true;
+						break;
+					}
+				}
+
+				if(!comandoExistenteEncontrado) {
+					juego.outputTexto("No conozco el comando '" + comando + "'.");
+
+				} else if(!jugador.isDePie()) {
+					juego.outputTexto("No puedes hacer eso mientras estás en el suelo.");
+				} else {
+					juego.outputTexto("En este momento no puedes realizar esa acción.");
+				}
 			}
 
 		} else {
@@ -280,7 +311,6 @@ public class Comandos {
 	}
 
 
-
 	/*
 	 * 
 	 * 
@@ -299,7 +329,7 @@ public class Comandos {
 	 *  EMPEZAR
 	 *  
 	 *  
-	 */
+	 *
 	private void comandoEmpezar() {
 		if(!juego.empezarJuego && comandosActivados.contains(ListaComandos.EMPEZAR.name())) {
 			juego.empezarJuego = true;
@@ -315,9 +345,7 @@ public class Comandos {
 		} else {
 			juego.outputTexto("Ya has empezado tu aventura!");
 		}
-	}
-
-
+	}*/
 
 	/*
 	 * 
@@ -333,11 +361,39 @@ public class Comandos {
 	}
 
 	// Método para moverse entre habitaciones.
-	private Habitacion obtenerHabitacionEnDireccion(Habitacion habitacionActual, ConectorHabitaciones.Direccion direccion) {
+	private Habitacion obtenerHabitacionEnDireccion(Habitacion habitacionActual, Mapa.Direccion direccion) {
 		return mapa.moverJugador(habitacionActual, direccion);
 	}
 
 
+	/*
+	 * 
+	 * 
+	 *  LEVANTARSE
+	 *  
+	 *  
+	 */
+	private void comandoLevantarse() {
+		StringBuilder mensaje = new StringBuilder();
+
+		if(!jugador.isDePie()) {
+			jugador.setDePie(true);
+
+			// Volver a activar comandos.
+			comandosActivados.clear();
+			for(ListaComandos comando : ListaComandos.values()) {
+				comandosActivados.add(comando.name());
+				setComandoActivado(comando, true);
+			}
+
+			mensaje.append("Te has puesto de pie.");
+
+		} else {
+			mensaje.append("Ya estás de pie");
+		}
+
+		juego.outputTexto(mensaje.toString());
+	}
 
 	/*
 	 * 
@@ -350,10 +406,10 @@ public class Comandos {
 		Habitacion habitacionActual = obtenerHabitacionActual();
 		Habitacion nuevaHabitacion = null;
 		StringBuilder mensaje = new StringBuilder();
-		boolean teMueves = false;
+		boolean teMueves = false, teMuevesVerticalmente = false;
 		Direccion direccionPermitida = null;
 
-		if(arg != null && !arg.isEmpty()) {
+		if(arg != null && !arg.isEmpty() && Direccion.obtenerAtajo(arg) != null) {
 			switch(Direccion.obtenerAtajo(arg)) {
 			case NORTE:
 				nuevaHabitacion = obtenerHabitacionEnDireccion(habitacionActual, Direccion.NORTE);
@@ -398,26 +454,39 @@ public class Comandos {
 			case ARRIBA:
 				nuevaHabitacion = obtenerHabitacionEnDireccion(habitacionActual, Direccion.ARRIBA);
 				teMueves = true;
+				teMuevesVerticalmente = true;
 				direccionPermitida = Direccion.ARRIBA;
 				break;
 			case ABAJO:
 				nuevaHabitacion = obtenerHabitacionEnDireccion(habitacionActual, Direccion.ABAJO);
 				teMueves = true;
+				teMuevesVerticalmente = true;
 				direccionPermitida = Direccion.ABAJO;
 				break;
 			default:
+				//System.out.println("entra en default");
 				break;
 			}
-
 
 			// Actualizar la ubicación del jugador y mostrar mensaje.
 			if(teMueves && nuevaHabitacion != null && nuevaHabitacion != habitacionActual) {
 				jugador.setUbicacion(nuevaHabitacion);
-				mensaje.append("Te mueves en dirección " + direccionPermitida.name().toLowerCase() + ".\n" + nuevaHabitacion.getNombre() + 
-						"\n" + nuevaHabitacion.getDescripcion());
+				if(!teMuevesVerticalmente) {
+					mensaje.append("Te mueves en dirección " + direccionPermitida.name().toLowerCase() + ".\n" + nuevaHabitacion.getNombre());
+				} else {
+					mensaje.append("Te diriges hacia " + direccionPermitida.name().toLowerCase() + ".\n" + nuevaHabitacion.getNombre());
+				}
+				
+				// Mostrar descripción de la habitación solamente cuando es la primera vez que la visitas.
+				if(!nuevaHabitacion.isVisitada()) {
+					mensaje.append("\n" + nuevaHabitacion.getDescripcion());
+				}
+
 				juego.labelUbicacion.setText("UBICACIÓN: " + nuevaHabitacion.getNombre());
 				// Guardar dirección para el comando 'VOLVER'.
 				ultimaDireccionUsada = direccionPermitida;
+				// Marcar la habitación como visitada.
+				nuevaHabitacion.setVisitada(true);
 			} else if(!teMueves) {
 				mensaje.append("No reconozco la dirección '" + arg + "'.");
 			} else {
@@ -449,16 +518,34 @@ public class Comandos {
 			nuevaHabitacion = obtenerHabitacionEnDireccion(habitacionActual, ultimaDireccionUsada.opuesta());
 			if(nuevaHabitacion != null && nuevaHabitacion != habitacionActual) {
 				jugador.setUbicacion(nuevaHabitacion);
-				mensaje.append("Regresas en dirección " + ultimaDireccionUsada.opuesta().toString().toLowerCase() + ".\n" + nuevaHabitacion.getNombre() + 
-						"\n" + nuevaHabitacion.getDescripcion());
+				if(ultimaDireccionUsada.equals(Direccion.ARRIBA) || ultimaDireccionUsada.equals(Direccion.ABAJO)) {
+					mensaje.append("Regresas hacia " + ultimaDireccionUsada.opuesta().toString().toLowerCase() + ".\n" + nuevaHabitacion.getNombre());
+				} else {
+					mensaje.append("Regresas en dirección " + ultimaDireccionUsada.opuesta().toString().toLowerCase() + ".\n" + nuevaHabitacion.getNombre());
+				}
+				// Mostrar descripción de la habitación solamente cuando es la primera vez que la visitas.
+				if(!nuevaHabitacion.isVisitada()) {
+					mensaje.append("\n" + nuevaHabitacion.getDescripcion());
+				}
 				juego.labelUbicacion.setText("UBICACIÓN: " + nuevaHabitacion.getNombre());
+				// Marcar la habitación como visitada.
+				nuevaHabitacion.setVisitada(true);
 
 			} else {
 				nuevaHabitacion = obtenerHabitacionEnDireccion(habitacionActual, ultimaDireccionUsada);
 				jugador.setUbicacion(nuevaHabitacion);
-				mensaje.append("Vuelves en dirección " + ultimaDireccionUsada.toString().toLowerCase() + ".\n" + nuevaHabitacion.getNombre() + 
-						"\n" + nuevaHabitacion.getDescripcion());
+				if(ultimaDireccionUsada.equals(Direccion.ARRIBA) || ultimaDireccionUsada.equals(Direccion.ABAJO)) {
+					mensaje.append("Vuelves hacia " + ultimaDireccionUsada.toString().toLowerCase() + ".\n" + nuevaHabitacion.getNombre());
+				} else {
+					mensaje.append("Vuelves en dirección " + ultimaDireccionUsada.toString().toLowerCase() + ".\n" + nuevaHabitacion.getNombre());
+				}
+				// Mostrar descripción de la habitación solamente cuando es la primera vez que la visitas.
+				if(!nuevaHabitacion.isVisitada()) {
+					mensaje.append("\n" + nuevaHabitacion.getDescripcion());
+				}
 				juego.labelUbicacion.setText("UBICACIÓN: " + nuevaHabitacion.getNombre());
+				// Marcar la habitación como visitada.
+				nuevaHabitacion.setVisitada(true);
 			}
 
 		} else {
@@ -467,6 +554,20 @@ public class Comandos {
 
 		juego.outputTexto(mensaje.toString());
 
+	}
+
+	/*
+	 * 
+	 * 
+	 *  LUGAR
+	 *  
+	 *  
+	 */
+	private void comandoLugar() {
+		// Muestra la descripción del lugar.
+		Habitacion habitacionActual = jugador.getUbicacion();
+
+		juego.outputTexto(habitacionActual.getDescripcion());
 	}
 
 	/*
@@ -869,7 +970,7 @@ public class Comandos {
 				Objeto_Contenedor objetoContenedor = null;
 				for (Objeto objeto : inventarioJugador) {
 					String objetoNormalizado = NormalizarCadena.quitarAcentos(objeto.getNombre());
-					if (objeto instanceof Objeto_Contenedor && args[1].equalsIgnoreCase(objetoNormalizado)) {
+					if (objeto instanceof Objeto_Contenedor && args[1] != null && args[1].equalsIgnoreCase(objetoNormalizado)) {
 						Objeto_Contenedor contenedor = (Objeto_Contenedor) objeto;
 						// Utilizar el nombre normalizado para la comparación.
 						if (contenedor.getObjetosContenidos().stream().anyMatch(obj -> NormalizarCadena.quitarAcentos(obj.getNombre()).equalsIgnoreCase(nombreObjeto))) {
@@ -1010,35 +1111,51 @@ public class Comandos {
 		// No se podrán destruir objetos de misión.
 		StringBuilder mensaje = new StringBuilder();
 		List<Objeto> inventarioJugador = jugador.getInventario();
-
-		if(inventarioJugador != null && !inventarioJugador.isEmpty()) {
+		boolean objetoEncontrado = false;
+		
+		if(arg != null && inventarioJugador != null && !inventarioJugador.isEmpty()) {
 			for(Objeto objeto : inventarioJugador) {
 				// Normalizar nombre del objeto.
 				StringBuilder objetoNormalizado = new StringBuilder(NormalizarCadena.quitarAcentos(objeto.getNombre()));
-				if(arg != null && arg.equalsIgnoreCase(objetoNormalizado.toString())){
+				if(arg.equalsIgnoreCase(objetoNormalizado.toString())){
 					// Si es un objeto de misión denegar su destrucción.
-					if(objeto.isObjetoDeMision()) {
-						mensaje.append("No puedes destruir objetos de misión.");
-						break;
+					if(objeto instanceof Objeto_Comun) {
+						Objeto_Comun objetoComun = (Objeto_Comun) objeto;
+						if(objetoComun.isObjetoDeMision()) {
+							mensaje.append("No puedes destruir objetos de misión.");
+							objetoEncontrado = true;
+							break;
+						}
+
+					} else if(objeto instanceof Objeto_Arma) {
+						Objeto_Arma objetoArma = (Objeto_Arma) objeto;
+						if(objetoArma.isObjetoDeMision()) {
+							mensaje.append("No puedes destruir objetos de misión.");
+							objetoEncontrado = true;
+							break;
+						}
 
 					} else {
 						inventarioJugador.remove(objeto);
 						mensaje.append("Has destruido el objeto '" + objeto.getNombre() + "'.");
+						objetoEncontrado = true;
 						break;
 					}
 				}
 			}
-
-		} else {
-			mensaje.append("No portas ningún objeto.");
-		}
-
-		if(arg == null && inventarioJugador != null && !inventarioJugador.isEmpty()) {
+			
+			if(!objetoEncontrado) {
+				mensaje.append("No tienes el objeto '" + arg + "' en tu inventario.");
+			}
+			
+		} else if(arg == null && inventarioJugador != null && !inventarioJugador.isEmpty()) {
 			mensaje.append("¿Qué objeto quieres destruir?");
+			
+		} else {
+			mensaje.append("No llevas ningún objeto.");
 		}
-
+		
 		juego.outputTexto(mensaje.toString());
-
 	}
 
 
@@ -1076,13 +1193,12 @@ public class Comandos {
 				// OBJETO CONTENEDOR
 				if (objeto instanceof Objeto_Contenedor) {
 					Objeto_Contenedor objetoContenedor = (Objeto_Contenedor) objeto;
-					mensaje.append("\n  - ").append(objetoContenedor.getNombre()).append(": ").append(objetoContenedor.getDescripcion())
-					.append(objetoContenedor.isObjetoDeMision() ? " (Objeto de misión)" : "");;
+					mensaje.append("\n  - ").append(objetoContenedor.getNombre()).append(": ").append(objetoContenedor.getDescripcion());
 
 					if(objetoContenedor.getObjetosContenidos() != null && !objetoContenedor.getObjetosContenidos().isEmpty()) {
-						mensaje.append("\n    - Contenido: ");
+						//mensaje.append("\n    - Contenido: ");
 						for(Objeto objetoContenido : objetoContenedor.getObjetosContenidos()) {
-							mensaje.append("\n      - ").append(objetoContenido.getNombre());
+							mensaje.append("\n      └ ").append(objetoContenido.getNombre());
 						}
 					} else {
 						mensaje.append("\n    - Contenido: (vacío)");
@@ -1181,8 +1297,8 @@ public class Comandos {
 		Juego.listaObjetos = new ListaObjetos();
 
 		// Reiniciar habitaciones.
-		Juego.habitaciones = new ConectorHabitaciones();
-		Juego.ubicacionInicial = Juego.habitaciones.obtenerHabitacionInicial();
+		Juego.mapa = new Mapa();
+		Juego.ubicacionInicial = Juego.mapa.obtenerHabitacionInicial();
 
 		// Reiniciar atributos del jugador.
 		jugador.setNombre(null);
@@ -1222,28 +1338,30 @@ public class Comandos {
 	 *  
 	 */
 	private void comandoAyuda() {
-		String mensaje = "LISTA DE COMANDOS:\n"
-				+ "- DIRECCIÓN\n"
-				+ "  - IR [DIRECCION]: Te mueves en la dirección indicada.\n"
-				+ "  - VOLVER: Retrocedes a la ubicación anterior.\n"
-				+ "- EXPLORACIÓN\n"
-				+ "  - EXPLORAR: Exploras el lugar en busca de caminos a seguir.\n"
-				+ "  - MIRAR: Observas el alrededor para detectar personajes o enemigos.\n"
-				+ "  - BUSCAR: Encuentra objetos en tu ubicación.\n"
-				+ "  - COGER [OBJETO]: Coges un objeto de la habitación actual y lo añades a tu inventario.\n"
-				+ "  - SOLTAR [OBJETO]: Tiras un objeto de tu inventario al suelo de la habitación actual.\n"
-				+ "  - GUARDAR [OBJETO][CONTENEDOR]: Guardas un objeto de tu inventario dentro de un contenedor.\n"
-				+ "  - SACAR [OBJETO][CONTENEDOR]: Sacas un objeto de un contenedor y lo devuelves al inventario.\n"
-				+ "  - DESTRUIR [OBJETO]: Destruye un objeto de tu inventario permanentemente.\n"
-				+ "  - INVENTARIO: Muestra los objetos que estás portando.\n"
-				+ "  - MISION: Muestra la misión actual.\n"
-				+ "  - DIARIO: Muestra las misiones que has completado.\n"
-				+ "- JUEGO\n"
-				+ "  - TERMINAR: Terminas la partida.\n"
-				+ "  - REINICIAR: Reinicias el juego.\n"
-				+ "  - TEMA [TEMA]: Cambia el esquema de color de la interfaz.\n"
-				+ "  - CREDITOS: Muestra información del juego y del creador.\n"
-				+ "  - VERSION: Muestra la versión actual del juego.";
+		String mensaje = "Lista de comandos:\n"
+				+ "- DIRECCIÓN:\n"
+				+ "  ├ IR [DIRECCION]: Te mueves en la dirección indicada.\n"
+				+ "  └ VOLVER: Retrocedes a la ubicación anterior.\n"
+				+ "- EXPLORACIÓN:\n"
+				+ "  ├ LUGAR: Muestra la descripción de tu ubicación actual.\n"
+				+ "  ├ EXPLORAR: Exploras el lugar en busca de caminos a seguir.\n"
+				+ "  ├ MIRAR: Observas el alrededor para detectar personajes o enemigos.\n"
+				+ "  ├ BUSCAR: Encuentra objetos en tu ubicación.\n"
+				+ "  ├ COGER [OBJETO]: Coges un objeto de la habitación actual y lo añades a tu inventario.\n"
+				+ "  ├ SOLTAR [OBJETO]: Tiras un objeto de tu inventario al suelo de la habitación actual.\n"
+				+ "  ├ GUARDAR [OBJETO] [CONTENEDOR]: Guardas un objeto de tu inventario dentro de un contenedor.\n"
+				+ "  ├ SACAR [OBJETO] [CONTENEDOR]: Sacas un objeto de un contenedor y lo devuelves al inventario.\n"
+				+ "  ├ DESTRUIR [OBJETO]: Destruye un objeto de tu inventario permanentemente.\n"
+				+ "  ├ INVENTARIO: Muestra los objetos que estás portando.\n"
+				+ "  ├ MISION: Muestra la misión actual.\n"
+				+ "  ├ DIARIO: Muestra las misiones que has completado.\n"
+				+ "  └ LEVANTARSE: Te levantas del suelo si estás tumbado.\n"
+				+ "- JUEGO:\n"
+				+ "  ├ TERMINAR: Terminas la partida.\n"
+				+ "  ├ REINICIAR: Reinicias el juego.\n"
+				+ "  ├ TEMA [TEMA]: Cambia el esquema de color de la interfaz.\n"
+				+ "  ├ CREDITOS: Muestra información del juego y del creador.\n"
+				+ "  └ VERSION: Muestra la versión actual del juego.";
 
 		juego.outputTexto(mensaje);
 	}
@@ -1329,17 +1447,20 @@ public class Comandos {
 			case "FANTASIA", "5":
 				Config.temaActual = Config.TEMA_5;
 			break;
-			case "MENTA", "6":
+			case "OLIVA", "6":
 				Config.temaActual = Config.TEMA_6;
 			break;
 			case "ORO", "7":
 				Config.temaActual = Config.TEMA_7;
 			break;
-			case "MATRIX", "8":
+			case "TINTO", "8":
 				Config.temaActual = Config.TEMA_8;
 			break;
-			case "CLASICO", "9":
+			case "HIELO", "9":
 				Config.temaActual = Config.TEMA_9;
+			break;
+			case "CLASICO", "10":
+				Config.temaActual = Config.TEMA_10;
 			break;
 			default:
 				mensaje = "No reconozco el tema '" + arg + "'.\n"
@@ -1349,10 +1470,11 @@ public class Comandos {
 						+ "- TEMA 3: AGUA\n"
 						+ "- TEMA 4: BRONCE\n"
 						+ "- TEMA 5: FANTASÍA\n"
-						+ "- TEMA 6: MENTA\n"
+						+ "- TEMA 6: OLIVA\n"
 						+ "- TEMA 7: ORO\n"
-						+ "- TEMA 8: MATRIX\n"
-						+ "- TEMA 9: CLÁSICO\n";
+						+ "- TEMA 8: TINTO\n"
+						+ "- TEMA 9: HIELO\n"
+						+ "- TEMA 10: CLÁSICO\n";
 				temaValido = false;
 				break;
 			}
@@ -1363,10 +1485,11 @@ public class Comandos {
 				else if(arg.equalsIgnoreCase("agua") || arg.equalsIgnoreCase("3")) mensaje = "Se ha cambiado el tema a 'TEMA 3: AGUA'.";
 				else if(arg.equalsIgnoreCase("bronce") || arg.equalsIgnoreCase("4")) mensaje = "Se ha cambiado el tema a 'TEMA 4: BRONCE'.";
 				else if(arg.equalsIgnoreCase("fantasia") || arg.equalsIgnoreCase("5")) mensaje = "Se ha cambiado el tema a 'TEMA 5: FANTASÍA'.";
-				else if(arg.equalsIgnoreCase("menta") || arg.equalsIgnoreCase("6")) mensaje = "Se ha cambiado el tema a 'TEMA 6: MENTA'.";
+				else if(arg.equalsIgnoreCase("oliva") || arg.equalsIgnoreCase("6")) mensaje = "Se ha cambiado el tema a 'TEMA 6: OLIVA'.";
 				else if(arg.equalsIgnoreCase("oro") || arg.equalsIgnoreCase("7")) mensaje = "Se ha cambiado el tema a 'TEMA 7: ORO'.";
-				else if(arg.equalsIgnoreCase("matrix") || arg.equalsIgnoreCase("8")) mensaje = "Se ha cambiado el tema a 'TEMA 8: MATRIX'.";
-				else if(arg.equalsIgnoreCase("clasico") || arg.equalsIgnoreCase("9")) mensaje = "Se ha cambiado el tema a 'TEMA 9: CLÁSICO'.";
+				else if(arg.equalsIgnoreCase("tinto") || arg.equalsIgnoreCase("8")) mensaje = "Se ha cambiado el tema a 'TEMA 8: TINTO'.";
+				else if(arg.equalsIgnoreCase("hielo") || arg.equalsIgnoreCase("9")) mensaje = "Se ha cambiado el tema a 'TEMA 9: HIELO";
+				else if(arg.equalsIgnoreCase("clasico") || arg.equalsIgnoreCase("10")) mensaje = "Se ha cambiado el tema a 'TEMA 10: CLÁSICO'.";
 				actualizarTemaInterfaz();
 			}
 		}

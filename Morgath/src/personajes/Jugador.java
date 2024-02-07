@@ -13,6 +13,7 @@ public class Jugador extends Personaje {
 	private int puntos;
 	public List<Mision> diario; // lista de misiones.
 	private int maxObjetosInventario;
+	private boolean dePie;
 	
 	// Constructor.
 	public Jugador(String nombre, Habitacion ubicacion, int vidas) {
@@ -23,6 +24,7 @@ public class Jugador extends Personaje {
 		this.inventario = new ArrayList<>();
 		this.diario = new ArrayList<>();
 		this.maxObjetosInventario = 6;
+		this.dePie = false;
 	}
 
 	// Getters i setters.
@@ -56,6 +58,14 @@ public class Jugador extends Personaje {
 
 	public void setMaxObjetosInventario(int maxObjetosInventario) {
 		this.maxObjetosInventario = maxObjetosInventario;
+	}
+
+	public boolean isDePie() {
+		return dePie;
+	}
+
+	public void setDePie(boolean dePie) {
+		this.dePie = dePie;
 	}
 	
     

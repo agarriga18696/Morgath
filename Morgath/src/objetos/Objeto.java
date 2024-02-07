@@ -4,7 +4,6 @@ public abstract class Objeto {
 	
 	private String nombre;
 	private String descripcion;
-	private boolean objetoDeMision;
 	
 	public Objeto(String nombre, String descripcion) {
 		this.nombre = nombre;
@@ -22,14 +21,5 @@ public abstract class Objeto {
 	public String getDescripcion() {
 		return descripcion;
 	}
-
-	public boolean isObjetoDeMision() {
-		return objetoDeMision;
-	}
-
-	public void setObjetoDeMision(boolean objetoDeMision) {
-		this.objetoDeMision = objetoDeMision;
-	}
-	
 
 }

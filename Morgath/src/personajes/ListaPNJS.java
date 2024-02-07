@@ -36,7 +36,7 @@ public class ListaPNJS {
 		nombre.setLength(0);
 		conversacion.setLength(0);
 		nombre.append("Aldeano");
-		conversacion.append("");
+		conversacion.append("Saludos, viajero. Mi nombre es Eydran.");
 		vidas = 1;
 		
 		return new PNJ(nombre.toString(), conversacion.toString(), vidas);

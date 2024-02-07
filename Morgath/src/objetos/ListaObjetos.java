@@ -142,7 +142,7 @@ public class ListaObjetos {
 		nombre.append("Espada Larga");
 		descripcion.append("Una elegante espada larga de acero.");
 		valorVenta = 25;
-		esObjetoMision = true;
+		esObjetoMision = false;
 		ataque = 3;
 
 		return new Objeto_Arma(nombre.toString(), descripcion.toString(), esObjetoMision, valorVenta, ataque);

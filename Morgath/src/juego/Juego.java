@@ -12,7 +12,7 @@ import javax.swing.border.EmptyBorder;
 import comandos.Comandos;
 import configuracion.Config;
 import localizaciones.Habitacion;
-import localizaciones.ConectorHabitaciones;
+import localizaciones.Mapa;
 import misiones.Mision;
 import misiones.Misiones;
 import objetos.ListaObjetos;
@@ -31,13 +31,13 @@ public class Juego extends JFrame {
 
 	private Jugador jugador;
 	public static Misiones misiones;
-	public static ConectorHabitaciones habitaciones;
+	public static Mapa mapa;
 	public static Habitacion ubicacionInicial;
 	public static ListaObjetos listaObjetos;
 	public static ListaEnemigos listaEnemigos;
 	private Comandos comandos;
 	public Mision misionActiva;
-	public boolean empezarJuego;
+	//public boolean empezarJuego;
 	public static String ultimoComandoUsado;
 	private String nombreJugador;
 
@@ -62,10 +62,10 @@ public class Juego extends JFrame {
 
 		// Juego
 		listaObjetos = new ListaObjetos();
-		habitaciones = new ConectorHabitaciones();
-		ubicacionInicial = habitaciones.obtenerHabitacionInicial();
+		mapa = new Mapa();
+		ubicacionInicial = mapa.obtenerHabitacionInicial();
 		jugador = new Jugador(nombreJugador, ubicacionInicial, 4);
-		comandos = new Comandos(jugador, this, habitaciones);
+		comandos = new Comandos(jugador, this, mapa);
 		misiones = new Misiones();
 		listaEnemigos = new ListaEnemigos();
 
@@ -241,7 +241,9 @@ public class Juego extends JFrame {
 		SwingUtilities.invokeLater(() -> {
 			SimpleAttributeSet atributos = new SimpleAttributeSet();
 			StyledDocument doc = outputTexto.getStyledDocument();
-
+			StyleConstants.setLineSpacing(atributos, Config.espaciadoLinea);
+			doc.setParagraphAttributes(0, doc.getLength(), atributos, false);
+			
 			outputTexto.setCaretPosition(outputTexto.getDocument().getLength());
 
 			try {

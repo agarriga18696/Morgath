@@ -28,7 +28,7 @@ public class Habitaciones {
 						ListaObjetos.MOCHILA}, 
 				
 				new PNJ[]{
-						ListaPNJS.COMERCIANTE}, 
+						ListaPNJS.ALDEANO}, 
 				
 				new Enemigo[]{ListaEnemigos.LADRON});
 	}
@@ -88,7 +88,10 @@ public class Habitaciones {
 		String nombre = "Casa, Ático";
 		String desc = "Hay un pequeño tragaluz que ilumina ligeramente el lugar. El ambiente es frío.";
 
-		return new Habitacion(2.2, nombre, desc, new Objeto[]{}, new PNJ[]{}, new Enemigo[]{});
+		return new Habitacion(2.2, nombre, desc, new Objeto[]{
+				ListaObjetos.LAMPARA}, 
+				new PNJ[]{}, 
+				new Enemigo[]{});
 	}
 	
 	
@@ -102,7 +105,10 @@ public class Habitaciones {
 		String nombre = "Casa, Sótano";
 		String desc = "Aquí abajo no hay luz, y el aire se percibe pesado y seco. Es escalofriante.";
 
-		return new Habitacion(2.3, nombre, desc, new Objeto[]{}, new PNJ[]{}, new Enemigo[]{});
+		return new Habitacion(2.3, nombre, desc, new Objeto[]{
+				ListaObjetos.ESPADA}, 
+				new PNJ[]{}, 
+				new Enemigo[]{});
 	}
 	
 }

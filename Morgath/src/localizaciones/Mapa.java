@@ -4,7 +4,7 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 
-public class ConectorHabitaciones {
+public class Mapa {
 
 	/*
 	 * 
@@ -25,13 +25,13 @@ public class ConectorHabitaciones {
 	public final Map<Habitacion, Map<Direccion, Habitacion>> habitaciones;
 
 	// Constructor
-	public ConectorHabitaciones() {
+	public Mapa() {
 		this.habitaciones = new HashMap<>();
 		inicializarHabitaciones();
 	}
 
 	// Getter.
-	public Map<Habitacion, Map<Direccion, Habitacion>> getConectorHabitaciones(){
+	public Map<Habitacion, Map<Direccion, Habitacion>> getMapa(){
 		return habitaciones;
 	}
 
@@ -68,7 +68,7 @@ public class ConectorHabitaciones {
 		Direccion(String... atajo) {
 			this.atajo = atajo;
 		}
-
+		
 		// Getter.
 		public String[] getAtajo() {
 			return atajo;
@@ -76,13 +76,14 @@ public class ConectorHabitaciones {
 
 		// Método para obtener el atajo del comando.
 		public static Direccion obtenerAtajo(String atajo) {
-			for(Direccion direccion : values()) {
-				if(direccion.name().equalsIgnoreCase(atajo) || Arrays.asList(direccion.atajo).contains(atajo.toUpperCase())) {
-					return direccion;
-				}
-			}
-
-			throw new IllegalArgumentException("Error, atajo " + atajo + " no encontrado.");
+		    for (Direccion direccion : values()) {
+		        if (direccion.name().equalsIgnoreCase(atajo) || Arrays.asList(direccion.atajo).contains(atajo.toUpperCase())) {
+		            return direccion;
+		        }
+		    }
+		    
+		    return null;
+		    //throw new IllegalArgumentException("Error, atajo " + atajo + " no encontrado.");
 		}
 
 		// Método para obtener la dirección opuesta (retorno).

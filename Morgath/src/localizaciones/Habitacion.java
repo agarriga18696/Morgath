@@ -6,7 +6,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import localizaciones.ConectorHabitaciones.Direccion;
+import localizaciones.Mapa.Direccion;
 import objetos.Objeto;
 import personajes.Enemigo;
 import personajes.PNJ;
@@ -21,6 +21,7 @@ public class Habitacion {
 	private List<Objeto> objetos;
 	private List<PNJ> pnjs;
 	private List<Enemigo> enemigos;
+	private boolean visitada;
 
 	// Constructor.
 	public Habitacion(double id, String nombre, String descripcion, Objeto[] objetos, PNJ[] pnjs, Enemigo[] enemigos) {
@@ -31,6 +32,7 @@ public class Habitacion {
 		this.objetos = new ArrayList<>(Arrays.asList(objetos));
 		this.pnjs = new ArrayList<>(Arrays.asList(pnjs));
 		this.enemigos = new ArrayList<>(Arrays.asList(enemigos));
+		this.visitada = false;
 	}
 
 	// Getters i setters.
@@ -77,5 +79,13 @@ public class Habitacion {
 	public void setSalidas(Map<Direccion, Habitacion> salidas) {
         this.salidas = salidas;
     }
+
+	public boolean isVisitada() {
+		return visitada;
+	}
+
+	public void setVisitada(boolean visitada) {
+		this.visitada = visitada;
+	}
 
 }

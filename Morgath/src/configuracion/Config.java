@@ -13,14 +13,17 @@ public class Config {
 	public static final String CURSOR = ">";
 
 	// RESOLUCION VENTANA
-	public static int anchoVentana = 1280;
-	public static int altoVentana = 800;
+	public static int anchoVentana = 1280; //1280
+	public static int altoVentana = 800; //800
 
 	// PADDING
-	public static Border borde = new EmptyBorder(20, 20, 20, 20);
+	public static Border borde = new EmptyBorder(30, 30, 30, 30);
+	
+	// ESPACIADO ENTRE LINEAS
+	public static float espaciadoLinea = 0.17f;
 
 	// FUENTE
-	public static float tamanoFuente = 25;
+	public static float tamanoFuente = 28;
 	public static Font fuente;
 	
 	static {
@@ -34,14 +37,15 @@ public class Config {
 	}
 
 	// TEMAS
-	public static final Tema TEMA_1 = new Tema(Color.decode("#262a34"), Color.decode("#ebefed"), Color.decode("#d34a55"));
-	public static final Tema TEMA_2 = new Tema(Color.decode("#f9fcfc"), Color.decode("#192c53"), Color.decode("#5433fb"));
+	public static final Tema TEMA_1 = new Tema(Color.decode("#282b33"), Color.decode("#cfd1d8"), Color.decode("#d3ad4a"));
+	public static final Tema TEMA_2 = new Tema(Color.decode("#eeecf0"), Color.decode("#1a2043"), Color.decode("#e42262"));
 	public static final Tema TEMA_3 = new Tema(Color.decode("#112544"), Color.decode("#edecf4"), Color.decode("#23acc9"));
-	public static final Tema TEMA_4 = new Tema(Color.decode("#383735"), Color.decode("#dbd4ca"), Color.decode("#fecaa7"));
+	public static final Tema TEMA_4 = new Tema(Color.decode("#3b3733"), Color.decode("#dbd4ca"), Color.decode("#fecaa7"));
 	public static final Tema TEMA_5 = new Tema(Color.decode("#f6bce6"), Color.decode("#472a74"), Color.decode("#924eb7"));
-	public static final Tema TEMA_6 = new Tema(Color.decode("#326257"), Color.decode("#d1d3d4"), Color.decode("#14e0af"));
-	public static final Tema TEMA_7 = new Tema(Color.decode("#d0a407"), Color.decode("#46494a"), Color.decode("#322c13"));
-	public static final Tema TEMA_8 = new Tema(Color.decode("#000000"), Color.decode("#21e379"), Color.decode("#21e379"));
-	public static final Tema TEMA_9 = new Tema(Color.decode("#000000"), Color.decode("#ffffff"), Color.decode("#ffffff"));
+	public static final Tema TEMA_6 = new Tema(Color.decode("#172c28"), Color.decode("#e1d8d5"), Color.decode("#a2a489"));
+	public static final Tema TEMA_7 = new Tema(Color.decode("#ffc64c"), Color.decode("#46494a"), Color.decode("#322c13"));
+	public static final Tema TEMA_8 = new Tema(Color.decode("#300d05"), Color.decode("#ffbfc9"), Color.decode("#d80859"));
+	public static final Tema TEMA_9 = new Tema(Color.decode("#ffffff"), Color.decode("#00b5cb"), Color.decode("#00b5cb"));
+	public static final Tema TEMA_10 = new Tema(Color.decode("#000000"), Color.decode("#ffffff"), Color.decode("#ffffff"));
 	public static Tema temaActual = TEMA_1;
 }

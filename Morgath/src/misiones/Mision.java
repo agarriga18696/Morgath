@@ -114,10 +114,10 @@ public class Mision {
 
 	public boolean verificarCondicionesEspecificas(Jugador jugador) {
 		switch (nombre.toUpperCase()) {
-		case "1, INICIACIÓN":
-			return condicionesMision1();
-		case "2, DESPERTAR":
-			return condicionesMision2(jugador);
+		case "0, INICIACIÓN":
+			return condicionesMision0();
+		case "1, DESPERTAR":
+			return condicionesMision1(jugador);
 			// Resto de misiones.
 		default:
 			return false;
@@ -147,7 +147,7 @@ public class Mision {
 	 *  
 	 */
 
-	public boolean condicionesMision1() {
+	public boolean condicionesMision0() {
 		// Condición: escribir el comando 'EMPEZAR'.
 
 		if (Juego.ultimoComandoUsado != null && Juego.ultimoComandoUsado.equalsIgnoreCase("empezar")) {
@@ -167,14 +167,13 @@ public class Mision {
 	 *  
 	 */
 
-	private boolean condicionesMision2(Jugador jugador) {
+	private boolean condicionesMision1(Jugador jugador) {
 		// Condición: coger espada de la habitación "Casa: entrada".
-		// - Objeto: espada
-		// - Objeto: bolsa
-		// - Habitación: Casa: entrada
+		// - Objeto: espada -> Habitación: Casa: ático
+		// - Objeto: bolsa -> Habitación: Casa: sótano
 
 		String habitacionMision[] = {"casa, ático", "casa, sótano"};
-		String objetoMision[] = {"lámpara", "espada", "bolsa"};
+		String objetoMision[] = {"lámpara", "espada"};
 
 		// Obtener la ubicación actual del jugador y su inventario.
 		Habitacion ubicacionJugador = jugador.getUbicacion();
