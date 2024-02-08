@@ -17,6 +17,7 @@ public class Habitacion {
 	private double id;
 	private String nombre;
 	private String descripcion;
+	private Tipo tipo;
 	private Map<Direccion, Habitacion> salidas;
 	private List<Objeto> objetos;
 	private List<PNJ> pnjs;
@@ -24,15 +25,20 @@ public class Habitacion {
 	private boolean visitada;
 
 	// Constructor.
-	public Habitacion(double id, String nombre, String descripcion, Objeto[] objetos, PNJ[] pnjs, Enemigo[] enemigos) {
+	public Habitacion(double id, String nombre, String descripcion, Tipo tipo, Objeto[] objetos, PNJ[] pnjs, Enemigo[] enemigos) {
 		this.id = id;
 		this.nombre = nombre;	
 		this.descripcion = descripcion;
+		this.tipo = tipo;
 		this.salidas = new HashMap<>();
 		this.objetos = new ArrayList<>(Arrays.asList(objetos));
 		this.pnjs = new ArrayList<>(Arrays.asList(pnjs));
 		this.enemigos = new ArrayList<>(Arrays.asList(enemigos));
 		this.visitada = false;
+	}
+	
+	public enum Tipo {
+		INTERIOR, EXTERIOR, SUPERIOR, INFERIOR
 	}
 
 	// Getters i setters.
@@ -60,6 +66,14 @@ public class Habitacion {
 		this.descripcion = descripcion;
 	}
 	
+	public Tipo getTipo() {
+		return tipo;
+	}
+
+	public void setTipo(Tipo tipo) {
+		this.tipo = tipo;
+	}
+
 	public List<Objeto> getObjetos() {
         return objetos;
     }

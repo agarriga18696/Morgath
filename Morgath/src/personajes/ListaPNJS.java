@@ -4,8 +4,8 @@ import objetos.ListaObjetos;
 
 public class ListaPNJS {
 	
-	private static StringBuilder nombre = new StringBuilder();
-	private static StringBuilder conversacion = new StringBuilder();
+	private static StringBuffer nombre = new StringBuffer();
+	private static StringBuffer conversacion = new StringBuffer();
 	private static int vidas = 1;
 
 	/*
