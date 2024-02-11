@@ -16,22 +16,17 @@ public class Habitaciones {
 	 */
 	
 	public static Habitacion h_00() {
-		String nombre = "Sendero sin salida";
-		String desc = "Estás en mitad de un sendero sin salida, al este hay un sendero que parece ser la única ruta de escape.";
+		String nombre = "Callejón sin salida";
+		String desc = "Estás en un sendero sin salida. Al este hay un sendero que parece ser la única ruta de escape.";
 		Tipo tipo = Tipo.EXTERIOR;
 		
 		return new Habitacion(0, nombre, desc, tipo,
 				new Objeto[]{
-						ListaObjetos.ESPADA,
-						ListaObjetos.MONEDA,
-						ListaObjetos.LAMPARA,
-						ListaObjetos.BOLSA,
+						//ListaObjetos.LAMPARA,
+						ListaObjetos.ESPADA_CORTA,
+						ListaObjetos.ESPADA_LARGA,
 						ListaObjetos.MOCHILA}, 
-				
-				new PNJ[]{
-						ListaPNJS.ALDEANO,
-						ListaPNJS.COMERCIANTE}, 
-				
+				new PNJ[]{}, 
 				new Enemigo[]{});
 	}
 	
@@ -58,7 +53,7 @@ public class Habitaciones {
 	 */
 	
 	public static Habitacion h_02() {
-		String nombre = "Exterior de la casa";
+		String nombre = "Sur de la casa";
 		String desc = "Te encuentras frente a la casa, las ventanas están cerradas desde el interior. No parece haber nadie cera.";
 		Tipo tipo = Tipo.EXTERIOR;
 		
@@ -95,7 +90,7 @@ public class Habitaciones {
 		Tipo tipo = Tipo.SUPERIOR;
 
 		return new Habitacion(2.2, nombre, desc, tipo, new Objeto[]{
-				ListaObjetos.LAMPARA}, 
+				ListaObjetos.BOLSA}, 
 				new PNJ[]{}, 
 				new Enemigo[]{});
 	}
@@ -113,7 +108,7 @@ public class Habitaciones {
 		Tipo tipo = Tipo.INFERIOR;
 
 		return new Habitacion(2.3, nombre, desc, tipo, new Objeto[]{
-				ListaObjetos.ESPADA}, 
+				ListaObjetos.ESPADA_CORTA}, 
 				new PNJ[]{}, 
 				new Enemigo[]{});
 	}

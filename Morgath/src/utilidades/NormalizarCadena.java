@@ -1,15 +1,18 @@
 package utilidades;
 
 import java.text.Normalizer;
-import java.util.regex.Pattern;
 
 public class NormalizarCadena {
 
-	// Método para normalizar una cadena y omitir acentos.
+	// Método para normalizar una cadena y quitar acentos.
 	public static String quitarAcentos(String cadena) {
-		String comandoNormalizado = Normalizer.normalize(cadena, Normalizer.Form.NFD);
-		Pattern patron = Pattern.compile("\\p{InCombiningDiacriticalMarks}+");
-		return patron.matcher(comandoNormalizado).replaceAll("");
+	    if (cadena == null) {
+	        return null;
+	    }
+	    
+	    // Reemplazar los caracteres acentuados con sus equivalentes sin acento.
+	    return Normalizer.normalize(cadena, Normalizer.Form.NFD)
+	            .replaceAll("\\p{InCombiningDiacriticalMarks}+", "");
 	}
 
 }

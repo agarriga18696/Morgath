@@ -1,9 +1,14 @@
 # 1, Despertar
--Objetivo: Recupera tus objetos.
+-Objetivo: Ponte en pie.
 -Mensaje:
-Te despiertas en plena noche, tirado en el suelo en mitad de un sendero. Es un callejón sin salida. Dubitativo sobre cómo llegaste a este lugar intentas hacer memoria. La última imagen que reposa en tu memoria es la de disfrutar de aguardiente en una celebración local. De repente, empiezas a recordar algunos sucesos. Recuerdas estar bebiendo en la fiesta y sentir ganas de orinar, por lo que decidiste ir a un lugar apartado para hacerlo. Sin darte cuenta te alejaste más de la cuenta debido a tu embriaguez, que te hizo perder el sentido de la orientación. Estuviste caminando sin saber a dónde te dirigías, hasta llegar a este lugar. El último recuerdo que te viene a la cabeza es oír unos murmullos entre la maleza, y de repente toda la luz se apagó de golpe. Al parecer, fuiste presa de unos bandidos, que te robaron todo cuanto llevabas encima; la bolsa de monedas, tu espada, abalorios..., y además, parece que al final te orinaste encima.
-No ves ninguna salida a tu alrededor, excepto un angosto sendero que se despliega hacia el este. La noche, poco amigable en estos tiempos, presenta un riesgo inminente para alguien en tus condiciones; una presa fácil para los carroñeros nocturnos. La prudencia te sugiere hallar refugio y procurar una espada para asegurar tu defensa.
--Recompensa: 20
+Te despiertas en plena noche, tirado en el suelo en mitad de un sendero montañoso, rodeado por una densa oscuridad que envuelve el paisaje. No recuerdas nada sobre cómo llegaste a parar aquí.
+-Recompensa: 5
+
+# 1-1, Despertar
+-Objetivo: Recupera tus pertenencias.
+-Mensaje:
+Al levantarte, te das cuenta de que te faltan algunas de tus pertenencias. A pesar de la oscuridad, no logras ver ninguna salida a tu alrededor, excepto un angosto sendero que se despliega hacia el este.
+-Recompensa: 10
 
 # 2, Prueba
 -Objetivo: nose

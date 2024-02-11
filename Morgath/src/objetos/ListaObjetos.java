@@ -36,7 +36,8 @@ public class ListaObjetos {
 	public static final Objeto MONEDA = crearMoneda();
 
 	// ARMAS
-	public static final Objeto ESPADA = crearEspada();
+	public static final Objeto ESPADA_CORTA = crearEspadaCorta();
+	public static final Objeto ESPADA_LARGA = crearEspadaLarga();
 
 	// CONTENEDORES
 	public static final Objeto BOLSA = crearBolsa();
@@ -47,7 +48,7 @@ public class ListaObjetos {
 		listaTodosLosObjetos.clear();
 		listaTodosLosObjetos.add(LAMPARA);
 		listaTodosLosObjetos.add(MONEDA);
-		listaTodosLosObjetos.add(ESPADA);
+		listaTodosLosObjetos.add(ESPADA_CORTA);
 		listaTodosLosObjetos.add(BOLSA);
 		listaTodosLosObjetos.add(MOCHILA);
 	}
@@ -123,11 +124,11 @@ public class ListaObjetos {
 	 */
 
 	// ESPADA
-	public static Objeto crearEspada() {
+	public static Objeto crearEspadaCorta() {
 		nombre.setLength(0);
 		descripcion.setLength(0);
-		nombre.append("Espada");
-		descripcion.append("Una afilada espada de hierro.");
+		nombre.append("Espada corta");
+		descripcion.append("Una afilada espada corta de hierro.");
 		valorVenta = 0;
 		esObjetoMision = true;
 		ataque = 2;
@@ -139,7 +140,7 @@ public class ListaObjetos {
 	public static Objeto crearEspadaLarga() {
 		nombre.setLength(0);
 		descripcion.setLength(0);
-		nombre.append("Espada Larga");
+		nombre.append("Espada larga");
 		descripcion.append("Una elegante espada larga de acero.");
 		valorVenta = 25;
 		esObjetoMision = false;

@@ -51,7 +51,7 @@ public class ListaPNJS {
 		vidas = 2;
 		
 		return new PNJ(nombre.toString(), conversacion.toString(), vidas,
-				ListaObjetos.ESPADA,
+				ListaObjetos.ESPADA_CORTA,
 				ListaObjetos.LAMPARA,
 				ListaObjetos.BOLSA);
 	}

@@ -115,9 +115,11 @@ public class Mision {
 	public boolean verificarCondicionesEspecificas(Jugador jugador) {
 		switch (nombre.toUpperCase()) {
 		case "0, INICIACIÓN":
-			return condicionesMision0();
+			return condicionesMision_0_00();
 		case "1, DESPERTAR":
-			return condicionesMision1(jugador);
+			return condicionesMision_1_00(jugador);
+		case "1-1, DESPERTAR":
+			return condicionesMision_1_01(jugador);
 			// Resto de misiones.
 		default:
 			return false;
@@ -142,12 +144,12 @@ public class Mision {
 	/*
 	 * 
 	 * 
-	 *  CONDICIÓN MISIÓN 1
+	 *  CONDICIÓN MISIÓN 0
 	 *  
 	 *  
 	 */
 
-	public boolean condicionesMision0() {
+	public boolean condicionesMision_0_00() {
 		// Condición: escribir el comando 'EMPEZAR'.
 
 		if (Juego.ultimoComandoUsado != null && Juego.ultimoComandoUsado.equalsIgnoreCase("empezar")) {
@@ -162,18 +164,62 @@ public class Mision {
 	/*
 	 * 
 	 * 
-	 *  CONDICIÓN MISIÓN 2
+	 *  CONDICIÓN MISIÓN 1: DESPERTAR
 	 *  
 	 *  
 	 */
 
-	private boolean condicionesMision1(Jugador jugador) {
-		// Condición: coger espada de la habitación "Casa: entrada".
-		// - Objeto: espada -> Habitación: Casa: ático
-		// - Objeto: bolsa -> Habitación: Casa: sótano
+	private boolean condicionesMision_1_00(Jugador jugador) {
+		// Condición: ponerte en pie y coger la lámpara de la habitación 'Callejón sin salida'.
+		// - Objeto: lámpara -> Habitación: Callejón sin salida
 
-		String habitacionMision[] = {"casa, ático", "casa, sótano"};
-		String objetoMision[] = {"lámpara", "espada"};
+		String objetoMision[] = {"lámpara"};
+		String habitacionMision[] = {"Callejón sin salida"};
+
+		// Obtener la ubicación actual del jugador y su inventario.
+		Habitacion ubicacionJugador = jugador.getUbicacion();
+		List<Objeto> inventarioJugador = jugador.getInventario();
+		int contadorObjetos = 0;
+
+		// Verificar que el jugador esté en pie.
+		if(jugador.isDePie()) {
+			// Verificar que el jugador está en la habitación correcta.
+			for(int i = 0; i < habitacionMision.length; i++) {
+				if (ubicacionJugador != null && ubicacionJugador.getNombre().equalsIgnoreCase(habitacionMision[i])) {
+					// Verificar que el jugador tiene la espada específica en su inventario.
+					for (Objeto objetoJugador : inventarioJugador) {
+						for(int j = 0; j < objetoMision.length; j++) {
+							// Verificar que haya encontrado todos los objetos de la misión.
+							if (objetoJugador != null && objetoJugador.getNombre().equalsIgnoreCase(objetoMision[j])) {
+								contadorObjetos++;			
+								if(contadorObjetos == objetoMision.length) {
+									return true;
+								}
+							}
+						}
+					}
+				}
+			}
+		}
+
+		return false;
+	}
+
+	/*
+	 * 
+	 * 
+	 *  CONDICIÓN MISIÓN 1-1: DESPERTAR
+	 *  
+	 *  
+	 */
+
+	private boolean condicionesMision_1_01(Jugador jugador) {
+		// Condición: coger bolsa y espada de las habitaciones 'Ático' y 'Sótano'.
+		// - Objeto: bolsa -> Habitación: Ático
+		// - Objeto: espada -> Habitación: Sótano
+
+		String objetoMision[] = {"bolsa", "espada"};
+		String habitacionMision[] = {"Ático", "Sótano"};
 
 		// Obtener la ubicación actual del jugador y su inventario.
 		Habitacion ubicacionJugador = jugador.getUbicacion();
