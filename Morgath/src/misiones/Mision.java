@@ -125,21 +125,13 @@ public class Mision {
 			return false;
 		}
 	}
+	
 
-
-
-
-	/*
-	 * 
-	 * 
-	 * 
-	 * 
-	 * CONDICIONES PARA FINALIZAR LAS MISIONES
-	 * 
-	 * 
-	 * 
-	 * 
-	 */
+	///////////////////////////////////////////////
+	//											 //
+	//	CONDICIONES PARA FINALIZAR LAS MISIONES  //
+	//											 //
+	///////////////////////////////////////////////
 
 	/*
 	 * 

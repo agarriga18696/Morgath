@@ -29,7 +29,7 @@ public class Juego extends JFrame {
 	public JTextPane outputTexto;
 	public JTextField inputTexto;
 
-	private Jugador jugador;
+	public static Jugador jugador;
 	public static Misiones misiones;
 	public static Mapa mapa;
 	public static Habitacion ubicacionInicial;
@@ -39,12 +39,7 @@ public class Juego extends JFrame {
 	public Mision misionActiva;
 	//public boolean empezarJuego;
 	public static String ultimoComandoUsado;
-	private String nombreJugador;
-
-
-
-	public JLabel labelObjeto = new JLabel();
-
+	public static String nombreJugador = "Jugador";
 
 
 	/*
@@ -61,10 +56,10 @@ public class Juego extends JFrame {
 	public Juego() {
 
 		// Juego
-		listaObjetos = new ListaObjetos();
 		mapa = new Mapa();
 		ubicacionInicial = mapa.obtenerHabitacionInicial();
 		jugador = new Jugador(nombreJugador, ubicacionInicial, 4);
+		listaObjetos = new ListaObjetos();
 		comandos = new Comandos(jugador, this, mapa);
 		misiones = new Misiones();
 		listaEnemigos = new ListaEnemigos();
@@ -148,8 +143,6 @@ public class Juego extends JFrame {
 			labelCursor.setFont(Config.fuente);
 			outputTexto.setFont(Config.fuente);
 			inputTexto.setFont(Config.fuente);
-
-			labelObjeto.setFont(Config.fuente);
 
 			// Panel principal.
 			panelPrincipal.setLayout(new BorderLayout());

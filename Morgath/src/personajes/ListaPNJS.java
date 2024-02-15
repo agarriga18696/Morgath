@@ -35,7 +35,7 @@ public class ListaPNJS {
 	public static PNJ crearAldeano() {
 		nombre.setLength(0);
 		conversacion.setLength(0);
-		nombre.append("Eydran");
+		nombre.append(NombresPersonajes.getNombreMasculino());
 		conversacion.append("Mi nombre es " + nombre + ". ¿En qué puedo ayudarte?");
 		vidas = 1;
 		
@@ -46,8 +46,8 @@ public class ListaPNJS {
 	public static PNJ crearComerciante() {
 		nombre.setLength(0);
 		conversacion.setLength(0);
-		nombre.append("Comerciante");
-		conversacion.append("");
+		nombre.append(NombresPersonajes.getNombreMasculino());
+		conversacion.append("¿Te interesa comerciar?");
 		vidas = 2;
 		
 		return new PNJ(nombre.toString(), conversacion.toString(), vidas,

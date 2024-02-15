@@ -2,11 +2,13 @@ package personajes;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 import objetos.Objeto;
 
 public abstract class Personaje {
 
+	protected String id;
 	protected String nombre;
 	protected List<Objeto> inventario;
 	protected int vidas;
@@ -15,6 +17,7 @@ public abstract class Personaje {
 	
 	// Constructor
 	public Personaje(String nombre, int vidas) {
+		this.id = UUID.nameUUIDFromBytes(nombre.getBytes()).toString().replace("-", "");
 		this.nombre = nombre;
 		this.inventario = new ArrayList<>();
 		this.vidas = vidas;
@@ -27,6 +30,10 @@ public abstract class Personaje {
 		return nombre.toUpperCase();
 	}
 	
+	public String getId() {
+		return id;
+	}
+
 	public void setNombre(String nombre) {
 		this.nombre = nombre;
 	}

@@ -18,6 +18,7 @@ public class Jugador extends Personaje {
 	// Constructor.
 	public Jugador(String nombre, Habitacion ubicacion, int vidas) {
 		super(nombre, vidas);
+		this.nombre = "Jugador";
 		this.setVidas(4);
 		this.ubicacion = ubicacion;
 		this.puntos = 0;

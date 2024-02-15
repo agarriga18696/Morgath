@@ -3,39 +3,38 @@ package objetos;
 import java.util.ArrayList;
 import java.util.List;
 
+import juego.Juego;
 import objetos.Objeto_Contenedor.*;
 
 public class ListaObjetos {
 
-	private static StringBuilder nombre = new StringBuilder();
-	private static StringBuilder descripcion = new StringBuilder();
-	private static int valorVenta = 0;
-	private static boolean esObjetoMision = false;
-	private static int ataque = 1;
-	private static Capacidad capacidad = Capacidad.BAJA;
-	private static List<Objeto> objetosContenidos = new ArrayList<>();
+	private static final List<Objeto> listaTodosLosObjetos = new ArrayList<>();
 
-	public static List<Objeto> listaTodosLosObjetos = new ArrayList<>();
-
-	
+	// Constructor, inicializa la lista de objetos.
 	public ListaObjetos() {
 		inicializarListaObjetos();
 	}
-	
-	
+
+	// Método para inicializar la lista de objetos.
+	private static void inicializarListaObjetos() {
+		listaTodosLosObjetos.clear();
+		listaTodosLosObjetos.add(crearLampara());
+		listaTodosLosObjetos.add(crearMoneda());
+		listaTodosLosObjetos.add(crearEspadaCorta());
+		listaTodosLosObjetos.add(crearBolsa());
+		listaTodosLosObjetos.add(crearMochila());
+	}
+
 	/*
-	 * 
 	 * DEFINICIÓN DE LOS OBJETOS
-	 * 
 	 */
 
 	// OBJETOS COMUNES
 	public static final Objeto LAMPARA = crearLampara();
-
-	// DINERO
 	public static final Objeto MONEDA = crearMoneda();
 
 	// ARMAS
+	public static final Objeto ESPADA_JUGADOR = crearEspadaJugador();
 	public static final Objeto ESPADA_CORTA = crearEspadaCorta();
 	public static final Objeto ESPADA_LARGA = crearEspadaLarga();
 
@@ -43,168 +42,99 @@ public class ListaObjetos {
 	public static final Objeto BOLSA = crearBolsa();
 	public static final Objeto MOCHILA = crearMochila();
 
-	// Añadir todos los objetos creados a la lista.
-	public static void inicializarListaObjetos() {
-		listaTodosLosObjetos.clear();
-		listaTodosLosObjetos.add(LAMPARA);
-		listaTodosLosObjetos.add(MONEDA);
-		listaTodosLosObjetos.add(ESPADA_CORTA);
-		listaTodosLosObjetos.add(BOLSA);
-		listaTodosLosObjetos.add(MOCHILA);
-	}
+	// OBJETOS CON CERRADURA
+	public static final Objeto COFRE = crearCofre();
 
+	// LLAVES
+	public static final Objeto LLAVE_VIEJA = crearLlaveVieja(); 
 
 	/*
-	 * 
 	 * CREACIÓN DE LOS OBJETOS
-	 * 
-	 * 
-	 * 
 	 */
 
-	/* ----------------------------------------------------------------------------------------------------------
-	 * 
-	 * 
-	 * 
-	 * 
-	 * OBJETOS COMUNES
-	 * 
-	 * (nombre, descripción, valorVenta, esObjetoMision)
-	 * 
-	 * 
-	 */
+	//////////////////////////////
+	//							//
+	//			COMUNES			//
+	//							//
+	//////////////////////////////
 
-	// LÁMPARA
-	public static Objeto crearLampara() {
-		nombre.setLength(0);
-		descripcion.setLength(0);
-		nombre.append("Lámpara");
-		descripcion.append("Ilumina hasta el más oscuro pasadizo.");
-		valorVenta = 0;
-		esObjetoMision = true;
-
-		return new Objeto_Comun(nombre.toString(), descripcion.toString(), esObjetoMision, valorVenta);
+	// Lámpara
+	private static Objeto crearLampara() {
+		return new Objeto_Comun("Lámpara", "Ilumina hasta el más oscuro pasadizo.", false, 0);
 	}
 
+	//////////////////////////////
+	//							//
+	//			DINERO			//
+	//							//
+	//////////////////////////////
 
-	/* ----------------------------------------------------------------------------------------------------------
-	 * 
-	 * 
-	 * 
-	 * 
-	 * DINERO
-	 * 
-	 * (nombre, descripción)
-	 * 
-	 * 
-	 */
-
-	// MONEDA
-	public static Objeto crearMoneda() {
-		nombre.setLength(0);
-		descripcion.setLength(0);
-		nombre.append("Moneda");
-		descripcion.append("Reluciente y tallada a mano en forma hexagonal");
-
-		return new Objeto_Dinero(nombre.toString(), descripcion.toString());
+	// Moneda
+	private static Objeto crearMoneda() {
+		return new Objeto_Dinero("Moneda", "Tallada a mano en forma hexagonal.");
 	}
 
+	//////////////////////////////
+	//							//
+	//			ARMAS			//
+	//							//
+	//////////////////////////////
 
-
-	/* ----------------------------------------------------------------------------------------------------------
-	 * 
-	 * 
-	 * 
-	 * 
-	 * ARMAS
-	 * 
-	 * (nombre, descripción, valorVenta, esObjetoMision, ataque)
-	 * 
-	 * 
-	 */
-
-	// ESPADA
-	public static Objeto crearEspadaCorta() {
-		nombre.setLength(0);
-		descripcion.setLength(0);
-		nombre.append("Espada corta");
-		descripcion.append("Una afilada espada corta de hierro.");
-		valorVenta = 0;
-		esObjetoMision = true;
-		ataque = 2;
-
-		return new Objeto_Arma(nombre.toString(), descripcion.toString(), esObjetoMision, valorVenta, ataque);
+	// Espada Jugador
+	private static Objeto crearEspadaJugador() {
+		return new Objeto_Arma("Espada " + Juego.nombreJugador, "Una ligera espada de hierro.", true, 0, 1);
 	}
 
-	// ESPADA LARGA
-	public static Objeto crearEspadaLarga() {
-		nombre.setLength(0);
-		descripcion.setLength(0);
-		nombre.append("Espada larga");
-		descripcion.append("Una elegante espada larga de acero.");
-		valorVenta = 25;
-		esObjetoMision = false;
-		ataque = 3;
-
-		return new Objeto_Arma(nombre.toString(), descripcion.toString(), esObjetoMision, valorVenta, ataque);
+	// Espada Corta
+	private static Objeto crearEspadaCorta() {
+		return new Objeto_Arma("Espada corta", "Una afilada espada corta de acero.", false, 15, 3);
 	}
 
-
-
-	/* ----------------------------------------------------------------------------------------------------------
-	 * 
-	 * 
-	 * 
-	 * 
-	 * CONTENEDORES DE OBJETOS
-	 * 
-	 * 
-	 * 
-	 * 
-	 */
-
-	/*
-	 * 
-	 * CAPACIDAD BAJA
-	 * 
-	 */
-
-	// BOLSA
-	public static Objeto crearBolsa() {
-		nombre.setLength(0);
-		descripcion.setLength(0);
-		nombre.append("Bolsa");
-		descripcion.append("Una pequeña bolsa de piel de gato.");
-		capacidad = Capacidad.BAJA;
-		//objetosContenidos.add(MONEDA);
-
-		return new Objeto_Contenedor(nombre.toString(), descripcion.toString(), capacidad, objetosContenidos);
+	// Espada Larga
+	private static Objeto crearEspadaLarga() {
+		return new Objeto_Arma("Espada larga", "Una elegante espada larga de acero.", false, 30, 5);
 	}
 
+	//////////////////////////////
+	//							//
+	//	     CONTENEDORES		//
+	//							//
+	//////////////////////////////
 
-	/*
-	 * 
-	 * CAPACIDAD MEDIA
-	 * 
-	 */
+	// Bolsa
+	private static Objeto crearBolsa() {
+		List<Objeto> objetosContenidos = new ArrayList<>();
+		return new Objeto_Contenedor("Bolsa", "Una pequeña bolsa de piel de gato.", Capacidad.BAJA, objetosContenidos);
+	}
 
+	// Mochila
+	private static Objeto crearMochila() {
+		List<Objeto> objetosContenidos = new ArrayList<>();
+		return new Objeto_Contenedor("Mochila", "Una práctica mochila de cuero de vaca.", Capacidad.MEDIA, objetosContenidos);
+	}
 
-	/*
-	 * 
-	 * CAPACIDAD ALTA
-	 * 
-	 */
+	//////////////////////////////
+	//							//
+	// CONTENEDOR CON CERRADURA	//
+	//							//
+	//////////////////////////////
 
-	// MOCHILA
-	public static Objeto crearMochila() {
-		nombre.setLength(0);
-		descripcion.setLength(0);
-		nombre.append("Mochila");
-		descripcion.append("Una práctica mochila de cuero de vaca.");
-		capacidad = Capacidad.ALTA;
-		//objetosContenidos.add(MONEDA);
+	// Cofre
+	private static Objeto crearCofre() {
+		List<Objeto> objetosContenidos = new ArrayList<>();
+		objetosContenidos.add(LAMPARA);
+		return new Objeto_Cerradura("Cofre", "Un polvoriento cofre de madera.", true, objetosContenidos);
+	}
 
-		return new Objeto_Contenedor(nombre.toString(), descripcion.toString(), capacidad, objetosContenidos);
+	//////////////////////////////
+	//							//
+	// 			LLAVES			//
+	//							//
+	//////////////////////////////
+
+	// Llave vieja
+	private static Objeto crearLlaveVieja() {
+		return new Objeto_Llave("Llave", "Una vieja llave de hierro.", COFRE.getId());
 	}
 
 }

@@ -22,10 +22,9 @@ public class Habitaciones {
 		
 		return new Habitacion(0, nombre, desc, tipo,
 				new Objeto[]{
-						//ListaObjetos.LAMPARA,
-						ListaObjetos.ESPADA_CORTA,
-						ListaObjetos.ESPADA_LARGA,
-						ListaObjetos.MOCHILA}, 
+						ListaObjetos.COFRE,
+						ListaObjetos.LLAVE_VIEJA},
+				
 				new PNJ[]{}, 
 				new Enemigo[]{});
 	}

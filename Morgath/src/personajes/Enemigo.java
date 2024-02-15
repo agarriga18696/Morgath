@@ -1,6 +1,5 @@
 package personajes;
 
-
 public class Enemigo extends Personaje /*implements Conversar*/ {
 
 	//private String conversacion;
@@ -10,7 +9,7 @@ public class Enemigo extends Personaje /*implements Conversar*/ {
 	public Enemigo(String nombre, int vidas, String conversacion, boolean esJefe, int recompensaPorMatar) {
 		super(nombre, vidas);
 		
-		//this.conversacion = conversacion;;
+		//this.conversacion = conversacion;
 		this.esJefe = esJefe;
 		this.recompensaPorMatar = recompensaPorMatar;
 	}
@@ -29,7 +28,6 @@ public class Enemigo extends Personaje /*implements Conversar*/ {
 	public boolean isEsJefe() {
 		return esJefe;
 	}
-
 
 	public int getRecompensaPorMatar() {
 		return recompensaPorMatar;

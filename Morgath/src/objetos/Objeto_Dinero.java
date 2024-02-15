@@ -6,6 +6,5 @@ public class Objeto_Dinero extends Objeto {
 		super(nombre, descripcion);
 		
 	}
-	
 
 }
