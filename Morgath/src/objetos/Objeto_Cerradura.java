@@ -3,7 +3,7 @@ package objetos;
 import java.util.ArrayList;
 import java.util.List;
 
-public class Objeto_Cerradura extends Objeto implements Cerradura {
+public class Objeto_Cerradura extends Objeto {
 	
 	private boolean cerrado;
 	private List<Objeto> objetosContenidos;
@@ -34,16 +34,6 @@ public class Objeto_Cerradura extends Objeto implements Cerradura {
 
 	public void setObjetosContenidos(List<Objeto> objetosContenidos) {
 		this.objetosContenidos = objetosContenidos;
-	}
-
-	
-	@Override
-	public void abrir(Objeto_Llave llave) {
-		
-		if(llave.getIdObjetoVinculado().equalsIgnoreCase(this.getId())) {
-			this.setCerrado(false);
-		}
-		
 	}
 	
 }

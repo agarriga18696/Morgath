@@ -1,7 +1,7 @@
 # 1, Despertar
--Objetivo: Ponte en pie.
+-Objetivo: Levántate del suelo.
 -Mensaje:
-Te despiertas en plena noche, tirado en el suelo en mitad de un sendero montañoso, rodeado por una densa oscuridad que envuelve el paisaje. No recuerdas nada sobre cómo llegaste a parar aquí.
+Te despiertas en plena noche, tirado en el suelo en mitad de un sendero montañoso, rodeado por una densa oscuridad que envuelve el paisaje.
 -Recompensa: 5
 
 # 1-1, Despertar
@@ -10,8 +10,8 @@ Te despiertas en plena noche, tirado en el suelo en mitad de un sendero montaño
 Al levantarte, te das cuenta de que te faltan algunas de tus pertenencias. A pesar de la oscuridad, no logras ver ninguna salida a tu alrededor, excepto un angosto sendero que se despliega hacia el este.
 -Recompensa: 10
 
-# 2, Prueba
--Objetivo: nose
+# 2, Un viejo amigo
+-Objetivo: Busca pistas sobre el paradero del ladrón.
 -Mensaje:
 uepaaa
 -Recompensa: 25

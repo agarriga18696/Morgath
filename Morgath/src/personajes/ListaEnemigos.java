@@ -28,7 +28,7 @@ public class ListaEnemigos {
 	public static final Enemigo LADRON = crearLadron();
 	public static final Enemigo MUTANTE = crearMutante();
 
-	// Añadir todos los objetos creados a la lista.
+	// Añadir todos los enemigos creados a la lista.
 	public static void inicializarListaEnemigos() {
 		listaTodosLosEnemigos.clear();
 		listaTodosLosEnemigos.add(LADRON);
@@ -50,7 +50,7 @@ public class ListaEnemigos {
 	 */
 
 	// LADRON
-	public static Enemigo crearLadron() {
+	private static Enemigo crearLadron() {
 		nombre.setLength(0);
 		conversacion.setLength(0);
 		nombre.append("Ladrón");
@@ -63,7 +63,7 @@ public class ListaEnemigos {
 	}
 
 	// MUTANTE
-	public static Enemigo crearMutante() {
+	private static Enemigo crearMutante() {
 		nombre.setLength(0);
 		conversacion.setLength(0);
 		nombre.append("Mutante");

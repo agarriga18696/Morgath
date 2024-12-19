@@ -2,6 +2,7 @@ package misiones;
 
 import java.util.List;
 
+import comandos.Comandos;
 import juego.Juego;
 import localizaciones.Habitacion;
 import objetos.Objeto;
@@ -25,7 +26,7 @@ public class Mision {
 	}
 
 	public String getNombre() {
-		return nombre;
+		return nombre.toUpperCase();
 	}
 
 	public void setNombre(String nombre) {
@@ -113,19 +114,19 @@ public class Mision {
 	 */
 
 	public boolean verificarCondicionesEspecificas(Jugador jugador) {
-		switch (nombre.toUpperCase()) {
-		case "0, INICIACIÓN":
-			return condicionesMision_0_00();
+		switch(nombre.toUpperCase()) {
 		case "1, DESPERTAR":
-			return condicionesMision_1_00(jugador);
+			return condicionesMision_1_0();
 		case "1-1, DESPERTAR":
-			return condicionesMision_1_01(jugador);
+			return condicionesMision_1_1(jugador);
+		case "2, PRUEBA":
+			return condicionesMision_2_0(jugador);
 			// Resto de misiones.
 		default:
 			return false;
 		}
 	}
-	
+
 
 	///////////////////////////////////////////////
 	//											 //
@@ -141,11 +142,20 @@ public class Mision {
 	 *  
 	 */
 
-	public boolean condicionesMision_0_00() {
-		// Condición: escribir el comando 'EMPEZAR'.
+	public boolean condicionesMision_1_0() {
+		// Condición: Ponerte en pie con el comando 'LEVANTARSE'.
 
-		if (Juego.ultimoComandoUsado != null && Juego.ultimoComandoUsado.equalsIgnoreCase("empezar")) {
-			return true;
+		if(Juego.ultimoComandoUsado != null && !Juego.ultimoComandoUsado.trim().isEmpty()) {
+			try {
+				Comandos.ListaComandos comandoUsado = Comandos.ListaComandos.obtenerAtajo(Juego.ultimoComandoUsado);
+				if(comandoUsado == Comandos.ListaComandos.LEVANTARSE) {
+					return true;
+				}
+
+			} catch(IllegalArgumentException e) {
+				// Comando no encontrado.
+				e.printStackTrace();
+			}
 		}
 
 		return false;
@@ -161,8 +171,8 @@ public class Mision {
 	 *  
 	 */
 
-	private boolean condicionesMision_1_00(Jugador jugador) {
-		// Condición: ponerte en pie y coger la lámpara de la habitación 'Callejón sin salida'.
+	private boolean condicionesMision_1_1(Jugador jugador) {
+		// Condición: Coger la lámpara de la habitación 'Callejón sin salida'.
 		// - Objeto: lámpara -> Habitación: Callejón sin salida
 
 		String objetoMision[] = {"lámpara"};
@@ -177,21 +187,23 @@ public class Mision {
 		if(jugador.isDePie()) {
 			// Verificar que el jugador está en la habitación correcta.
 			for(int i = 0; i < habitacionMision.length; i++) {
-				if (ubicacionJugador != null && ubicacionJugador.getNombre().equalsIgnoreCase(habitacionMision[i])) {
-					// Verificar que el jugador tiene la espada específica en su inventario.
-					for (Objeto objetoJugador : inventarioJugador) {
-						for(int j = 0; j < objetoMision.length; j++) {
-							// Verificar que haya encontrado todos los objetos de la misión.
-							if (objetoJugador != null && objetoJugador.getNombre().equalsIgnoreCase(objetoMision[j])) {
-								contadorObjetos++;			
-								if(contadorObjetos == objetoMision.length) {
-									return true;
+				if(ubicacionJugador != null && ubicacionJugador.getNombre().equalsIgnoreCase(habitacionMision[i])) {
+					// Verificar que el jugador tiene objetos en su inventario.
+					if(!inventarioJugador.isEmpty()) {
+						for(Objeto objetoJugador : inventarioJugador) {
+							for(int j = 0; j < objetoMision.length; j++) {
+								// Verificar que haya encontrado todos los objetos de la misión.
+								if(objetoJugador != null && objetoJugador.getNombre().equalsIgnoreCase(objetoMision[j])) {
+									contadorObjetos++;			
+									if(contadorObjetos == objetoMision.length) {
+										return true;
+									}
 								}
-							}
-						}
+							} // tercer for
+						} // segundo for
 					}
 				}
-			}
+			} // primer for
 		}
 
 		return false;
@@ -205,7 +217,7 @@ public class Mision {
 	 *  
 	 */
 
-	private boolean condicionesMision_1_01(Jugador jugador) {
+	private boolean condicionesMision_2_0(Jugador jugador) {
 		// Condición: coger bolsa y espada de las habitaciones 'Ático' y 'Sótano'.
 		// - Objeto: bolsa -> Habitación: Ático
 		// - Objeto: espada -> Habitación: Sótano

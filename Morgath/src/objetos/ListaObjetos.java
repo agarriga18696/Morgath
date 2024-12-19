@@ -23,6 +23,7 @@ public class ListaObjetos {
 		listaTodosLosObjetos.add(crearEspadaCorta());
 		listaTodosLosObjetos.add(crearBolsa());
 		listaTodosLosObjetos.add(crearMochila());
+		listaTodosLosObjetos.add(crearLlaveVieja());
 	}
 
 	/*
@@ -34,7 +35,7 @@ public class ListaObjetos {
 	public static final Objeto MONEDA = crearMoneda();
 
 	// ARMAS
-	public static final Objeto ESPADA_JUGADOR = crearEspadaJugador();
+	public static final Objeto ESPADA_ROTA = crearEspadaRota();
 	public static final Objeto ESPADA_CORTA = crearEspadaCorta();
 	public static final Objeto ESPADA_LARGA = crearEspadaLarga();
 
@@ -81,18 +82,18 @@ public class ListaObjetos {
 	//////////////////////////////
 
 	// Espada Jugador
-	private static Objeto crearEspadaJugador() {
-		return new Objeto_Arma("Espada " + Juego.nombreJugador, "Una ligera espada de hierro.", true, 0, 1);
+	private static Objeto crearEspadaRota() {
+		return new Objeto_Arma("Espada rota", "Una espada rota que le falta el filo.", true, 0, 1);
 	}
 
 	// Espada Corta
 	private static Objeto crearEspadaCorta() {
-		return new Objeto_Arma("Espada corta", "Una afilada espada corta de acero.", false, 15, 3);
+		return new Objeto_Arma("Espada corta", "Una ligera espada corta de acero.", false, 15, 3);
 	}
 
 	// Espada Larga
 	private static Objeto crearEspadaLarga() {
-		return new Objeto_Arma("Espada larga", "Una elegante espada larga de acero.", false, 30, 5);
+		return new Objeto_Arma("Espada larga", "Una elegante espada larga de acero templado.", false, 30, 5);
 	}
 
 	//////////////////////////////
@@ -123,6 +124,8 @@ public class ListaObjetos {
 	private static Objeto crearCofre() {
 		List<Objeto> objetosContenidos = new ArrayList<>();
 		objetosContenidos.add(LAMPARA);
+		objetosContenidos.add(BOLSA);
+		objetosContenidos.add(MONEDA);
 		return new Objeto_Cerradura("Cofre", "Un polvoriento cofre de madera.", true, objetosContenidos);
 	}
 
@@ -134,7 +137,7 @@ public class ListaObjetos {
 
 	// Llave vieja
 	private static Objeto crearLlaveVieja() {
-		return new Objeto_Llave("Llave", "Una vieja llave de hierro.", COFRE.getId());
+		return new Objeto_Llave("Llave vieja", "Una vieja llave oxidada.");
 	}
 
 }

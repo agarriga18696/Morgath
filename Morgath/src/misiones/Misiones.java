@@ -25,12 +25,13 @@ public class Misiones {
 
 	// Método para ejecutar las misiones.
 	public Mision ejecutarMisiones() {
-	    for (Mision m : misiones) {
-	        if (!m.isActivada() && !m.isCompletada()) {
+	    for(Mision m : misiones) {
+	        if(!m.isActivada() && !m.isCompletada()) {
 	            m.setActivada(true);
 	            return m;
 	        }
 	    }
+	    
 	    return null;
 	}
 	
@@ -49,20 +50,23 @@ public class Misiones {
 		String linea = bReader.readLine();
 
 		// Leer las líneas de texto hasta encontrar '#' o 'Recompensa:'.
-		while (linea != null && !linea.trim().startsWith("#") && !linea.trim().startsWith("-Recompensa:")) {
+		while(linea != null && !linea.trim().startsWith("#") && !linea.trim().startsWith("-Recompensa:")) {
 			mensaje.append(linea.trim()).append("\n");
 			linea = bReader.readLine(); // Leer la siguiente línea dentro del bucle.
 		}
 
 		// Obtener el valor de la recompensa si la línea comienza con 'Recompensa:'.
-		if (linea != null && linea.trim().startsWith("-Recompensa:")) {
+		if(linea != null && linea.trim().startsWith("-Recompensa:")) {
 			String recompensaString = linea.substring(12).trim();
 			int recompensa;
+			
 			if(recompensaString != null && !recompensaString.isEmpty()) {
 				recompensa = Integer.parseInt(recompensaString);
+				
 			} else {
 				recompensa = 0;
 			}
+			
 			misionActual.setRecompensa(recompensa);
 
 		}
@@ -72,13 +76,13 @@ public class Misiones {
 
 	// Método para obtener las misiones del archivo de misiones.
 	private void obtenerMisionesArchivo(String nombreArchivo) {
-		try (BufferedReader bReader = new BufferedReader(new FileReader(nombreArchivo))) {
+		try(BufferedReader bReader = new BufferedReader(new FileReader(nombreArchivo))) {
 			String linea;
 
-			while ((linea = bReader.readLine()) != null) {
-				if (linea.startsWith("#")) {
+			while((linea = bReader.readLine()) != null) {
+				if(linea.startsWith("#")) {
 					// Nueva misión.
-					if (misionActual != null) {
+					if(misionActual != null) {
 						agregarMision(misionActual);
 					}
 
@@ -88,21 +92,21 @@ public class Misiones {
 					// Asignar los valores desde el archivo.
 					misionActual.setNombre(linea.substring(2).trim());
 
-				} else if (linea.startsWith("-Objetivo:")) {
+				} else if(linea.startsWith("-Objetivo:")) {
 					misionActual.setObjetivo(linea.substring(10).trim());
 
-				} else if (linea.startsWith("-Mensaje:")) {
+				} else if(linea.startsWith("-Mensaje:")) {
 					misionActual.setMensaje(leerMensaje(bReader));
 
 				}
 			}
 
 			// Añadir la misión y activarla.
-			if (misionActual != null) {
+			if(misionActual != null) {
 				agregarMision(misionActual);
 			}
 
-		} catch (IOException e) {
+		} catch(IOException e) {
 			e.printStackTrace();
 			System.out.println("No se ha podido obtener la misión del archivo.");
 		}

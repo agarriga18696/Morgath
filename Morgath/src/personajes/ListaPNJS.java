@@ -1,6 +1,8 @@
 package personajes;
 
 import objetos.ListaObjetos;
+import personajes.PNJ.TipoPNJ;
+import utilidades.Aleatorio;
 
 public class ListaPNJS {
 	
@@ -25,32 +27,32 @@ public class ListaPNJS {
 	 * 
 	 * PNJ
 	 * 
-	 * (nombre, conversación, vida, objetos)
+	 * (nombre, conversación, tipo, vida, objetos)
 	 * 
 	 * 
 	 * 
 	 */
 
 	// ALDEANO
-	public static PNJ crearAldeano() {
+	private static PNJ crearAldeano() {
 		nombre.setLength(0);
 		conversacion.setLength(0);
-		nombre.append(NombresPersonajes.getNombreMasculino());
-		conversacion.append("Mi nombre es " + nombre + ". ¿En qué puedo ayudarte?");
+		nombre.append(Aleatorio.Boolean() ? NombresPersonajes.getNombreMasculino() : NombresPersonajes.getNombreFemenino());
+		conversacion.append("¿En qué puedo ayudarte?");
 		vidas = 1;
 		
-		return new PNJ(nombre.toString(), conversacion.toString(), vidas);
+		return new PNJ(nombre.toString(), conversacion.toString(), TipoPNJ.ALDEANO, vidas);
 	}
 
 	// COMERCIANTE
-	public static PNJ crearComerciante() {
+	private static PNJ crearComerciante() {
 		nombre.setLength(0);
 		conversacion.setLength(0);
-		nombre.append(NombresPersonajes.getNombreMasculino());
+		nombre.append(Aleatorio.Boolean() ? NombresPersonajes.getNombreMasculino() : NombresPersonajes.getNombreFemenino());
 		conversacion.append("¿Te interesa comerciar?");
 		vidas = 2;
 		
-		return new PNJ(nombre.toString(), conversacion.toString(), vidas,
+		return new PNJ(nombre.toString(), conversacion.toString(), TipoPNJ.COMERCIANTE, vidas,
 				ListaObjetos.ESPADA_CORTA,
 				ListaObjetos.LAMPARA,
 				ListaObjetos.BOLSA);

@@ -9,6 +9,7 @@ import misiones.Mision;
 public class Jugador extends Personaje {
 
 	// Atributos.
+	private final String NOMBRE_POR_DEFECTO = "Jugador"; 
 	Habitacion ubicacion;
 	private int puntos;
 	public List<Mision> diario; // lista de misiones.
@@ -31,6 +32,10 @@ public class Jugador extends Personaje {
 	// Getters i setters.
 	public int getPuntos() {
 		return puntos;
+	}
+
+	public String getNombrePorDefecto() {
+		return NOMBRE_POR_DEFECTO;
 	}
 
 	public void setPuntos(int puntos) {

@@ -20,6 +20,7 @@ public class Objeto_Contenedor extends Objeto {
 			this.objetosContenidos = new ArrayList<>();
 		}
 
+		// Capacidad del contenedor.
 		switch(capacidad) {
 		case BAJA:
 			this.maxObjetosContenidos = 4;

@@ -7,14 +7,14 @@ import java.util.UUID;
 import objetos.Objeto;
 
 public abstract class Personaje {
-
+	
 	protected String id;
 	protected String nombre;
 	protected List<Objeto> inventario;
 	protected int vidas;
 	protected boolean muerto;
 	protected boolean inmortal;
-	
+
 	// Constructor
 	public Personaje(String nombre, int vidas) {
 		this.id = UUID.nameUUIDFromBytes(nombre.getBytes()).toString().replace("-", "");
@@ -24,12 +24,12 @@ public abstract class Personaje {
 		this.muerto = false;
 		this.inmortal = false;
 	}
-	
+
 	// Getters.
 	public String getNombre() {
 		return nombre.toUpperCase();
 	}
-	
+
 	public String getId() {
 		return id;
 	}
@@ -37,11 +37,11 @@ public abstract class Personaje {
 	public void setNombre(String nombre) {
 		this.nombre = nombre;
 	}
-	
+
 	public List<Objeto> getInventario() {
-        return inventario;
-    }
-	
+		return inventario;
+	}
+
 	public void setInventario(List<Objeto> inventario) {
 		this.inventario = inventario;
 	}
@@ -71,8 +71,13 @@ public abstract class Personaje {
 	}
 
 	// Método para agregar objetos al inventario.
-    public void agregarObjetoAlInventario(Objeto objeto) {
-        inventario.add(objeto);
-    }
-	
+	public void agregarObjetoAlInventario(Objeto objeto) {
+		inventario.add(objeto);
+	}
+
+	// Método para eliminar objetos al inventario.
+	public void eliminarObjetoAlInventario(Objeto objeto) {
+		inventario.add(objeto);
+	}
+
 }

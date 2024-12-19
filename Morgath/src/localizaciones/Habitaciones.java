@@ -3,6 +3,7 @@ package localizaciones;
 import objetos.ListaObjetos;
 import objetos.Objeto;
 import personajes.Enemigo;
+import personajes.ListaEnemigos;
 import personajes.ListaPNJS;
 import personajes.PNJ;
 import localizaciones.Habitacion.*;
@@ -22,10 +23,14 @@ public class Habitaciones {
 		
 		return new Habitacion(0, nombre, desc, tipo,
 				new Objeto[]{
-						ListaObjetos.COFRE,
-						ListaObjetos.LLAVE_VIEJA},
-				
-				new PNJ[]{}, 
+						ListaObjetos.LAMPARA,
+						ListaObjetos.LLAVE_VIEJA,
+						ListaObjetos.COFRE
+				},
+				new PNJ[]{
+						ListaPNJS.ALDEANO,
+						ListaPNJS.COMERCIANTE
+				}, 
 				new Enemigo[]{});
 	}
 	
@@ -41,7 +46,13 @@ public class Habitaciones {
 		String desc = "El sendero es muy estrecho, parece desviarse al norte hacia una vieja casa de campo. ¿Estará abandonada? Tal vez sea un buen sitio para empezar a buscar.";
 		Tipo tipo = Tipo.EXTERIOR;
 		
-		return new Habitacion(1, nombre, desc, tipo, new Objeto[]{}, new PNJ[]{}, new Enemigo[]{});
+		return new Habitacion(1, nombre, desc, tipo, 
+				new Objeto[]{}, 
+				new PNJ[]{}, 
+				new Enemigo[]{
+						ListaEnemigos.LADRON,
+						ListaEnemigos.MUTANTE
+				});
 	}
 	
 	

@@ -2,39 +2,21 @@ package configuracion;
 
 import javax.swing.border.Border;
 import java.awt.Color;
-import java.awt.Font;
-import java.io.File;
 
 import javax.swing.border.EmptyBorder;
 
 public class Config {
 
-	// CURSOR
-	public static final String CURSOR = ">";
-
 	// RESOLUCION VENTANA
 	public static int anchoVentana = 1280; //1280
 	public static int altoVentana = 800; //800
+	
+	// ICONOS
+	public static final int TAMANO_ICONO = 34;
 
 	// PADDING
-	public static Border borde = new EmptyBorder(30, 30, 30, 30);
-	
-	// ESPACIADO ENTRE LINEAS
-	public static float espaciadoLinea = 0.17f;
-
-	// FUENTE
-	public static float tamanoFuente = 28;
-	public static Font fuente;
-	
-	static {
-		try {
-			File archivo = new File("resources/fonts/Flexi_IBM_VGA_True.ttf");
-			fuente = Font.createFont(Font.TRUETYPE_FONT, archivo).deriveFont(tamanoFuente); 
-		} catch (Exception e) {
-			e.printStackTrace();
-			fuente = new Font(Font.SANS_SERIF, Font.PLAIN, 22);
-		}
-	}
+	private static final int PADDING = 50;
+	public static Border borde = new EmptyBorder(PADDING, PADDING, PADDING, PADDING);
 
 	// TEMAS
 	public static final Tema TEMA_1 = new Tema(Color.decode("#282b33"), Color.decode("#cfd1d8"), Color.decode("#d3ad4a"));
