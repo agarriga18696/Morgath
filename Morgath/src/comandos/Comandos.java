@@ -1097,19 +1097,19 @@ public class Comandos {
 							argNormalizado.toString().equalsIgnoreCase(objetoNormalizado.toString())) {
 						// Si el jugador ya tiene un objeto contenedor, no puede coger más objetos contenedor.
 						if(objeto instanceof Objeto_Contenedor && tieneContenedor) {
-							mensaje.append("%icon[halt] No has cogido '")
+							mensaje.append("%icon[halt] No has cogido %c[destacado]")
 							.append(objeto.getNombre())
-							.append("' porque ya posees un objeto contenedor.");
+							.append("%/c porque ya posees un objeto contenedor.");
 
 						} else if(objeto instanceof Objeto_Cerradura) {
 							// Comprobar que el objeto que quiere coger no sea un objeto con cerradura.
-							mensaje.append("%icon[weight] No puedes coger el objeto '")
+							mensaje.append("%icon[weight] No puedes coger el objeto %c[destacado]")
 							.append(objeto.getNombre())
-							.append("'. Es demasiado pesado.");
+							.append("%/c. Es demasiado pesado.");
 
 						} else {
 							jugador.agregarObjetoAlInventario(objeto);
-							mensaje.append("%icon[card-play] Has cogido ").append(objeto.getNombre()).append(".");
+							mensaje.append("%icon[card-play] Has cogido %c[destacado]").append(objeto.getNombre()).append("%/c.");
 							// Eliminar el objeto de la habitación.
 							iterador.remove();
 						}
@@ -1119,16 +1119,16 @@ public class Comandos {
 					} else if(arg != null && argNormalizado.toString().equalsIgnoreCase("todo")) {
 						// Si el jugador ya tiene un objeto contenedor, no puede coger más objetos.
 						if(objeto instanceof Objeto_Contenedor && tieneContenedor) {
-							mensaje.append("%icon[halt] No puedes coger '")
-							.append(objeto.getNombre()).append("' si ya posees otro objeto contenedor.");
+							mensaje.append("%icon[halt] No puedes coger %c[destacado]")
+							.append(objeto.getNombre()).append("%/c si ya posees otro objeto contenedor.");
 
 						} else if(objeto instanceof Objeto_Cerradura) {
 							// Comprobar que el objeto que quiere coger no sea un objeto con cerradura.
-							mensaje.append("%icon[weight] No puedes coger el objeto '").append(objeto.getNombre()).append("'. Es demasiado pesado.\n");
+							mensaje.append("%icon[weight] No puedes coger el objeto %c[destacado]").append(objeto.getNombre()).append("%/c. Es demasiado pesado.\n");
 
 						} else {
 							jugador.agregarObjetoAlInventario(objeto);
-							mensaje.append("%icon[card-play] Has cogido ").append(objeto.getNombre()).append(".\n");
+							mensaje.append("%icon[card-play] Has cogido %c[destacado]").append(objeto.getNombre()).append("%/c.\n");
 							// Eliminar el objeto de la habitación.
 							iterador.remove();
 						}
@@ -1218,10 +1218,10 @@ public class Comandos {
 								contenedor.getObjetosContenidos().add(objetoAGuardar);
 								// Eliminar el objeto del inventario.
 								inventarioJugador.remove(objetoAGuardar);
-								mensaje.append("'").append(objetoAGuardar.getNombre())
-								.append("' almacenado en '").append(contenedor.getNombre()).append("'.");
+								mensaje.append("%c[destacado]").append(objetoAGuardar.getNombre())
+								.append("%/c almacenado en %c[destacado]").append(contenedor.getNombre()).append("%/c.");
 							} else {
-								mensaje.append("El contenedor '").append(contenedor.getNombre()).append("' está lleno.");
+								mensaje.append("El contenedor %c[destacado]").append(contenedor.getNombre()).append("%/c está lleno.");
 							}
 						}
 					} else {
@@ -1231,7 +1231,7 @@ public class Comandos {
 					mensaje.append("El objeto '").append(nombreObjeto).append("' no está en tu inventario.");
 				}
 			} else {
-				mensaje.append("Para almacenar un objeto en un contenedor usa el comando 'ALMACENAR <OBJETO> EN <CONTENEDOR>'.");
+				mensaje.append("Para almacenar un objeto en un contenedor usa el comando %c[comando]ALMACENAR <OBJETO> EN <CONTENEDOR>%/c.");
 			}
 		} else {
 			if(arg == null) {
