@@ -6,7 +6,7 @@ import java.util.List;
 import localizaciones.Habitacion;
 import misiones.Mision;
 
-public class Jugador extends Personaje {
+public class Jugador extends PersonajeBase {
 
 	// Atributos.
 	private final String NOMBRE_POR_DEFECTO = "Jugador"; 
@@ -20,7 +20,7 @@ public class Jugador extends Personaje {
 	public Jugador(String nombre, Habitacion ubicacion, int vidas) {
 		super(nombre, vidas);
 		this.nombre = "Jugador";
-		this.setVidas(4);
+		this.setVidas(5);
 		this.ubicacion = ubicacion;
 		this.puntos = 0;
 		this.inventario = new ArrayList<>();

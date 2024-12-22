@@ -4,8 +4,8 @@ import objetos.ListaObjetos;
 import objetos.Objeto;
 import personajes.Enemigo;
 import personajes.ListaEnemigos;
-import personajes.ListaPNJS;
-import personajes.PNJ;
+import personajes.ListaPersonajes;
+import personajes.Personaje;
 import localizaciones.Habitacion.*;
 
 public class Habitaciones {
@@ -23,13 +23,10 @@ public class Habitaciones {
 		
 		return new Habitacion(0, nombre, desc, tipo,
 				new Objeto[]{
-						ListaObjetos.LAMPARA,
-						ListaObjetos.LLAVE_VIEJA,
-						ListaObjetos.COFRE
+						ListaObjetos.crearCofre()
 				},
-				new PNJ[]{
-						ListaPNJS.ALDEANO,
-						ListaPNJS.COMERCIANTE
+				new Personaje[]{
+						ListaPersonajes.crearAldeano(),
 				}, 
 				new Enemigo[]{});
 	}
@@ -48,11 +45,10 @@ public class Habitaciones {
 		
 		return new Habitacion(1, nombre, desc, tipo, 
 				new Objeto[]{}, 
-				new PNJ[]{}, 
-				new Enemigo[]{
-						ListaEnemigos.LADRON,
-						ListaEnemigos.MUTANTE
-				});
+				new Personaje[]{
+						ListaPersonajes.crearComerciante()
+				}, 
+				new Enemigo[]{});
 	}
 	
 	
@@ -67,7 +63,7 @@ public class Habitaciones {
 		String desc = "Te encuentras frente a la casa, las ventanas están cerradas desde el interior. No parece haber nadie cera.";
 		Tipo tipo = Tipo.EXTERIOR;
 		
-		return new Habitacion(2, nombre, desc, tipo, new Objeto[]{}, new PNJ[]{}, new Enemigo[]{});
+		return new Habitacion(2, nombre, desc, tipo, new Objeto[]{}, new Personaje[]{}, new Enemigo[]{});
 	}
 
 	
@@ -84,7 +80,7 @@ public class Habitaciones {
 					+ "Al fondo ves una entrada a un sótano.";
 		Tipo tipo = Tipo.INTERIOR;
 
-		return new Habitacion(2.1, nombre, desc, tipo, new Objeto[]{}, new PNJ[]{}, new Enemigo[]{});
+		return new Habitacion(2.1, nombre, desc, tipo, new Objeto[]{}, new Personaje[]{}, new Enemigo[]{});
 	}
 	
 	
@@ -99,10 +95,15 @@ public class Habitaciones {
 		String desc = "Hay un pequeño tragaluz que ilumina ligeramente el lugar. El ambiente es frío.";
 		Tipo tipo = Tipo.SUPERIOR;
 
-		return new Habitacion(2.2, nombre, desc, tipo, new Objeto[]{
-				ListaObjetos.BOLSA}, 
-				new PNJ[]{}, 
-				new Enemigo[]{});
+		return new Habitacion(2.2, nombre, desc, tipo, 
+				new Objeto[]{
+						ListaObjetos.crearLampara(),
+						ListaObjetos.crearBolsa()
+				}, 
+				new Personaje[]{}, 
+				new Enemigo[]{
+						ListaEnemigos.crearLadron()
+				});
 	}
 	
 	
@@ -117,10 +118,15 @@ public class Habitaciones {
 		String desc = "Aquí abajo no hay luz, y el aire se percibe pesado y seco. Es escalofriante.";
 		Tipo tipo = Tipo.INFERIOR;
 
-		return new Habitacion(2.3, nombre, desc, tipo, new Objeto[]{
-				ListaObjetos.ESPADA_CORTA}, 
-				new PNJ[]{}, 
-				new Enemigo[]{});
+		return new Habitacion(2.3, nombre, desc, tipo, 
+				new Objeto[]{
+						ListaObjetos.crearEspadaCorta(),
+						ListaObjetos.crearLlave()
+						}, 
+				new Personaje[]{}, 
+				new Enemigo[]{
+						ListaEnemigos.crearMutante()
+						});
 	}
 	
 }

@@ -6,8 +6,8 @@ public class Objeto_Arma extends Objeto {
 	private int ataque;
 	private boolean objetoDeMision;
 
-	public Objeto_Arma(String nombre, String descripcion, boolean objetoDeMision, int valorVenta, int ataque) {
-		super(nombre, descripcion);
+	public Objeto_Arma(String icono, String nombre, String descripcion, boolean objetoDeMision, int valorVenta, int ataque) {
+		super(icono, nombre, descripcion);
 		
 		this.objetoDeMision = objetoDeMision;
 		this.valorVenta = valorVenta;

@@ -30,7 +30,6 @@ import misiones.Misiones;
 import objetos.ListaObjetos;
 import personajes.Jugador;
 import personajes.ListaEnemigos;
-import utilidades.Simbolo;
 
 public class Juego extends JFrame {
 
@@ -107,14 +106,14 @@ public class Juego extends JFrame {
 		// Etiquetas del panel superior.
 		labelUbicacion = new JLabel();
 		labelPuntuacion = new JLabel();
-		labelCursor = new JLabel(Simbolo.SISTEMA_CURSOR);
+		labelCursor = new JLabel(Config.CURSOR);
 
 		// Action Listener para el input de texto.
 		inputTexto.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent e) {
 				String comando = inputTexto.getText();
-				outputTexto(Simbolo.SISTEMA_CURSOR + " " + comando, Fuente.fuenteBase);
+				outputTexto(Config.CURSOR + " " + comando, Fuente.fuenteBase);
 				comandos.ejecutarComando(comando);
 				ultimoComandoUsado = comando;
 
@@ -136,6 +135,23 @@ public class Juego extends JFrame {
 			}
 		});
 
+		// Hacer focus en el inputTexto al hacer clic en la ventana.
+		// Panel principal.
+		panelPrincipal.addMouseListener(new java.awt.event.MouseAdapter() {
+			@Override
+			public void mouseClicked(java.awt.event.MouseEvent e) {
+				inputTexto.requestFocusInWindow();
+			}
+		});
+		// Output Texto.
+		outputTexto.addMouseListener(new java.awt.event.MouseAdapter() {
+			@Override
+			public void mouseClicked(java.awt.event.MouseEvent e) {
+				inputTexto.requestFocusInWindow();
+			}
+		});
+
+		// Mostrar ventana.
 		setVisible(true);
 	}
 
@@ -392,21 +408,17 @@ public class Juego extends JFrame {
 	// Método auxiliar para obtener un color por su nombre
 	private Color obtenerColorPorNombre(String colorNombre) {
 		switch (colorNombre) {
-		case "red": return Color.RED;
-		case "blue": return Color.BLUE;
-		case "green": return Color.GREEN;
-		case "yellow": return Color.YELLOW;
-		case "black": return Color.BLACK;
-		case "white": return Color.WHITE;
-		case "gray": return Color.GRAY;
-		case "orange": return Color.ORANGE;
-		case "pink": return Color.PINK;
+		case "pnj": return Config.COLOR_PNJ;
+		case "enemigo": return Config.COLOR_ENEMIGO;
+		case "comando": return Config.COLOR_COMANDO;
+		case "destacado": return Config.temaActual.getColorEnfasis();
 		default: 
 			try {
-				// Intentar interpretar un color en formato hexadecimal
-				return Color.decode(colorNombre);  // Permite colores como "#FF5733"
+				// Intentar interpretar un color en formato hexadecimal.
+				return Color.decode(colorNombre);
 			} catch (NumberFormatException e) {
-				throw new IllegalArgumentException("Color desconocido o no válido: " + colorNombre);
+				// Devolver color por defecto (color del texto).
+				return Config.temaActual.getColorSecundario();
 			}
 		}
 	}
@@ -422,8 +434,8 @@ public class Juego extends JFrame {
 				// Cargar la imagen original
 				Image img = new ImageIcon(archivoIcono.getAbsolutePath()).getImage();
 
-				// Redimensionar la imagen a un tamaño más pequeño (por ejemplo, 32x32) usando Graphics2D
-				int nuevoAncho = Config.TAMANO_ICONO;  // Tamaño deseado
+				// Redimensionar la imagen a un tamaño más pequeño usando Graphics2D.
+				int nuevoAncho = Config.TAMANO_ICONO;
 				int nuevoAlto = Config.TAMANO_ICONO;
 
 				// Crear una imagen con un buffer de memoria
@@ -435,21 +447,21 @@ public class Juego extends JFrame {
 				g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
 				g2d.setRenderingHint(RenderingHints.KEY_RENDERING, RenderingHints.VALUE_RENDER_QUALITY);
 
-				// Dibujar la imagen redimensionada
+				// Dibujar la imagen redimensionada.
 				g2d.drawImage(img, 0, 0, nuevoAncho, nuevoAlto, null);
-				g2d.dispose(); // Liberar recursos del gráfico
+				g2d.dispose(); // Liberar recursos del gráfico.
 
 				// Cambiar el color de los píxeles de la imagen
 				for(int x = 0; x < imgRedimensionada.getWidth(); x++) {
 					for(int y = 0; y < imgRedimensionada.getHeight(); y++) {
 						int pixel = imgRedimensionada.getRGB(x, y);
 
-						// Si el píxel no es transparente, cambiar su color
-						if((pixel >> 24) != 0x00) { // El valor del canal alfa (transparente es 0x00)
+						// Si el píxel no es transparente, cambiar su color.
+						if((pixel >> 24) != 0x00) { // El valor del canal alfa (transparente es 0x00).
 							Color colorOriginal = new Color(pixel, true);
-							// Verificar si el color original es blanco (o el color que deseas cambiar)
+							// Verificar si el color original es blanco.
 							if(colorOriginal.getRed() == 255 && colorOriginal.getGreen() == 255 && colorOriginal.getBlue() == 255) {
-								// Cambiar el color del píxel a nuevoColor
+								// Cambiar el color del píxel a nuevoColor.
 								imgRedimensionada.setRGB(x, y, nuevoColor.getRGB());
 							}
 						}
@@ -476,7 +488,7 @@ public class Juego extends JFrame {
 	// Mostrar mensaje de la misión.
 	private void mostrarMensajeDeMision() {
 		if(misionActiva != null && !misionActiva.isCompletada() && !misionActiva.isMensajeMostrado()) {
-			String mensajeSistema = "%icon[scroll-unfurled] NUEVA MISIÓN: " + misionActiva.getNombre() + "\n" + misionActiva.getMensaje();
+			String mensajeSistema = "%icon[scroll-unfurled] %c[destacado]NUEVA MISIÓN: " + misionActiva.getNombre() + "%/c\n" + misionActiva.getMensaje();
 			outputTexto(mensajeSistema, Fuente.fuenteBase);
 			misionActiva.setMensajeMostrado(true);
 		}
@@ -486,8 +498,10 @@ public class Juego extends JFrame {
 	private void procesarMisionCompletada() {
 		int recompensa = misionActiva.getRecompensa();
 
-		String mensaje = "%icon[scroll-unfurled] " + String.format("¡MISIÓN \"%s\" COMPLETADA!\n- Recompensa: %d puntos.", misionActiva.getNombre(), recompensa);
-		outputTexto(mensaje, Fuente.fuenteBase);
+		StringBuilder mensaje = new StringBuilder();
+		mensaje.append("%icon[check-mark] %c[destacado]").append(String.format("MISIÓN COMPLETADA: %s", misionActiva.getNombre())).append("%/c")
+		.append("\n\t%icon[two-coins] Recompensa: ").append(String.format("%d de oro.", recompensa));
+		outputTexto(mensaje.toString(), Fuente.fuenteBase);
 
 		// Sumar los puntos de la misión.
 		jugador.setPuntos(jugador.getPuntos() + recompensa);
@@ -504,7 +518,7 @@ public class Juego extends JFrame {
 
 			if(misionActiva != null) {
 				if(!misionActiva.isMensajeMostrado()) {
-					String mensajeSistema = "\n%icon[scroll-unfurled] NUEVA MISIÓN: " + misionActiva.getNombre() + "\n" + misionActiva.getMensaje();
+					String mensajeSistema = "\n%icon[scroll-unfurled] %c[destacado]NUEVA MISIÓN: " + misionActiva.getNombre() + "%/c\n" + misionActiva.getMensaje();
 					outputTexto(mensajeSistema, Fuente.fuenteBase);
 					misionActiva.setMensajeMostrado(true);
 				}
@@ -516,7 +530,7 @@ public class Juego extends JFrame {
 
 	// Actualizar label de puntos.
 	public void actualizarLabelPuntos() {
-		labelPuntuacion.setText("PUNTOS: " + jugador.getPuntos());
+		labelPuntuacion.setText("ORO: " + jugador.getPuntos());
 	}
 
 	public void actualizarLabelUbicacion() {

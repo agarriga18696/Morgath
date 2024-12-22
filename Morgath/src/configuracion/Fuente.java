@@ -8,7 +8,7 @@ public class Fuente {
 
 	// Atributos Fuente
 	public static final float INTERLINEADO = 0.27f;
-	public static final float TAMANO_FUENTE = 34;
+	public static final float TAMANO_FUENTE = 32;
 
 	// Fuentes
 	public static Font fuenteBase;

@@ -1,29 +1,50 @@
 package personajes;
 
-public class Enemigo extends Personaje /*implements Conversar*/ {
+public class Enemigo extends PersonajeBase {
 
-	//private String conversacion;
+	private String conversacion;
+	private Tipo tipo;
 	private boolean esJefe;
 	private int recompensaPorMatar;
-	
-	public Enemigo(String nombre, int vidas, String conversacion, boolean esJefe, int recompensaPorMatar) {
+
+	public Enemigo(String nombre, String conversacion, Tipo tipo, int vidas, boolean esJefe, int recompensaPorMatar) {
 		super(nombre, vidas);
-		
-		//this.conversacion = conversacion;
+
+		this.conversacion = conversacion;
+		this.tipo = tipo == null ? Tipo.DESCONOCIDO : tipo;
 		this.esJefe = esJefe;
 		this.recompensaPorMatar = recompensaPorMatar;
 	}
 
-	
-	/*@Override
-	public String obtenerConversacion() {
-		return this.conversacion;
+	// Tipos de enemigo.
+	public enum Tipo {
+		MALEANTE,
+		MERCENARIO,
+		BANDIDO,
+		CRIATURA,
+		BESTIA,
+		DEMONIO,
+		NO_MUERTO,
+		DESCONOCIDO;
+
+		public String getTipoLegible() {
+			switch(this) {
+			case NO_MUERTO:
+				return "NO MUERTO";
+			default:
+				return this.toString();
+			}
+		}
 	}
 
-	@Override
-	public void establecerConversacion(String nuevaConversacion) {
-		this.conversacion = nuevaConversacion;
-	}*/
+
+	public Tipo getTipo() {
+		return tipo;
+	}
+
+	public String getConversacion() {
+		return conversacion;
+	}
 
 	public boolean isEsJefe() {
 		return esJefe;
@@ -32,6 +53,6 @@ public class Enemigo extends Personaje /*implements Conversar*/ {
 	public int getRecompensaPorMatar() {
 		return recompensaPorMatar;
 	}
-	
-	
+
+
 }

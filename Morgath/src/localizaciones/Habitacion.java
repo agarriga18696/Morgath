@@ -9,7 +9,7 @@ import java.util.Map;
 import localizaciones.Mapa.Direccion;
 import objetos.Objeto;
 import personajes.Enemigo;
-import personajes.PNJ;
+import personajes.Personaje;
 
 public class Habitacion {
 
@@ -20,12 +20,12 @@ public class Habitacion {
 	private Tipo tipo;
 	private Map<Direccion, Habitacion> salidas;
 	private List<Objeto> objetos;
-	private List<PNJ> pnjs;
+	private List<Personaje> pnjs;
 	private List<Enemigo> enemigos;
 	private boolean visitada;
 
 	// Constructor.
-	public Habitacion(double id, String nombre, String descripcion, Tipo tipo, Objeto[] objetos, PNJ[] pnjs, Enemigo[] enemigos) {
+	public Habitacion(double id, String nombre, String descripcion, Tipo tipo, Objeto[] objetos, Personaje[] pnjs, Enemigo[] enemigos) {
 		this.id = id;
 		this.nombre = nombre;	
 		this.descripcion = descripcion;
@@ -78,7 +78,7 @@ public class Habitacion {
         return objetos;
     }
 	
-	public List<PNJ> getPnjs() {
+	public List<Personaje> getPnjs() {
 		return pnjs;
 	}
 

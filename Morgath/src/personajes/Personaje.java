@@ -1,83 +1,121 @@
 package personajes;
 
 import java.util.ArrayList;
-import java.util.List;
-import java.util.UUID;
+import java.util.Arrays;
 
 import objetos.Objeto;
+import utilidades.Aleatorio;
 
-public abstract class Personaje {
+
+public class Personaje extends PersonajeBase implements Conversar {
+
+	private String conversacion;
+	private TipoPNJ tipo;
 	
-	protected String id;
-	protected String nombre;
-	protected List<Objeto> inventario;
-	protected int vidas;
-	protected boolean muerto;
-	protected boolean inmortal;
-
-	// Constructor
-	public Personaje(String nombre, int vidas) {
-		this.id = UUID.nameUUIDFromBytes(nombre.getBytes()).toString().replace("-", "");
-		this.nombre = nombre;
-		this.inventario = new ArrayList<>();
-		this.vidas = vidas;
-		this.muerto = false;
-		this.inmortal = false;
+	private boolean estaMolesto;
+	private boolean estaIntimidado;
+	private boolean estaPersuadido;
+	private boolean estaHalagado;
+	private boolean estaSobornado;
+	
+	public Personaje(String nombre, String conversacion, TipoPNJ tipo, int vidas, Objeto... objeto) {
+		super(nombre, vidas);
+		
+		this.conversacion = conversacion;
+		this.tipo = tipo;
+		this.inventario = new ArrayList<>(Arrays.asList(objeto));
+	}
+	
+	public enum TipoPNJ {
+		ALDEANO,
+		COMERCIANTE,
+		GUARDIA,
+		SACERDOTE,
+		DRUIDA
+	}
+	
+	public TipoPNJ getTipo() {
+		return this.tipo;
 	}
 
-	// Getters.
-	public String getNombre() {
-		return nombre.toUpperCase();
+	@Override
+	public String obtenerConversacion() {
+		return this.conversacion;
+	}
+	
+	/*
+	 * 
+	 * SALUDOS
+	 * 
+	 */
+
+	@Override
+	public String saludoNormal() {
+		String[] texto = {
+				"Saludos, viajero.", 
+				"Hola.", 
+				"¡Saludos, forastero!"};
+		
+		return texto[Aleatorio.Int(0, texto.length - 1)];
 	}
 
-	public String getId() {
-		return id;
+	@Override
+	public String saludoGrosero() {
+		String[] texto = {
+				"Si quieres algo dáte prisa, tengo quehaceres importantes.", 
+				"(Gruñido) ¿Y tú que quieres?", 
+				"No tengo tiempo para estupideces.",
+				"No me interesa nada que puedas ofrecerme."};
+		
+		return texto[Aleatorio.Int(0, texto.length - 1)];
 	}
 
-	public void setNombre(String nombre) {
-		this.nombre = nombre;
+	@Override
+	public String saludoAmigable() {
+		String[] texto = {
+				"Ah, eres tú. Pensaba que eras uno de esos bandidos. ¿Qué se te ofrece, amigo?", 
+				"Nunca olvidaré tus palabras, ¿qué necesitas, amigo?", 
+				"¡Bienaventurado seas, amigo! Si necesitas ayuda, no dudes en preguntarme.",
+				"¡Que los dioses te protegan! ¿Qué puedo ofrecerte?"};
+		
+		return texto[Aleatorio.Int(0, texto.length - 1)];
+	}
+	
+	
+	/*
+	 * 
+	 * DESPEDIDAS
+	 * 
+	 */
+	
+	@Override
+	public String despedidaNormal() {
+		String[] texto = {
+				"¡Hasta pronto!", 
+				"¡Adiós!", 
+				"¡Hasta la vista, viajero!"};
+		
+		return texto[Aleatorio.Int(0, texto.length - 1)];
+	}
+	
+	@Override
+	public String despedidaAmigable() {
+		String[] texto = {
+				"Que tengas un buen viaje, viajero.", 
+				"", 
+				""};
+		
+		return texto[Aleatorio.Int(0, texto.length - 1)];
 	}
 
-	public List<Objeto> getInventario() {
-		return inventario;
-	}
-
-	public void setInventario(List<Objeto> inventario) {
-		this.inventario = inventario;
-	}
-
-	public int getVidas() {
-		return vidas;
-	}
-
-	public void setVidas(int vidas) {
-		this.vidas = vidas;
-	}
-
-	public boolean isInmortal() {
-		return inmortal;
-	}
-
-	public void setInmortal(boolean inmortal) {
-		this.inmortal = inmortal;
-	}
-
-	public boolean isMuerto() {
-		return muerto;
-	}
-
-	public void setMuerto(boolean muerto) {
-		this.muerto = muerto;
-	}
-
-	// Método para agregar objetos al inventario.
-	public void agregarObjetoAlInventario(Objeto objeto) {
-		inventario.add(objeto);
-	}
-
-	// Método para eliminar objetos al inventario.
-	public void eliminarObjetoAlInventario(Objeto objeto) {
-		inventario.add(objeto);
+	@Override
+	public String despedidaGrosera() {
+		String[] texto = {
+				"Que tengas un buen viaje, viajero.", 
+				"", 
+				""};
+		
+		return texto[Aleatorio.Int(0, texto.length - 1)];
 	}
 
 }

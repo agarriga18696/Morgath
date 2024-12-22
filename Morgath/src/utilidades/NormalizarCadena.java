@@ -6,7 +6,7 @@ public class NormalizarCadena {
 
 	// Método para normalizar una cadena y quitar acentos.
 	public static String quitarAcentos(String cadena) {
-	    if (cadena == null) {
+	    if(cadena == null) {
 	        return null;
 	    }
 	    

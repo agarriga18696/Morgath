@@ -4,6 +4,8 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 
+import utilidades.NormalizarCadena;
+
 public class Mapa {
 
 	/*
@@ -43,7 +45,7 @@ public class Mapa {
 	 *  
 	 *  
 	 *  
-	 *  DEFINICIÓN DE DIRECCIONES PARA CONECTAR LAS HABITACIONES
+	 *  DEFINICIÓN DE DIRECCIONES Y SUS ATAJOS PARA REALIZAR LAS CONEXIONES ENTRE HABITACIONES Y PERMITIR EL MOVIMIENTO.
 	 *  
 	 *  
 	 *  
@@ -51,71 +53,73 @@ public class Mapa {
 	 */
 
 	public enum Direccion {
-		NORTE("N"),
-		SUR("S"),
-		ESTE("E"),
-		OESTE("O"),
-		NORESTE("NE"),
-		NOROESTE("NO"),
-		SUDESTE("SE"),
-		SUDOESTE("SO"),
-		ARRIBA("AR"),
-		ABAJO("AB");
+	    NORTE("NORTE", "N", "RECTO", "RE"),
+	    SUR("SUR", "S", "ATRÁS", "AT"),
+	    ESTE("ESTE", "E", "DERECHA", "DE"),
+	    OESTE("OESTE", "O", "IZQUIERDA", "IZ"),
+	    NORESTE("NORESTE", "NE"),
+	    NOROESTE("NOROESTE", "NO"),
+	    SUDESTE("SUDESTE", "SURESTE", "SE"),
+	    SUDOESTE("SUDOESTE", "SUROESTE", "SO"),
+	    ARRIBA("ARRIBA", "AR"),
+	    ABAJO("ABAJO", "AB");
 
-		private final String[] atajo;
+	    private final String[] atajo;
 
-		// Constructor.
-		Direccion(String... atajo) {
-			this.atajo = atajo;
-		}
-		
-		// Getter.
-		public String[] getAtajo() {
-			return atajo;
-		}
+	    // Constructor.
+	    Direccion(String... atajo) {
+	    	// Normalizar cada atajo para quitar los acentos.
+	        this.atajo = Arrays.stream(atajo)
+	        		.map(NormalizarCadena::quitarAcentos) // Normalizar cada atajo.
+	        		.toArray(String[]::new);
+	    }
 
-		// Método para obtener el atajo del comando.
-		public static Direccion obtenerAtajo(String atajo) {
-		    for (Direccion direccion : values()) {
-		        if (direccion.name().equalsIgnoreCase(atajo) || Arrays.asList(direccion.atajo).contains(atajo.toUpperCase())) {
-		            return direccion;
-		        }
-		    }
-		    
-		    return null;
-		    //throw new IllegalArgumentException("Error, atajo " + atajo + " no encontrado.");
-		}
+	    public String[] getAtajo() {
+	        return atajo;
+	    }
 
-		// Método para obtener la dirección opuesta (retorno).
-		public Direccion opuesta() {
-			switch (this) {
-			case NORTE:
-				return SUR;
-			case SUR:
-				return NORTE;
-			case OESTE:
-				return ESTE;
-			case ESTE:
-				return OESTE;
-			case NORESTE:
-				return NOROESTE;
-			case NOROESTE:
-				return NORESTE;
-			case SUDESTE:
-				return SUDOESTE;
-			case SUDOESTE:
-				return SUDESTE;
-			case ARRIBA:
-				return ABAJO;
-			case ABAJO:
-				return ARRIBA;
-			default:
-				throw new IllegalArgumentException("Dirección no válida :(");
-			}
-		}
+	    public static Direccion obtenerAtajo(String atajo) {
+	        // Normalizar la cadena de entrada para comparar sin acentos.
+	        String atajoNormalizado = NormalizarCadena.quitarAcentos(atajo).toUpperCase();
+
+	        for(Direccion direccion : values()) {
+	            // Comparar el atajo normalizado con los atajos almacenados normalizados.
+	            if(direccion.name().equalsIgnoreCase(atajoNormalizado) || 
+	                Arrays.asList(direccion.atajo).stream().anyMatch(atajoStr -> atajoStr.equalsIgnoreCase(atajoNormalizado))) {
+	                return direccion;
+	            }
+	        }
+
+	        return null; // No se encontró el atajo.
+	    }
+
+	    public Direccion opuesta() {
+	        switch (this) {
+	            case NORTE:
+	                return SUR;
+	            case SUR:
+	                return NORTE;
+	            case OESTE:
+	                return ESTE;
+	            case ESTE:
+	                return OESTE;
+	            case NORESTE:
+	                return NOROESTE;
+	            case NOROESTE:
+	                return NORESTE;
+	            case SUDESTE:
+	                return SUDOESTE;
+	            case SUDOESTE:
+	                return SUDESTE;
+	            case ARRIBA:
+	                return ABAJO;
+	            case ABAJO:
+	                return ARRIBA;
+	            default:
+	                throw new IllegalArgumentException("Dirección no válida :(");
+	        }
+	    }
 	}
-
-
 
 
 	/*
@@ -140,8 +144,8 @@ public class Mapa {
 
 		habitacion_00 = Habitaciones.h_00(); // Callejón sin salida.
 		habitacion_01 = Habitaciones.h_01(); // Sendero
-		habitacion_02 = Habitaciones.h_02(); // Casa, exterior
-		habitacion_02_01 = Habitaciones.h_02_01(); // Casa, entrada
+		habitacion_02 = Habitaciones.h_02(); // Sur de la casa
+		habitacion_02_01 = Habitaciones.h_02_01(); // Casa
 		habitacion_02_02 = Habitaciones.h_02_02(); // Casa, ático
 		habitacion_02_03 = Habitaciones.h_02_03(); // Casa, sótano
 
@@ -153,12 +157,11 @@ public class Mapa {
 		 * 
 		 */
 
-		conectar(habitacion_00, habitacion_01, Direccion.ESTE); // Callejón sin salida.
-		conectar(habitacion_01, habitacion_02, Direccion.NORTE); // Sendero
-		conectar(habitacion_02, habitacion_02_01, Direccion.NORTE); // Casa, exterior
-		conectar(habitacion_02, habitacion_02_01, Direccion.NORTE); // Casa, entrada
-		conectar(habitacion_02_01, habitacion_02_02, Direccion.ARRIBA); // Casa, ático
-		conectar(habitacion_02_01, habitacion_02_03, Direccion.ABAJO); // Casa, sótano
+		conectar(habitacion_00, habitacion_01, Direccion.ESTE); // Callejón sin salida -> E -> Sendero
+		conectar(habitacion_01, habitacion_02, Direccion.NORTE); // Sendero -> N -> Sur de la casa
+		conectar(habitacion_02, habitacion_02_01, Direccion.NORTE); // Sur de la casa -> N -> Casa
+		conectar(habitacion_02_01, habitacion_02_02, Direccion.ARRIBA); // Casa -> AR -> Ático
+		conectar(habitacion_02_01, habitacion_02_03, Direccion.ABAJO); // Casa -> AB -> Sótano
 
 	}
 
@@ -169,8 +172,8 @@ public class Mapa {
 
 	// Método para obtener una habitación del mapa por su ID.
 	public Habitacion obtenerHabitacionPorId(int id) {
-		for (Habitacion habitacion : habitaciones.keySet()) {
-			if (habitacion.getId() == id) {
+		for(Habitacion habitacion : habitaciones.keySet()) {
+			if(habitacion.getId() == id) {
 				return habitacion;
 			}
 		}
@@ -190,7 +193,7 @@ public class Mapa {
 	// Método para mover al jugador por las habitaciones.
 	public Habitacion moverJugador(Habitacion habitacionActual, Direccion direccion) {
 		Map<Direccion, Habitacion> direcciones = habitaciones.get(habitacionActual);
-		if (direcciones != null && direcciones.containsKey(direccion)) {
+		if(direcciones != null && direcciones.containsKey(direccion)) {
 			return direcciones.get(direccion);
 		} else {
 			return habitacionActual;

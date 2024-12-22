@@ -3,6 +3,8 @@ package personajes;
 import java.util.ArrayList;
 import java.util.List;
 
+import personajes.Enemigo.Tipo;
+
 
 public class ListaEnemigos {
 
@@ -25,14 +27,14 @@ public class ListaEnemigos {
 	 */
 
 	// Enemigos normales.
-	public static final Enemigo LADRON = crearLadron();
-	public static final Enemigo MUTANTE = crearMutante();
+	//public static final Enemigo LADRON = crearLadron();
+	//public static final Enemigo MUTANTE = crearMutante();
 
 	// Añadir todos los enemigos creados a la lista.
 	public static void inicializarListaEnemigos() {
 		listaTodosLosEnemigos.clear();
-		listaTodosLosEnemigos.add(LADRON);
-		listaTodosLosEnemigos.add(MUTANTE);
+		listaTodosLosEnemigos.add(crearLadron());
+		listaTodosLosEnemigos.add(crearMutante());
 	}
 
 
@@ -50,7 +52,7 @@ public class ListaEnemigos {
 	 */
 
 	// LADRON
-	private static Enemigo crearLadron() {
+	public static Enemigo crearLadron() {
 		nombre.setLength(0);
 		conversacion.setLength(0);
 		nombre.append("Ladrón");
@@ -59,11 +61,11 @@ public class ListaEnemigos {
 		esJefe = false;
 		recompensa = 5;
 
-		return new Enemigo(nombre.toString(), vidas, conversacion.toString(), esJefe, recompensa);
+		return new Enemigo(nombre.toString(), conversacion.toString(), Tipo.MALEANTE, vidas, esJefe, recompensa);
 	}
 
 	// MUTANTE
-	private static Enemigo crearMutante() {
+	public static Enemigo crearMutante() {
 		nombre.setLength(0);
 		conversacion.setLength(0);
 		nombre.append("Mutante");
@@ -72,7 +74,7 @@ public class ListaEnemigos {
 		esJefe = false;
 		recompensa = 8;
 
-		return new Enemigo(nombre.toString(), vidas, conversacion.toString(), esJefe, recompensa);
+		return new Enemigo(nombre.toString(), conversacion.toString(), Tipo.CRIATURA, vidas, esJefe, recompensa);
 	}
 
 

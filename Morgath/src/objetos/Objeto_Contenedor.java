@@ -9,8 +9,8 @@ public class Objeto_Contenedor extends Objeto {
 	private Capacidad capacidad;
 	private int maxObjetosContenidos;
 
-	public Objeto_Contenedor(String nombre, String descripcion, Capacidad capacidad, List<Objeto> objetosContenidos) {
-		super(nombre, descripcion);
+	public Objeto_Contenedor(String icono, String nombre, String descripcion, Capacidad capacidad, List<Objeto> objetosContenidos) {
+		super(icono, nombre, descripcion);
 
 		this.capacidad = capacidad;
 

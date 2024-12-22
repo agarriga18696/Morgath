@@ -172,11 +172,11 @@ public class Mision {
 	 */
 
 	private boolean condicionesMision_1_1(Jugador jugador) {
-		// Condición: Coger la lámpara de la habitación 'Callejón sin salida'.
-		// - Objeto: lámpara -> Habitación: Callejón sin salida
+		// TODO: Condición: Coger la lámpara de la habitación 'Callejón sin salida'.
+		// TODO: - Objeto: lámpara -> Habitación: Callejón sin salida
 
-		String objetoMision[] = {"lámpara"};
-		String habitacionMision[] = {"Callejón sin salida"};
+		String objetoMision[] = {"bolsa"};
+		String habitacionMision[] = {"Ático"};
 
 		// Obtener la ubicación actual del jugador y su inventario.
 		Habitacion ubicacionJugador = jugador.getUbicacion();
@@ -222,7 +222,7 @@ public class Mision {
 		// - Objeto: bolsa -> Habitación: Ático
 		// - Objeto: espada -> Habitación: Sótano
 
-		String objetoMision[] = {"bolsa", "espada"};
+		String objetoMision[] = {"bolsa", "espada corta"};
 		String habitacionMision[] = {"Ático", "Sótano"};
 
 		// Obtener la ubicación actual del jugador y su inventario.

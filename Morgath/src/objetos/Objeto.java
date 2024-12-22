@@ -5,11 +5,13 @@ import java.util.UUID;
 public abstract class Objeto {
 
 	private String id;
+	private String icono;
 	private String nombre;
 	private String descripcion;
 	
-	public Objeto(String nombre, String descripcion) {
+	public Objeto(String icono, String nombre, String descripcion) {
 		this.id = UUID.nameUUIDFromBytes(nombre.getBytes()).toString().replace("-", "");
+		this.icono = icono;
 		this.nombre = nombre;
 		this.descripcion = descripcion;
 		
@@ -18,6 +20,10 @@ public abstract class Objeto {
 
 	public String getId() {
 		return id;
+	}
+	
+	public String getIcono() {
+		return icono;
 	}
 
 	public String getNombre() {

@@ -37,7 +37,7 @@ import objetos.Objeto_Dinero;
 import objetos.Objeto_Llave;
 import personajes.Jugador;
 import personajes.ListaEnemigos;
-import personajes.PNJ;
+import personajes.Personaje;
 import personajes.Enemigo;
 import utilidades.Aleatorio;
 import utilidades.NormalizarCadena;
@@ -51,9 +51,11 @@ public class Comandos {
 	private Juego juego;
 	private Mapa mapa;
 	private Direccion ultimaDireccionUsada;
-	private PNJ ultimoPersonajeHablado;
+	private Personaje ultimoPersonajeHablado;
+	private String comandoNormalizado;
 
 	private int contadorEspaciosVacios = 0;
+	private boolean alternarMensajeComandoVolver = true;
 
 	// Constructor.
 	public Comandos(Jugador jugador, Juego juego, Mapa mapa) {
@@ -80,23 +82,32 @@ public class Comandos {
 	public enum ListaComandos {
 
 		// MOVIMIENTO
-		LEVANTARSE("INCORPORARSE"),
-		IR("AVANZAR", "DIRIGIRSE", "CAMINAR"),
-		VOLVER("ATRAS", "RETROCEDER"),
+		LEVANTARSE("LEVANTAR", "LEVANTA", "INCORPORARSE"),
+
+		// Recoger todos los atajos de la lista enum 'Direccion' de la clase 'Mapa'.
+		IR(combinarAtajos(Direccion.NORTE.getAtajo(), Direccion.SUR.getAtajo(), Direccion.ESTE.getAtajo(), 
+				Direccion.OESTE.getAtajo(), Direccion.NORESTE.getAtajo(), Direccion.NOROESTE.getAtajo(), 
+				Direccion.SUDESTE.getAtajo(), Direccion.SUDOESTE.getAtajo(), 
+				Direccion.ARRIBA.getAtajo(), Direccion.ABAJO.getAtajo())),
+
+		VOLVER("RETROCEDER"),
 		ENTRAR,
 		SALIR,
 
 		// EXPLORACIÓN
 		LUGAR("L", "SITIO", "ZONA"),
-		EXPLORAR("E"),
+		EXPLORAR("EX"),
 		MIRAR("OBSERVAR"),
 		BUSCAR("B"),
 		COGER("AGARRAR"),
 		SOLTAR("TIRAR"),
 		ABRIR,
 
+		// JUGADOR
+		ESTADO("SALUD"),
+
 		// INVENTARIO
-		ALMACENAR("DEPOSITAR", "INTRODUCIR", "INSERTAR"),
+		ALMACENAR("DEPOSITAR", "INTRODUCIR", "INSERTAR", "METER"),
 		SACAR("QUITAR", "EXTRAER", "SUSTRAER"),
 		DESTRUIR("ROMPER"),
 		INVENTARIO("I", "OBJETOS"),
@@ -124,30 +135,36 @@ public class Comandos {
 		CREDITOS("CREADOR", "JUEGO"),
 		TOC,
 		VERSION,
-		TEMA;
+		TEMA("COLOR");
 
 		private final String[] atajo;
 
-		// Constructor.
-		ListaComandos(String... atajo){
+		// Constructor que maneja tanto los atajos directos como los obtenidos de Direccion
+		ListaComandos(String... atajo) {
 			this.atajo = atajo;
 		}
 
-		// Getter.
+		// Getter de atajos
 		public String[] getAtajo() {
 			return atajo;
 		}
 
-		// Método para obtener el atajo del comando.
+		// Método para obtener un comando a partir de un atajo
 		public static ListaComandos obtenerAtajo(String atajo) {
 			for(ListaComandos comando : values()) {
 				if(comando.name().equalsIgnoreCase(atajo) || Arrays.asList(comando.atajo).contains(atajo.toUpperCase())) {
 					return comando;
 				}
 			}
-
 			return null;
-			//throw new IllegalArgumentException("Error, atajo " + atajo + " no encontrado.");
+		}
+
+		// Método estático para combinar los atajos de las direcciones
+		private static String[] combinarAtajos(String[]... atajos) {
+			// Combina todos los arrays de atajos en uno solo
+			return Arrays.stream(atajos)
+					.flatMap(Arrays::stream)
+					.toArray(String[]::new);
 		}
 
 	}
@@ -164,9 +181,7 @@ public class Comandos {
 		setComandoActivado(ListaComandos.LUGAR, true);
 		setComandoActivado(ListaComandos.MISION, true);
 		setComandoActivado(ListaComandos.DIARIO, true);
-		setComandoActivado(ListaComandos.INVENTARIO, true);
 		setComandoActivado(ListaComandos.TERMINAR, true);
-		setComandoActivado(ListaComandos.REINICIAR, true);
 		setComandoActivado(ListaComandos.GUARDAR, true);
 		setComandoActivado(ListaComandos.AYUDA, true);
 		setComandoActivado(ListaComandos.VERSION, true);
@@ -244,7 +259,7 @@ public class Comandos {
 	public void ejecutarComando(String comando) {
 		// Normalizar comando.
 		comando = comando.trim().toUpperCase();
-		String comandoNormalizado = NormalizarCadena.quitarAcentos(comando).toUpperCase();
+		comandoNormalizado = NormalizarCadena.quitarAcentos(comando).toUpperCase();
 
 		// Verificar que el comando no esté vacío después de quitar los espacios.
 		if(!(comandoNormalizado.isEmpty() || comandoNormalizado.isBlank()) && comandoNormalizado != null) {
@@ -294,6 +309,9 @@ public class Comandos {
 					break;	
 				case ABRIR:
 					comandoAbrir(argumentoDetallado);
+					break;
+				case ESTADO: 
+					comandoEstado();
 					break;
 				case ALMACENAR:
 					comandoAlmacenar(argumentoDetallado);
@@ -363,7 +381,7 @@ public class Comandos {
 					juego.outputTexto("No conozco esa acción.", Fuente.fuenteBase);
 
 				} else if(!jugador.isDePie()) {
-					juego.outputTexto("No puedes hacer eso mientras estás en el suelo.", Fuente.fuenteBase);
+					juego.outputTexto("Sería mejor que te levantaras del suelo antes de hacer eso.", Fuente.fuenteBase);
 
 				} else {
 					if(comandoEnum != null && !esComandoActivado(comandoEnum)) {
@@ -376,7 +394,7 @@ public class Comandos {
 						} else if(accionJugador.equals(ListaComandos.VOLVER)){
 							mensaje.append("En estos momentos no puedes volver a ningún lugar.");
 						} else if(accionJugador.equals(ListaComandos.ENTRAR)) {
-							mensaje.append("Ahora mismo no puedes entrar a ninguna habitación");
+							mensaje.append("Ahora mismo no puedes entrar a ningún sitio.");
 						} else if(accionJugador.equals(ListaComandos.EXPLORAR)){
 							mensaje.append("Ahora no puedes explorar.");
 						} else if(accionJugador.equals(ListaComandos.MIRAR)){
@@ -411,8 +429,9 @@ public class Comandos {
 							mensaje.append("En este momento no puedes guardar la partida.");
 						} else if(accionJugador.equals(ListaComandos.TEMA)){
 							mensaje.append("En este momento no puedes cambiar el tema de la interfaz.");
-						} else {
-							mensaje.append("En este momento no puedes usar ese comando");
+
+						} else { // Mensaje genérico para cualquier otro comando.
+							mensaje.append("En este instante no puedes hacer eso.");
 						}
 
 						juego.outputTexto(mensaje.toString(), Fuente.fuenteBase);
@@ -535,91 +554,96 @@ public class Comandos {
 	 */
 	private void comandoIr(String arg) {
 		Habitacion habitacionActual = obtenerHabitacionActual();
-		Habitacion nuevaHabitacion = null;
 		StringBuilder mensaje = new StringBuilder();
-		boolean teMueves = false, teMuevesVerticalmente = false;
-		Direccion direccionPermitida = null, argDireccion = null;
 
-		// Comprobar que el argumento coincide con una dirección válida.
-		for(Direccion direccion : Direccion.values()) {
-			if(arg != null && !arg.isEmpty() && arg.equalsIgnoreCase(direccion.name())) {
-				argDireccion = direccion;
-				break;
-			}
+		Direccion direccion = obtenerDireccion(arg);
+		if(direccion == null) {
+			mostrarOpcionesDeDirecciones(mensaje);
+			juego.outputTexto(mensaje.toString(), Fuente.fuenteBase);
+			return;
 		}
 
-		// Comprobar que la dirección introducida existe.
-		if(argDireccion != null && Direccion.obtenerAtajo(argDireccion.name()) != null) {
-
-			nuevaHabitacion = obtenerHabitacionEnDireccion(habitacionActual, argDireccion);
-			// Verificar que sea de tipo EXTERIOR.
-			if(!habitacionActual.getTipo().equals(Habitacion.Tipo.INTERIOR) && nuevaHabitacion.getTipo().equals(Habitacion.Tipo.EXTERIOR)) {
-				teMueves = true;
-				direccionPermitida = argDireccion;
-
-			} else if(habitacionActual.getTipo().equals(Habitacion.Tipo.INTERIOR) &&
-					(nuevaHabitacion.getTipo().equals(Habitacion.Tipo.SUPERIOR) ||
-							nuevaHabitacion.getTipo().equals(Habitacion.Tipo.INFERIOR))) {
-				teMueves = true;
-				teMuevesVerticalmente = true;
-				direccionPermitida = argDireccion;
-
-			} else if((habitacionActual.getTipo().equals(Habitacion.Tipo.SUPERIOR) || 
-					habitacionActual.getTipo().equals(Habitacion.Tipo.INFERIOR)) && 
-					nuevaHabitacion.getTipo().equals(Habitacion.Tipo.INTERIOR)) {
-				teMueves = true;
-				teMuevesVerticalmente = true;
-				direccionPermitida = argDireccion;
-
-			} else {
-				if(nuevaHabitacion.getTipo().equals(Habitacion.Tipo.INTERIOR)) {
-					juego.outputTexto("Para acceder a un interior utiliza el comando 'ENTRAR <UBICACIÓN>'.", Fuente.fuenteBase);
-					return;
-
-				} else if(nuevaHabitacion.getTipo().equals(Habitacion.Tipo.EXTERIOR)) {
-					juego.outputTexto("Para salir al exterior utiliza el comando 'SALIR'.", Fuente.fuenteBase);
-					return;
-				}
-			}
-
-			// Actualizar la ubicación del jugador y mostrar mensaje.
-			if(teMueves && nuevaHabitacion != null && nuevaHabitacion != habitacionActual) {
-				jugador.setUbicacion(nuevaHabitacion);
-				if(!teMuevesVerticalmente) {
-					mensaje.append("Te mueves en dirección ")
-					.append(direccionPermitida.name().toLowerCase())
-					.append(".\n").append(nuevaHabitacion.getNombre());
-				} else {
-					mensaje.append("Te diriges hacia ")
-					.append(direccionPermitida.name().toLowerCase())
-					.append(".\n")
-					.append(nuevaHabitacion.getNombre());
-				}
-
-				// Mostrar descripción de la habitación solamente cuando es la primera vez que la visitas.
-				if(!nuevaHabitacion.isVisitada()) {
-					mensaje.append("\n").append(nuevaHabitacion.getDescripcion());
-				}
-
-				juego.labelUbicacion.setText("UBICACIÓN: " + nuevaHabitacion.getNombre());
-				// Guardar dirección para el comando 'VOLVER'.
-				ultimaDireccionUsada = direccionPermitida;
-				// Marcar la habitación como visitada.
-				nuevaHabitacion.setVisitada(true);
-
-			} else if(!teMueves) {
-				mensaje.append("No reconozco la dirección '").append(arg).append("'.");
-			} else {
-				mensaje.append("No puedes ir en esa dirección desde aquí.");
-			}
-
-		} else {
-			mensaje.append("¿En qué dirección quieres ir?");
+		Habitacion nuevaHabitacion = obtenerHabitacionEnDireccion(habitacionActual, direccion);
+		
+		// Validación para habitaciones no disponibles.
+		if(nuevaHabitacion == null || nuevaHabitacion == habitacionActual) {
+			juego.outputTexto("No puedes ir en esa dirección desde aquí.", Fuente.fuenteBase);
+			return;
 		}
 
+		if(!esMovimientoValido(habitacionActual, nuevaHabitacion, mensaje)) {
+			juego.outputTexto(mensaje.toString(), Fuente.fuenteBase);
+			return;
+		}
+
+		realizarMovimiento(habitacionActual, nuevaHabitacion, direccion, mensaje);
 		juego.outputTexto(mensaje.toString(), Fuente.fuenteBase);
-
 	}
+
+	/*
+	 * Métodos auxiliares
+	 */
+
+	// Método para obtener la dirección donde quieres dirigirte.
+	private Direccion obtenerDireccion(String arg) {
+		// Si no hay argumento, comprobar el comando normalizado.
+		if(arg == null || arg.isEmpty()) {
+			return Direccion.obtenerAtajo(comandoNormalizado);
+		}
+
+		// Normalizar el argumento para evitar problemas con los acentos.
+		String argNormalizado = NormalizarCadena.quitarAcentos(arg).toUpperCase();
+
+		// Si hay un argumento, comprobar si es una dirección o su atajo.
+		return Direccion.obtenerAtajo(argNormalizado);
+	}
+
+	// Método para mostrar el mensaje de error al introducir una dirección no válida.
+	private void mostrarOpcionesDeDirecciones(StringBuilder mensaje) {
+		mensaje.append("Parece que no puedes ir por ahí.");
+		
+		/*for(Direccion direccion : Direccion.values()) {
+			mensaje.append("%c[comando]").append(direccion.name())
+			.append(" (").append(String.join(", ", direccion.getAtajo())).append(")%/c, ");
+		}
+		mensaje.setLength(mensaje.length() - 2); // Eliminar la última coma.
+		mensaje.append(".");*/
+	}
+
+	// Método para validar si el movimiento es válido.
+	private boolean esMovimientoValido(Habitacion habitacionActual, Habitacion nuevaHabitacion, StringBuilder mensaje) {
+		Habitacion.Tipo tipoActual = habitacionActual.getTipo();
+		Habitacion.Tipo tipoNuevo = nuevaHabitacion.getTipo();
+
+		if(!tipoActual.equals(Habitacion.Tipo.INTERIOR) && tipoNuevo.equals(Habitacion.Tipo.INTERIOR)) {
+			mensaje.append("Para acceder a un interior utiliza el comando %c[comando]ENTRAR <UBICACIÓN>%/c.");
+			return false;
+		}
+		if(tipoActual.equals(Habitacion.Tipo.INTERIOR) && tipoNuevo.equals(Habitacion.Tipo.EXTERIOR)) {
+			mensaje.append("Para salir al exterior utiliza el comando %c[comando]SALIR <UBICACIÓN>%/c.");
+			return false;
+		}
+		return true;
+	}
+
+	// Método para realizar el movimiento en caso de ser una dirección válida.
+	private void realizarMovimiento(Habitacion habitacionActual, Habitacion nuevaHabitacion, Direccion direccion, StringBuilder mensaje) {
+		jugador.setUbicacion(nuevaHabitacion);
+
+		mensaje.append("%icon[walk] ");
+		mensaje.append("Te mueves en dirección ")
+		.append(direccion.name().toLowerCase())
+		.append(".\n").append(nuevaHabitacion.getNombre());
+
+		if(!nuevaHabitacion.isVisitada()) {
+			mensaje.append("\n").append(nuevaHabitacion.getDescripcion());
+			nuevaHabitacion.setVisitada(true);
+		}
+
+		juego.labelUbicacion.setText("UBICACIÓN: " + nuevaHabitacion.getNombre());
+		ultimaDireccionUsada = direccion; // Guardar la última dirección usada.
+	}
+
 
 	/*
 	 * 
@@ -639,45 +663,62 @@ public class Comandos {
 
 			if(nuevaHabitacion != null && nuevaHabitacion != habitacionActual) {
 				jugador.setUbicacion(nuevaHabitacion);
-				if(ultimaDireccionUsada.equals(Direccion.ARRIBA) || ultimaDireccionUsada.equals(Direccion.ABAJO)) {
-					mensaje.append("Regresas hacia ")
-					.append(ultimaDireccionUsada.opuesta().toString().toLowerCase())
-					.append(".\n").append(nuevaHabitacion.getNombre());
-				} else {
-					mensaje.append("Regresas en dirección ")
-					.append(ultimaDireccionUsada.opuesta().toString().toLowerCase())
-					.append(".\n").append(nuevaHabitacion.getNombre());
-				}
-				// Mostrar descripción de la habitación solamente cuando es la primera vez que la visitas.
-				if(!nuevaHabitacion.isVisitada()) {
-					mensaje.append("\n").append(nuevaHabitacion.getDescripcion());
-				}
-				juego.labelUbicacion.setText("UBICACIÓN: " + nuevaHabitacion.getNombre());
-				// Actualizar ultima direccion usadao.
-				ultimaDireccionUsada = ultimaDireccionUsada.opuesta();
-				// Marcar la habitación como visitada.
-				nuevaHabitacion.setVisitada(true);
 
-			} else {
-				nuevaHabitacion = obtenerHabitacionEnDireccion(habitacionActual, ultimaDireccionUsada);
-				jugador.setUbicacion(nuevaHabitacion);
-				if(ultimaDireccionUsada.equals(Direccion.ARRIBA) || ultimaDireccionUsada.equals(Direccion.ABAJO)) {
-					mensaje.append("Vuelves hacia ")
-					.append(ultimaDireccionUsada.toString().toLowerCase())
-					.append(".\n").append(nuevaHabitacion.getNombre());
+				// Mostrar el mensaje de manera dinámica según si vas o vuelves de la habitación.
+				boolean esDireccionVertical = ultimaDireccionUsada.equals(Direccion.ARRIBA) || ultimaDireccionUsada.equals(Direccion.ABAJO);
+
+				// Verificar si vienes de un "interior" o "exterior"
+				boolean esInterior = habitacionActual.getTipo() == Habitacion.Tipo.INTERIOR;
+				boolean esExterior = habitacionActual.getTipo() == Habitacion.Tipo.EXTERIOR;
+
+				// Alternar el mensaje según el valor de alternarMensaje
+				if(alternarMensajeComandoVolver) {
+					mensaje.append("%icon[walk-back] ");
+					if(esInterior && nuevaHabitacion.getTipo() == Habitacion.Tipo.EXTERIOR) {
+						// Regresas del interior al exterior
+						mensaje.append("Regresas al exterior");
+					} else if(esExterior && nuevaHabitacion.getTipo() == Habitacion.Tipo.INTERIOR) {
+						// Vuelves del exterior al interior
+						mensaje.append("Vuelves al interior");
+					} else if(esDireccionVertical) {
+						mensaje.append("Regresas hacia ")
+						.append(ultimaDireccionUsada.opuesta().toString().toLowerCase());
+					} else {
+						mensaje.append("Regresas en dirección ")
+						.append(ultimaDireccionUsada.opuesta().toString().toLowerCase());
+					}
 				} else {
-					mensaje.append("Vuelves en dirección ")
-					.append(ultimaDireccionUsada.toString().toLowerCase())
-					.append(".\n").append(nuevaHabitacion.getNombre());
+					mensaje.append("%icon[walk] ");
+					if(esInterior && nuevaHabitacion.getTipo() == Habitacion.Tipo.EXTERIOR) {
+						// Regresas del interior al exterior
+						mensaje.append("Regresas al exterior");
+					} else if(esExterior && nuevaHabitacion.getTipo() == Habitacion.Tipo.INTERIOR) {
+						// Vuelves del exterior al interior
+						mensaje.append("Vuelves al interior");
+					} else if(esDireccionVertical) {
+						mensaje.append("Vuelves hacia ")
+						.append(ultimaDireccionUsada.opuesta().toString().toLowerCase());
+					} else {
+						mensaje.append("Vuelves en dirección ")
+						.append(ultimaDireccionUsada.opuesta().toString().toLowerCase());
+					}
 				}
+
+				mensaje.append(".\n").append(nuevaHabitacion.getNombre());
+
 				// Mostrar descripción de la habitación solamente cuando es la primera vez que la visitas.
 				if(!nuevaHabitacion.isVisitada()) {
 					mensaje.append("\n").append(nuevaHabitacion.getDescripcion());
 				}
-				// Actualizar ultima direccion usadao.
+
+				// Alternar el valor de alternarMensaje para la siguiente ejecución
+				alternarMensajeComandoVolver = !alternarMensajeComandoVolver;
+
+				// Actualizar última dirección usada
 				ultimaDireccionUsada = ultimaDireccionUsada.opuesta();
 				juego.labelUbicacion.setText("UBICACIÓN: " + nuevaHabitacion.getNombre());
-				// Marcar la habitación como visitada.
+
+				// Marcar la habitación como visitada
 				nuevaHabitacion.setVisitada(true);
 			}
 
@@ -686,8 +727,8 @@ public class Comandos {
 		}
 
 		juego.outputTexto(mensaje.toString(), Fuente.fuenteBase);
-
 	}
+
 
 	/*
 	 * 
@@ -703,77 +744,74 @@ public class Comandos {
 		StringBuilder mensaje = new StringBuilder();
 
 		if(arg != null && habitacionActual != null) {
+			// Normalizamos el nombre de la habitación actual y la proporcionada por el jugador
+			StringBuilder habitacionActualNormalizada = new StringBuilder(NormalizarCadena.quitarAcentos(habitacionActual.getNombre()).toUpperCase());
+			StringBuilder argNormalizado = new StringBuilder(NormalizarCadena.quitarAcentos(arg).toUpperCase());
+
+			// Verificamos si el jugador intenta entrar a la misma ubicación donde ya está.
+			if(argNormalizado.toString().equalsIgnoreCase(habitacionActualNormalizada.toString())) {
+				mensaje.append("Ya te encuentras en ").append(habitacionActual.getNombre()).append(".");
+				juego.outputTexto(mensaje.toString(), Fuente.fuenteBase);
+				return;
+			}
+
 			Habitacion nuevaHabitacion = null;
 			Direccion nuevaDireccion = null;
 
+			// Intentamos encontrar la habitación conectada
 			for(Direccion direccion : Direccion.values()) {
 				nuevaDireccion = direccion;
 				nuevaHabitacion = obtenerHabitacionEnDireccion(habitacionActual, nuevaDireccion);
-				if(nuevaDireccion != null && nuevaHabitacion != null && nuevaHabitacion != habitacionActual
-						&& nuevaHabitacion.getTipo().equals(Tipo.INTERIOR)) {
-					break;
-				}
-			}
 
-			if(nuevaHabitacion != null) {
-				StringBuilder nombreNuevaHabitacion = new StringBuilder(NormalizarCadena.quitarAcentos(nuevaHabitacion.getNombre()).toUpperCase());
-				StringBuilder argNormalizado = new StringBuilder(NormalizarCadena.quitarAcentos(arg).toUpperCase());
+				// Si encontramos la habitación y es de tipo INTERIOR, procedemos
+				if(nuevaHabitacion != null) {
+					StringBuilder nombreHabitacionNormalizado = new StringBuilder(NormalizarCadena.quitarAcentos(nuevaHabitacion.getNombre()).toUpperCase());
 
-				if(argNormalizado.toString().equalsIgnoreCase(nombreNuevaHabitacion.toString()) && nuevaHabitacion.getTipo().equals(Tipo.INTERIOR)) {
-					// Comparar los nombres normalizados
-					jugador.setUbicacion(nuevaHabitacion);
-					mensaje.append("Entras en ").append(nuevaHabitacion.getNombre()).append(".\n");
-
-					if(!nuevaHabitacion.isVisitada()) {
-						mensaje.append(nuevaHabitacion.getDescripcion());
-						nuevaHabitacion.setVisitada(true);
-					}
-
-					juego.labelUbicacion.setText("UBICACIÓN: " + nuevaHabitacion.getNombre());
-					ultimaDireccionUsada = nuevaDireccion; // Guardar última dirección para el comando 'SALIR'.
-
-				} else {
-					Direccion nuevaDireccion2 = null;
-					Habitacion nuevaHabitacion2 = null;
-					List<Habitacion> habitacionesDisponibles = new ArrayList<>();
-					boolean existeHabitacion = false;
-
-					// Recorremos las direcciones para encontrar las habitaciones disponibles
-					for(Direccion direccion : Direccion.values()) {
-						nuevaDireccion2 = direccion;
-						nuevaHabitacion2 = obtenerHabitacionEnDireccion(habitacionActual, nuevaDireccion2);
-						if(nuevaDireccion2 != null && nuevaHabitacion2 != null && nuevaHabitacion2 != habitacionActual
-								&& !nuevaHabitacion2.getTipo().equals(Tipo.INTERIOR) 
-								&& !nuevaHabitacion2.getTipo().equals(Tipo.EXTERIOR)) {
-							existeHabitacion = true;
-							habitacionesDisponibles.add(nuevaHabitacion2);
-						}
-					}
-
-					if(existeHabitacion) {
-
-						for(Habitacion habitacion : habitacionesDisponibles) {
-							StringBuilder nombreHabitacionActualNormalizado = new StringBuilder(NormalizarCadena.quitarAcentos(habitacion.getNombre()).toUpperCase());
-
-							if(argNormalizado.toString().equalsIgnoreCase(nombreHabitacionActualNormalizado.toString())) {
-								if(habitacion.getTipo().equals(Tipo.SUPERIOR)) {
-									mensaje.append("Para subir a '")
-									.append(arg).append("' usa el comando 'IR ARRIBA'.");
-								} else if(habitacion.getTipo().equals(Tipo.INFERIOR)) {
-									mensaje.append("Para bajar a '")
-									.append(arg).append("' usa el comando 'IR ABAJO'.");
-								}
-								break;
+					// Si el nombre normalizado coincide con la habitación que el jugador quiere entrar
+					if(argNormalizado.toString().equalsIgnoreCase(nombreHabitacionNormalizado.toString())) {
+						// Si la habitación es de tipo EXTERIOR, mostramos el mensaje de error.
+						if(nuevaHabitacion.getTipo() == Tipo.EXTERIOR) {
+							if(habitacionActual.getTipo() == Tipo.EXTERIOR) {
+								mensaje.append("Si quieres ir por ese camino, mejor usa el comando %c[comando]IR <DIRECCIÓN>%/c.");
+							} else if(habitacionActual.getTipo() == Tipo.INTERIOR) {
+								mensaje.append("Si quieres salir al exterior, utiliza el comando %c[comando]SALIR <UBICACIÓN>%/c.");           
 							}
+
+							juego.outputTexto(mensaje.toString(), Fuente.fuenteBase);
+							return; // Salir para evitar que siga procesando.
+
 						}
-					} else {
-						mensaje.append("No reconozco la habitación '").append(arg).append("'.");
+						// TODO: manejar esta mierda.
+						/* else if(nuevaHabitacion.getTipo() == Tipo.SUPERIOR){
+	                    	mensaje.append("Si quieres subir, usa el comando %c[comando]IR ARRIBA%/c.");
+	                    	juego.outputTexto(mensaje.toString(), Fuente.fuenteBase);
+	                        return; // Salir para evitar que siga procesando.
+
+	                    } else if(nuevaHabitacion.getTipo() == Tipo.INFERIOR){
+	                    	mensaje.append("Si quieres bajar, usa el comando %c[comando]IR ABAJO%/c.");
+	                    	juego.outputTexto(mensaje.toString(), Fuente.fuenteBase);
+	                        return; // Salir para evitar que siga procesando.
+	                    }*/
+
+						// Si la habitación es INTERIOR, procedemos a cambiar de habitación.
+						jugador.setUbicacion(nuevaHabitacion);
+						mensaje.append("%icon[entry-door] Entras en ").append(nuevaHabitacion.getNombre()).append(".");
+
+						if(!nuevaHabitacion.isVisitada()) {
+							mensaje.append("\n").append(nuevaHabitacion.getDescripcion());
+							nuevaHabitacion.setVisitada(true);
+						}
+
+						juego.labelUbicacion.setText("UBICACIÓN: " + nuevaHabitacion.getNombre());
+						ultimaDireccionUsada = nuevaDireccion; // Guardar última dirección para el comando 'SALIR'.
+						juego.outputTexto(mensaje.toString(), Fuente.fuenteBase);
+						return;
 					}
 				}
-
-			} else {
-				mensaje.append("La habitación ").append(arg).append(" no se encuentra en este lugar.");
 			}
+
+			// Si no encontramos la habitación que coincide con el nombre proporcionado
+			mensaje.append("No es posible entrar a esa ubicación.");
 
 		} else {
 			mensaje.append("¿Dónde quieres entrar?");
@@ -783,12 +821,13 @@ public class Comandos {
 	}
 
 
+
 	/*
 	 * 
 	 * 
 	 *  SALIR
 	 *  
-	 *  Te permite salir al exterior desde una habitación de tipo 'interior'.
+	 *  Te permite salir al exterior desde una habitación de tipo interior.
 	 *  
 	 *  
 	 */
@@ -815,7 +854,7 @@ public class Comandos {
 
 				if(argNormalizado.toString().equalsIgnoreCase(nombreNuevaHabitacion.toString())) {
 					jugador.setUbicacion(nuevaHabitacion);
-					mensaje.append("Sales a ").append(nuevaHabitacion.getNombre()).append(".\n");
+					mensaje.append("%icon[exit-door] Sales a ").append(nuevaHabitacion.getNombre()).append(".");
 
 					if(!nuevaHabitacion.isVisitada()) {
 						mensaje.append("\n" + nuevaHabitacion.getDescripcion());
@@ -831,7 +870,7 @@ public class Comandos {
 
 			} else {
 				if(habitacionActual.getTipo().equals(Habitacion.Tipo.EXTERIOR)) {
-					mensaje.append("No puedes salir cuando ya te encuentras en el exterior.");
+					mensaje.append("Ya te encuentras en el exterior.");
 
 				} else {
 					mensaje.append("No puedes salir. No hay ninguna salida al exterior desde aquí.");
@@ -893,7 +932,45 @@ public class Comandos {
 					Direccion direccion = entry.getKey();
 					Habitacion habitacionConectada = entry.getValue();
 
-					mensaje.append("\n").append(direccion).append(": ").append(habitacionConectada.getNombre());
+					// Determinar el icono según la dirección
+					String icono = switch(direccion) {
+					case ESTE -> "%icon[arrow-right]";
+					case OESTE -> "%icon[arrow-left]";
+					case NORTE -> "%icon[arrow-up]";
+					case SUR -> "%icon[arrow-down]";
+					case NOROESTE -> "%icon[arrow-up-left]";
+					case NORESTE -> "%icon[arrow-up-right]";
+					case SUDOESTE -> "%icon[arrow-down-left]";
+					case SUDESTE -> "%icon[arrow-down-right]";
+					case ARRIBA -> "%icon[upstairs]";
+					case ABAJO -> "%icon[downstairs]";
+					default -> "";
+					};
+
+					mensaje.append("\n")
+					.append(icono)
+					.append(" ").append(direccion).append(": ")
+					.append(habitacionConectada.getNombre());
+
+					// Verificar el tipo de habitación conectada
+					if(habitacionActual.getTipo() == Habitacion.Tipo.INTERIOR) {
+						switch(habitacionConectada.getTipo()) {
+						case EXTERIOR -> mensaje.append(" (Exterior)");
+						case INTERIOR -> mensaje.append("");
+						case SUPERIOR -> mensaje.append("");
+						case INFERIOR -> mensaje.append("");
+						}
+					}
+
+					// Verificar el tipo de habitación conectada
+					if(habitacionActual.getTipo() == Habitacion.Tipo.EXTERIOR && habitacionConectada.getTipo() == Habitacion.Tipo.INTERIOR) {
+						switch(habitacionConectada.getTipo()) {
+						case EXTERIOR -> mensaje.append("");
+						case INTERIOR -> mensaje.append(" (Interior)");
+						case SUPERIOR -> mensaje.append("");
+						case INFERIOR -> mensaje.append("");
+						}
+					}
 				}
 
 			} else {
@@ -918,7 +995,7 @@ public class Comandos {
 		// Comprueba si hay Pnjs o enemigos en la habitación actual.
 		StringBuilder mensaje = new StringBuilder();
 		Habitacion habitacionActual = obtenerHabitacionActual();
-		List<PNJ> pnjsEnHabitacion = habitacionActual.getPnjs();
+		List<Personaje> pnjsEnHabitacion = habitacionActual.getPnjs();
 		List<Enemigo> enemigosEnHabitacion = habitacionActual.getEnemigos();
 
 		if(pnjsEnHabitacion != null && !pnjsEnHabitacion.isEmpty() || enemigosEnHabitacion != null && !enemigosEnHabitacion.isEmpty()) {
@@ -927,31 +1004,29 @@ public class Comandos {
 			// Caso PNJ.
 			if(pnjsEnHabitacion != null && !pnjsEnHabitacion.isEmpty()) {
 				hayPnj = true;
-				mensaje.append("Ves a ").append((pnjsEnHabitacion.size() > 1 ? "varios personajes cerca:" : "un personaje cerca:"));
+				mensaje.append("%icon[look-at] Miras a tu alrededor y ves a ").append((pnjsEnHabitacion.size() > 1 ? "varios %c[pnj]personajes%/c cerca:" : "un personaje cerca:"));
 
-				for(PNJ pnj : pnjsEnHabitacion) {
-					mensaje.append("\n- ").append(pnj.getNombre()).append(" (").append(pnj.getTipo()).append(")");
+				for(Personaje pnj : pnjsEnHabitacion) {
+					mensaje.append("\n\t").append(pnj.getNombre()).append(" (").append(pnj.getTipo()).append(")");
 				}
-
-				if(enemigosEnHabitacion.isEmpty()) mensaje.append("\n\nEl lugar parece tranquilo... por ahora.");
 			}
 
 			// Caso Enemigo.
 			if(enemigosEnHabitacion != null && !enemigosEnHabitacion.isEmpty()) {
 				if(hayPnj) {
-					mensaje.append("\n\nTambién ves a ").append((enemigosEnHabitacion.size() > 1 ? "múltiples enemigos en la cercanía:" : "un enemigo en la cercanía:"));
+					mensaje.append("\n\n%icon[look-at] También ves a ").append((enemigosEnHabitacion.size() > 1 ? "múltiples %c[enemigo]enemigos%/c en la cercanía:" : "un enemigo en la cercanía:"));
 
 				} else {
-					mensaje.append("Ves a ").append((enemigosEnHabitacion.size() > 1 ? "múltiples enemigos en la cercanía:" : "un enemigo en la cercanía:"));
+					mensaje.append("%icon[look-at] Observas el lugar y ves a ").append((enemigosEnHabitacion.size() > 1 ? "múltiples %c[enemigo]enemigos%/c en la cercanía:" : "un enemigo en la cercanía:"));
 				}
 
 				for(Enemigo enemigo : enemigosEnHabitacion) {
-					mensaje.append("\n- ").append(enemigo.getNombre());
+					mensaje.append("\n\t").append(enemigo.getNombre()).append(" (").append(enemigo.getTipo().getTipoLegible()).append(")");
 				}
 			}
 
 		} else {
-			mensaje.append("No ves a nadie en este lugar.");
+			mensaje.append("No ves a nadie en este lugar. El lugar parece tranquilo... por ahora.");
 		}
 
 		juego.outputTexto(mensaje.toString(), Fuente.fuenteBase);
@@ -974,7 +1049,7 @@ public class Comandos {
 			StringBuilder mensaje = new StringBuilder("Buscas objetos y encuentras:");
 
 			for(Objeto objeto : objetosHabitacion) {
-				mensaje.append("\n- ").append(objeto.getNombre()).append(": ").append(objeto.getDescripcion());
+				mensaje.append("\n").append(objeto.getIcono()).append(" ").append(objeto.getNombre()).append(": ").append(objeto.getDescripcion());
 			}
 
 			juego.outputTexto(mensaje.toString(), Fuente.fuenteBase);
@@ -1022,19 +1097,19 @@ public class Comandos {
 							argNormalizado.toString().equalsIgnoreCase(objetoNormalizado.toString())) {
 						// Si el jugador ya tiene un objeto contenedor, no puede coger más objetos contenedor.
 						if(objeto instanceof Objeto_Contenedor && tieneContenedor) {
-							mensaje.append("No has cogido '")
+							mensaje.append("%icon[halt] No has cogido '")
 							.append(objeto.getNombre())
 							.append("' porque ya posees un objeto contenedor.");
 
 						} else if(objeto instanceof Objeto_Cerradura) {
 							// Comprobar que el objeto que quiere coger no sea un objeto con cerradura.
-							mensaje.append("No puedes coger el objeto '")
+							mensaje.append("%icon[weight] No puedes coger el objeto '")
 							.append(objeto.getNombre())
 							.append("'. Es demasiado pesado.");
 
 						} else {
 							jugador.agregarObjetoAlInventario(objeto);
-							mensaje.append("Has cogido ").append(objeto.getNombre()).append(".");
+							mensaje.append("%icon[card-play] Has cogido ").append(objeto.getNombre()).append(".");
 							// Eliminar el objeto de la habitación.
 							iterador.remove();
 						}
@@ -1044,16 +1119,16 @@ public class Comandos {
 					} else if(arg != null && argNormalizado.toString().equalsIgnoreCase("todo")) {
 						// Si el jugador ya tiene un objeto contenedor, no puede coger más objetos.
 						if(objeto instanceof Objeto_Contenedor && tieneContenedor) {
-							mensaje.append("No puedes coger '")
+							mensaje.append("%icon[halt] No puedes coger '")
 							.append(objeto.getNombre()).append("' si ya posees otro objeto contenedor.");
 
 						} else if(objeto instanceof Objeto_Cerradura) {
 							// Comprobar que el objeto que quiere coger no sea un objeto con cerradura.
-							mensaje.append("No puedes coger el objeto '").append(objeto.getNombre()).append("'. Es demasiado pesado.\n");
+							mensaje.append("%icon[weight] No puedes coger el objeto '").append(objeto.getNombre()).append("'. Es demasiado pesado.\n");
 
 						} else {
 							jugador.agregarObjetoAlInventario(objeto);
-							mensaje.append("Has cogido ").append(objeto.getNombre()).append(".\n");
+							mensaje.append("%icon[card-play] Has cogido ").append(objeto.getNombre()).append(".\n");
 							// Eliminar el objeto de la habitación.
 							iterador.remove();
 						}
@@ -1107,10 +1182,15 @@ public class Comandos {
 				String nombreObjeto = partes[0].trim();
 				String nombreContenedor = partes[1].trim();
 
+				// Normalizar las cadenas de los nombres para compararlas sin acentos y en mayúsculas.
+				String nombreObjetoNormalizado = NormalizarCadena.quitarAcentos(nombreObjeto).toUpperCase();
+				String nombreContenedorNormalizado = NormalizarCadena.quitarAcentos(nombreContenedor).toUpperCase();
+
 				// Buscar el objeto en el inventario del jugador.
 				Objeto objetoAGuardar = null;
 				for(Objeto objeto : inventarioJugador) {
-					if(objeto.getNombre().equalsIgnoreCase(nombreObjeto)) {
+					String objetoNombreNormalizado = NormalizarCadena.quitarAcentos(objeto.getNombre()).toUpperCase();
+					if(objetoNombreNormalizado.equals(nombreObjetoNormalizado)) {
 						objetoAGuardar = objeto;
 						break;
 					}
@@ -1120,7 +1200,8 @@ public class Comandos {
 					// Buscar el contenedor en el inventario del jugador.
 					Objeto_Contenedor contenedor = null;
 					for(Objeto objeto : inventarioJugador) {
-						if(objeto instanceof Objeto_Contenedor && objeto.getNombre().equalsIgnoreCase(nombreContenedor)) {
+						String objetoContenedorNombreNormalizado = NormalizarCadena.quitarAcentos(objeto.getNombre()).toUpperCase();
+						if(objeto instanceof Objeto_Contenedor && objetoContenedorNombreNormalizado.equals(nombreContenedorNormalizado)) {
 							contenedor = (Objeto_Contenedor) objeto;
 							break;
 						}
@@ -1183,10 +1264,15 @@ public class Comandos {
 				String nombreObjeto = partes[0].trim();
 				String nombreContenedor = partes[1].trim();
 
+				// Normalizar las cadenas de los nombres para compararlas sin acentos y en mayúsculas.
+				String nombreObjetoNormalizado = NormalizarCadena.quitarAcentos(nombreObjeto).toUpperCase();
+				String nombreContenedorNormalizado = NormalizarCadena.quitarAcentos(nombreContenedor).toUpperCase();
+
 				// Buscar el contenedor en el inventario del jugador.
 				Objeto_Contenedor contenedor = null;
 				for(Objeto objeto : inventarioJugador) {
-					if(objeto instanceof Objeto_Contenedor && objeto.getNombre().equalsIgnoreCase(nombreContenedor)) {
+					String objetoContenedorNombreNormalizado = NormalizarCadena.quitarAcentos(objeto.getNombre()).toUpperCase();
+					if(objeto instanceof Objeto_Contenedor && objetoContenedorNombreNormalizado.equals(nombreContenedorNormalizado)) {
 						contenedor = (Objeto_Contenedor) objeto;
 						break;
 					}
@@ -1194,7 +1280,7 @@ public class Comandos {
 
 				if(contenedor != null) {
 
-					if(nombreObjeto.equalsIgnoreCase("todo")) {
+					if(nombreObjetoNormalizado.equals("TODO")) {
 						Iterator<Objeto> iterador = contenedor.getObjetosContenidos().iterator();
 						while(iterador.hasNext()) {
 							Objeto objeto = iterador.next();
@@ -1217,7 +1303,8 @@ public class Comandos {
 						// Buscar el objeto dentro del contenedor.
 						Objeto objetoASacar = null;
 						for(Objeto obj : contenedor.getObjetosContenidos()) {
-							if(obj.getNombre().equalsIgnoreCase(nombreObjeto)) {
+							String objetoNombreNormalizado = NormalizarCadena.quitarAcentos(obj.getNombre()).toUpperCase();
+							if(objetoNombreNormalizado.equals(nombreObjetoNormalizado)) {
 								objetoASacar = obj;
 								break;
 							}
@@ -1403,7 +1490,6 @@ public class Comandos {
 		juego.outputTexto(mensaje.toString(), Fuente.fuenteBase);
 	}
 
-
 	/*
 	 * 
 	 * 
@@ -1420,7 +1506,7 @@ public class Comandos {
 			boolean objetoEncontrado = false;
 			String argNormalizado = NormalizarCadena.quitarAcentos(arg).toUpperCase();
 
-			while (iterator.hasNext()) {
+			while(iterator.hasNext()) {
 				Objeto objeto = iterator.next();
 				String nombreObjetoNormalizado = NormalizarCadena.quitarAcentos(objeto.getNombre()).toUpperCase();
 
@@ -1475,43 +1561,35 @@ public class Comandos {
 			mensaje.append("Estás portando estos objetos:");
 			// Mostrar información según tipo de objeto.
 			for(Objeto objeto : inventarioJugador) {
+				mensaje.append("\n").append(objeto.getIcono()).append(" ");
 				// OBJETO ARMA
 				if(objeto instanceof Objeto_Arma) {
 					Objeto_Arma objetoArma = (Objeto_Arma) objeto;
-					mensaje.append("\n- ").append(objetoArma.getNombre()).append(": ").append(objetoArma.getDescripcion())
+					mensaje.append(objetoArma.getNombre()).append(": ").append(objetoArma.getDescripcion())
 					.append(objetoArma.isObjetoDeMision() ? " (Objeto de misión)" : "");
 				}
 
 				// OBJETO COMÚN
 				if(objeto instanceof Objeto_Comun) {
 					Objeto_Comun objetoComun = (Objeto_Comun) objeto;
-					mensaje.append("\n- ").append(objetoComun.getNombre()).append(": ").append(objetoComun.getDescripcion())
+					mensaje.append(objetoComun.getNombre()).append(": ").append(objetoComun.getDescripcion())
 					.append(objetoComun.isObjetoDeMision() ? " (Objeto de misión)" : "");
 				}
 
 				// OBJETO CONTENEDOR
 				if(objeto instanceof Objeto_Contenedor) {
 					Objeto_Contenedor objetoContenedor = (Objeto_Contenedor) objeto;
-					mensaje.append("\n- ").append(objetoContenedor.getNombre()).append(": ").append(objetoContenedor.getDescripcion());
+					mensaje.append(objetoContenedor.getNombre()).append(": ").append(objetoContenedor.getDescripcion());
 
 					if(objetoContenedor.getObjetosContenidos() != null && !objetoContenedor.getObjetosContenidos().isEmpty()) {
 						int tamanoLista = objetoContenedor.getObjetosContenidos().size(); 
 
 						for(int i = 0; i < tamanoLista; i++) {
 							Objeto objetoContenido = objetoContenedor.getObjetosContenidos().get(i);
-
-							if(tamanoLista > 1) {
-								if(i == (tamanoLista - 1)) {
-									mensaje.append("\n  └ ").append(objetoContenido.getNombre());
-								} else {
-									mensaje.append("\n  ├ ").append(objetoContenido.getNombre());
-								}
-							} else {
-								mensaje.append("\n  └ ").append(objetoContenido.getNombre());
-							}
+							mensaje.append("\n\t").append(objetoContenido.getIcono()).append(" ").append(objetoContenido.getNombre());
 						}
 					} else {
-						mensaje.append("\n  └ Contenido: (vacío)");
+						mensaje.append("\n\t(Contenido vacío)");
 					}
 
 				}
@@ -1519,13 +1597,13 @@ public class Comandos {
 				// OBJETO LLAVE
 				if(objeto instanceof Objeto_Llave) {
 					Objeto_Llave objetoLlave = (Objeto_Llave) objeto;
-					mensaje.append("\n- ").append(objetoLlave.getNombre()).append(": ").append(objetoLlave.getDescripcion());
+					mensaje.append(objetoLlave.getNombre()).append(": ").append(objetoLlave.getDescripcion());
 				}
 
 				// OBJETO DINERO
 				if(objeto instanceof Objeto_Dinero) {
 					Objeto_Dinero objetoDinero = (Objeto_Dinero) objeto;
-					mensaje.append("\n- ").append(objetoDinero.getNombre()).append(": ").append(objetoDinero.getDescripcion());
+					mensaje.append(objetoDinero.getNombre()).append(": ").append(objetoDinero.getDescripcion());
 				}
 			}
 			juego.outputTexto(mensaje.toString(), Fuente.fuenteBase);
@@ -1534,6 +1612,44 @@ public class Comandos {
 			juego.outputTexto("No llevas ningún objeto.", Fuente.fuenteBase);
 		}
 	}
+
+
+
+	//////////////////////
+	// 					//
+	//	  	JUGADOR		//
+	//					//
+	//////////////////////
+
+	/*
+	 * 
+	 * 
+	 *  ESTADO
+	 *  
+	 *  Muestra el estado de salud del jugador:
+	 *  
+	 *  
+	 */
+	private void comandoEstado() {
+		StringBuilder mensaje = new StringBuilder();
+		int vidas = jugador.getVidas();
+
+		// Determinar estado según los puntos de vida del jugador.
+		if(vidas >= 5) {
+			mensaje.append("%icon[mighty-force] Rebosas de energía y te sientes invencible.");
+		} else if(vidas >= 4) {
+			mensaje.append("%icon[strong] Te sientes en buena forma, listo para lo que venga.");
+		} else if(vidas == 3) {
+			mensaje.append("%icon[arm-bandage] Tienes algunos rasguños, pero puedes seguir adelante.");
+		} else if(vidas == 2) {
+			mensaje.append("%icon[knee-bandage] Empiezas a sentirte agotado, y las heridas dificultan tus movimientos.");
+		} else if(vidas == 1) {
+			mensaje.append("%icon[arm-sling] Tu vida pende de un hilo. Cada paso podría ser el último si no encuentras ayuda.");
+		}
+
+		juego.outputTexto(mensaje.toString(), Fuente.fuenteBase);
+	}
+
 
 
 	//////////////////////
@@ -1567,16 +1683,16 @@ public class Comandos {
 
 		if(misionesCompletadas != null) {
 			mensaje.append("Diario de misiones:\n");
-			
+
 			// Mostrar la misión activa la primera de todas.
-			mensaje.append("- ").append(juego.misionActiva.getNombre()).append(" (En curso)\n");
-			
+			mensaje.append("\t").append(juego.misionActiva.getNombre()).append(" (En curso)\n");
+
 			for(Mision mision : misionesCompletadas) {
 				if(mision.isCompletada() && !mision.isActivada()) {
-					mensaje.append("- ").append(mision.getNombre()).append(" (Completada)\n");
+					mensaje.append("\t").append(mision.getNombre()).append(" (Completada)\n");
 				}
 			}
-			
+
 		} else {
 			mensaje.append("Todavía no has completado ninguna misión.");
 		}
@@ -1612,11 +1728,11 @@ public class Comandos {
 			if(partes.length == 2) {
 				String nombrePersonaje = partes[1].trim();  // Nombre del personaje a quien hablar.
 				String nombrePersonajeNormalizado = NormalizarCadena.quitarAcentos(nombrePersonaje).toLowerCase();
-				PNJ personaje = null;
+				Personaje personaje = null;
 				boolean hayPnj = false;
 
 				// Buscar el personaje en la habitación.
-				for(PNJ pnj : habitacionActual.getPnjs()) {
+				for(Personaje pnj : habitacionActual.getPnjs()) {
 					if(NormalizarCadena.quitarAcentos(pnj.getNombre()).equalsIgnoreCase(nombrePersonajeNormalizado)) {
 						hayPnj = true;
 						personaje = pnj;
@@ -1657,7 +1773,41 @@ public class Comandos {
 					mensaje.append("No se ha encontrado a '").append(nombrePersonaje).append("'.");
 
 				} else if(esEnemigo) {
-					mensaje.append("No puedes hablar con un enemigo.");
+					// Distinguir tipo de enemigo.
+					for(Enemigo enemigo : habitacionActual.getEnemigos()) {
+						// Comprobar si el nombre coincide con el enemigo que se intenta hablar.
+						if(NormalizarCadena.quitarAcentos(enemigo.getNombre()).equalsIgnoreCase(nombrePersonajeNormalizado)) {
+							// Mostrar mensaje dependiendo del tipo de enemigo.
+							switch(enemigo.getTipo()) {
+							case MALEANTE:
+								mensaje.append("No puedes hablar con ese maleante, parece más interesado en vaciar tus bolsillos que en una charla amistosa.");
+								break;
+							case CRIATURA:
+								mensaje.append("No puedes hablar con esa criatura, lo único que parece interesarle es añadir tu cara a su menú del día.");
+								break;
+							case MERCENARIO:
+								mensaje.append("No puedes hablar con ese mercenario, parece de los que golpean primero y preguntan después.");
+								break;
+							case BANDIDO:
+								mensaje.append("No puedes hablar con ese bandido, parece que prefiere que la cuchilla hable por él. ¡Definitivamente no es el tipo de conversación que buscas!");
+								break;
+							case BESTIA:
+								mensaje.append("No puedes hablar con esa bestia, sus gruñidos y colmillos son lo más cercano a un saludo que recibirás. ¡Será mejor que mantengas las distancias!");
+								break;
+							case DEMONIO:
+								mensaje.append("No puedes hablar con ese demonio, parece que prefiere negociar en fuego y azufre. ¡Quizás no sea el mejor momento para una charla profunda!");
+								break;
+							case NO_MUERTO:
+								mensaje.append("No puedes hablar con ese no muerto, su concepto de conversación es bastante... macabro. ¡Un mal momento para filosofar sobre la vida!");
+								break;
+							default:
+								mensaje.append("No puedes hablar con este enemigo, pero seguro que tiene otras formas 'interesantes' de interactuar contigo.");
+								break;
+							}
+							break; // Salir del bucle tras encontrar al enemigo objetivo.
+						}
+					}
+
 
 				} else if(personaje != null && personaje.obtenerConversacion() == null) {
 					mensaje.append("'").append(personaje.getNombre()).append("' no tiene nada que decirte.");
@@ -1686,12 +1836,12 @@ public class Comandos {
 	 */
 	private void comandoAdios() {
 		StringBuilder mensaje = new StringBuilder();
-		
+
 		if(ultimoPersonajeHablado != null) {
 			mensaje.append(ultimoPersonajeHablado.getNombre()).append(" (").append(ultimoPersonajeHablado.getTipo()).append("):\n");
 			mensaje.append("%icon[hand] ").append(ultimoPersonajeHablado.despedidaNormal());
 		}
-		
+
 		juego.outputTexto(mensaje.toString(), Fuente.fuenteBase);
 
 		// Volver a activar los comandos del juego.
@@ -1814,8 +1964,8 @@ public class Comandos {
 				+ "  ├ EXPLORAR: Exploras el lugar en busca de caminos a seguir.\n"
 				+ "  ├ MIRAR: Observas el alrededor para detectar personajes o enemigos.\n"
 				+ "  ├ BUSCAR: Encuentra objetos en tu ubicación.\n"
-				+ "  ├ COGER <OBJETO>: Coges un objeto de la habitación actual y lo añades a tu inventario.\n"
-				+ "  ├ SOLTAR <OBJETO>: Tiras un objeto de tu inventario al suelo de la habitación actual.\n"
+				+ "  ├ COGER <OBJETO>: Coges un objeto de la ubicación actual y lo añades a tu inventario.\n"
+				+ "  ├ SOLTAR <OBJETO>: Tiras un objeto de tu inventario al suelo de la ubicación actual.\n"
 				+ "  ├ ALMACENAR <OBJETO> <CONTENEDOR>: Almacenas un objeto de tu inventario dentro de un contenedor.\n"
 				+ "  ├ SACAR <OBJETO> <CONTENEDOR>: Sacas un objeto de un contenedor y lo devuelves al inventario.\n"
 				+ "  ├ DESTRUIR <OBJETO>: Destruye un objeto de tu inventario permanentemente.\n"
@@ -1863,16 +2013,16 @@ public class Comandos {
 
 		if(arg == null) {
 			mensaje = "Mmm...";
-			
+
 		} else if(arg.equalsIgnoreCase("TOC")) {
 			mensaje = respuesta[Aleatorio.Int(0, respuesta.length - 1)];
-			
+
 		} else {
 			mensaje = "¿En serio? Toc " + arg + "?";
 		}
 
 		juego.outputTexto(mensaje, Fuente.fuenteBase);
-		
+
 		System.out.println(arg);
 
 	}
@@ -1899,18 +2049,17 @@ public class Comandos {
 		StringBuffer mensaje = new StringBuffer();
 
 		if(arg == null) {
-			mensaje.append("Para cambiar el tema debes usar el comando 'TEMA <TEMA>'.\n")
+			mensaje.append("Para cambiar el tema debes usar el comando %c[comando]TEMA <TEMA>%/c.\n")
 			.append("Los temas disponibles son:\n")
-			.append("- TEMA 1: OSCURO\n")
-			.append("- TEMA 2: CLARO\n")
-			.append("- TEMA 3: AGUA\n")
-			.append("- TEMA 4: BRONCE\n")
-			.append("- TEMA 5: FANTASÍA\n")
-			.append("- TEMA 6: BOSQUE\n")
-			.append("- TEMA 7: ORO\n")
-			.append("- TEMA 8: SANGRE\n")
-			.append("- TEMA 9: HIELO\n")
-			.append("- TEMA 10: CLÁSICO");
+			.append("\tTEMA 1: OSCURO\n")
+			.append("\tTEMA 2: CLARO\n")
+			.append("\tTEMA 3: AGUA\n")
+			.append("\tTEMA 4: BRONCE\n")
+			.append("\tTEMA 5: BOSQUE\n")
+			.append("\tTEMA 6: LAVA\n")
+			.append("\tTEMA 7: HIELO\n")
+			.append("\tTEMA 8: VINTAGE\n")
+			.append("\tTEMA 9: CLÁSICO");
 
 		} else {
 			boolean temaValido = true;
@@ -1928,23 +2077,20 @@ public class Comandos {
 			case "BRONCE", "4":
 				Config.temaActual = Config.TEMA_4;
 			break;
-			case "FANTASIA", "5":
+			case "BOSQUE", "5":
 				Config.temaActual = Config.TEMA_5;
 			break;
-			case "BOSQUE", "6":
+			case "LAVA", "6":
 				Config.temaActual = Config.TEMA_6;
 			break;
-			case "ORO", "7":
+			case "HIELO", "7":
 				Config.temaActual = Config.TEMA_7;
 			break;
-			case "SANGRE", "8":
+			case "VINTAGE", "8":
 				Config.temaActual = Config.TEMA_8;
 			break;
-			case "HIELO", "9":
+			case "CLASICO", "9":
 				Config.temaActual = Config.TEMA_9;
-			break;
-			case "CLASICO", "10":
-				Config.temaActual = Config.TEMA_10;
 			break;
 			default:
 				mensaje.append("No reconozco el tema '" + arg + "'.");
@@ -1953,16 +2099,16 @@ public class Comandos {
 			}
 
 			if(temaValido) {
-				if(arg.equalsIgnoreCase("oscuro") || arg.equalsIgnoreCase("1")) mensaje.append("Se ha cambiado el tema a 'TEMA 1: OSCURO'.");
-				else if(arg.equalsIgnoreCase("claro") || arg.equalsIgnoreCase("2")) mensaje.append("Se ha cambiado el tema a 'TEMA 2: CLARO'.");
-				else if(arg.equalsIgnoreCase("agua") || arg.equalsIgnoreCase("3")) mensaje.append("Se ha cambiado el tema a 'TEMA 3: AGUA'.");
-				else if(arg.equalsIgnoreCase("bronce") || arg.equalsIgnoreCase("4")) mensaje.append("Se ha cambiado el tema a 'TEMA 4: BRONCE'.");
-				else if(arg.equalsIgnoreCase("fantasia") || arg.equalsIgnoreCase("5")) mensaje.append("Se ha cambiado el tema a 'TEMA 5: FANTASÍA'.");
-				else if(arg.equalsIgnoreCase("bosque") || arg.equalsIgnoreCase("6")) mensaje.append("Se ha cambiado el tema a 'TEMA 6: BOSQUE'.");
-				else if(arg.equalsIgnoreCase("oro") || arg.equalsIgnoreCase("7")) mensaje.append("Se ha cambiado el tema a 'TEMA 7: ORO'.");
-				else if(arg.equalsIgnoreCase("sangre") || arg.equalsIgnoreCase("8")) mensaje.append("Se ha cambiado el tema a 'TEMA 8: SANGRE'.");
-				else if(arg.equalsIgnoreCase("hielo") || arg.equalsIgnoreCase("9")) mensaje.append("Se ha cambiado el tema a 'TEMA 9: HIELO");
-				else if(arg.equalsIgnoreCase("clasico") || arg.equalsIgnoreCase("10")) mensaje.append("Se ha cambiado el tema a 'TEMA 10: CLÁSICO'.");
+				mensaje.append("%icon[paint-roller] Se ha cambiado el tema a ");
+				if(arg.equalsIgnoreCase("oscuro") || arg.equalsIgnoreCase("1")) mensaje.append("%c[comando]TEMA 1: OSCURO%/c.");
+				else if(arg.equalsIgnoreCase("claro") || arg.equalsIgnoreCase("2")) mensaje.append("%c[comando]TEMA 2: CLARO%/c.");
+				else if(arg.equalsIgnoreCase("agua") || arg.equalsIgnoreCase("3")) mensaje.append("%c[comando]TEMA 3: AGUA%/c.");
+				else if(arg.equalsIgnoreCase("bronce") || arg.equalsIgnoreCase("4")) mensaje.append("%c[comando]TEMA 4: BRONCE%/c.");
+				else if(arg.equalsIgnoreCase("bosque") || arg.equalsIgnoreCase("5")) mensaje.append("%c[comando]TEMA 5: BOSQUE%/c.");
+				else if(arg.equalsIgnoreCase("lava") || arg.equalsIgnoreCase("6")) mensaje.append("%c[comando]TEMA 6: LAVA%/c.");
+				else if(arg.equalsIgnoreCase("hielo") || arg.equalsIgnoreCase("7")) mensaje.append("%c[comando]TEMA 7: HIELO%/c.");
+				else if(arg.equalsIgnoreCase("vintage") || arg.equalsIgnoreCase("8")) mensaje.append("%c[comando]TEMA 8: VINTAGE%/c.");
+				else if(arg.equalsIgnoreCase("clasico") || arg.equalsIgnoreCase("9")) mensaje.append("%c[comando]TEMA 9: CLÁSICO%/c.");
 				actualizarTemaInterfaz();
 			}
 		}

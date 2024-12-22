@@ -3,7 +3,6 @@ package objetos;
 import java.util.ArrayList;
 import java.util.List;
 
-import juego.Juego;
 import objetos.Objeto_Contenedor.*;
 
 public class ListaObjetos {
@@ -19,11 +18,10 @@ public class ListaObjetos {
 	private static void inicializarListaObjetos() {
 		listaTodosLosObjetos.clear();
 		listaTodosLosObjetos.add(crearLampara());
-		listaTodosLosObjetos.add(crearMoneda());
 		listaTodosLosObjetos.add(crearEspadaCorta());
 		listaTodosLosObjetos.add(crearBolsa());
 		listaTodosLosObjetos.add(crearMochila());
-		listaTodosLosObjetos.add(crearLlaveVieja());
+		listaTodosLosObjetos.add(crearLlave());
 	}
 
 	/*
@@ -31,7 +29,7 @@ public class ListaObjetos {
 	 */
 
 	// OBJETOS COMUNES
-	public static final Objeto LAMPARA = crearLampara();
+	/*public static final Objeto LAMPARA = crearLampara();
 	public static final Objeto MONEDA = crearMoneda();
 
 	// ARMAS
@@ -47,8 +45,8 @@ public class ListaObjetos {
 	public static final Objeto COFRE = crearCofre();
 
 	// LLAVES
-	public static final Objeto LLAVE_VIEJA = crearLlaveVieja(); 
-
+	public static final Objeto LLAVE = crearLlave(); */
+	
 	/*
 	 * CREACIÓN DE LOS OBJETOS
 	 */
@@ -60,20 +58,18 @@ public class ListaObjetos {
 	//////////////////////////////
 
 	// Lámpara
-	private static Objeto crearLampara() {
-		return new Objeto_Comun("Lámpara", "Ilumina hasta el más oscuro pasadizo.", false, 0);
+	public static Objeto crearLampara() {
+		return new Objeto_Comun("%icon[lantern-flame]", "Lámpara", "Ilumina hasta el más oscuro pasadizo.", false, 0);
 	}
 
 	//////////////////////////////
 	//							//
-	//			DINERO			//
+	//			JOYAS			//
 	//							//
 	//////////////////////////////
-
-	// Moneda
-	private static Objeto crearMoneda() {
-		return new Objeto_Dinero("Moneda", "Tallada a mano en forma hexagonal.");
-	}
+	
+	
+	
 
 	//////////////////////////////
 	//							//
@@ -82,18 +78,18 @@ public class ListaObjetos {
 	//////////////////////////////
 
 	// Espada Jugador
-	private static Objeto crearEspadaRota() {
-		return new Objeto_Arma("Espada rota", "Una espada rota que le falta el filo.", true, 0, 1);
+	public static Objeto crearEspadaRota() {
+		return new Objeto_Arma("%icon[shattered-sword]", "Espada rota", "Una espada rota que le falta el filo.", true, 0, 1);
 	}
 
 	// Espada Corta
-	private static Objeto crearEspadaCorta() {
-		return new Objeto_Arma("Espada corta", "Una ligera espada corta de acero.", false, 15, 3);
+	public static Objeto crearEspadaCorta() {
+		return new Objeto_Arma("%icon[sword]", "Espada corta", "Una ligera espada corta de acero.", false, 15, 3);
 	}
 
 	// Espada Larga
-	private static Objeto crearEspadaLarga() {
-		return new Objeto_Arma("Espada larga", "Una elegante espada larga de acero templado.", false, 30, 5);
+	public static Objeto crearEspadaLarga() {
+		return new Objeto_Arma("%icon[longsword]", "Espada larga", "Una elegante espada larga de acero templado.", false, 30, 5);
 	}
 
 	//////////////////////////////
@@ -103,15 +99,15 @@ public class ListaObjetos {
 	//////////////////////////////
 
 	// Bolsa
-	private static Objeto crearBolsa() {
+	public static Objeto crearBolsa() {
 		List<Objeto> objetosContenidos = new ArrayList<>();
-		return new Objeto_Contenedor("Bolsa", "Una pequeña bolsa de piel de gato.", Capacidad.BAJA, objetosContenidos);
+		return new Objeto_Contenedor("%icon[swap-bag]", "Bolsa", "Una pequeña bolsa de piel de gato.", Capacidad.BAJA, objetosContenidos);
 	}
 
 	// Mochila
-	private static Objeto crearMochila() {
+	public static Objeto crearMochila() {
 		List<Objeto> objetosContenidos = new ArrayList<>();
-		return new Objeto_Contenedor("Mochila", "Una práctica mochila de cuero de vaca.", Capacidad.MEDIA, objetosContenidos);
+		return new Objeto_Contenedor("%icon[knapsack]", "Mochila", "Una práctica mochila de cuero de vaca.", Capacidad.MEDIA, objetosContenidos);
 	}
 
 	//////////////////////////////
@@ -121,12 +117,11 @@ public class ListaObjetos {
 	//////////////////////////////
 
 	// Cofre
-	private static Objeto crearCofre() {
+	public static Objeto crearCofre() {
 		List<Objeto> objetosContenidos = new ArrayList<>();
-		objetosContenidos.add(LAMPARA);
-		objetosContenidos.add(BOLSA);
-		objetosContenidos.add(MONEDA);
-		return new Objeto_Cerradura("Cofre", "Un polvoriento cofre de madera.", true, objetosContenidos);
+		objetosContenidos.add(crearLampara());
+		objetosContenidos.add(crearBolsa());
+		return new Objeto_Cerradura("%icon[locked-chest]", "Cofre", "Un polvoriento cofre de madera.", true, objetosContenidos);
 	}
 
 	//////////////////////////////
@@ -136,8 +131,8 @@ public class ListaObjetos {
 	//////////////////////////////
 
 	// Llave vieja
-	private static Objeto crearLlaveVieja() {
-		return new Objeto_Llave("Llave vieja", "Una vieja llave oxidada.");
+	public static Objeto crearLlave() {
+		return new Objeto_Llave("%icon[key]", "Llave", "Una vieja llave oxidada. Me pregunto qué abrirá...");
 	}
 
 }
