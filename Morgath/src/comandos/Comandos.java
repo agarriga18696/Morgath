@@ -33,7 +33,6 @@ import objetos.Objeto_Arma;
 import objetos.Objeto_Cerradura;
 import objetos.Objeto_Comun;
 import objetos.Objeto_Contenedor;
-import objetos.Objeto_Dinero;
 import objetos.Objeto_Llave;
 import personajes.Jugador;
 import personajes.ListaEnemigos;
@@ -564,7 +563,7 @@ public class Comandos {
 		}
 
 		Habitacion nuevaHabitacion = obtenerHabitacionEnDireccion(habitacionActual, direccion);
-		
+
 		// Validación para habitaciones no disponibles.
 		if(nuevaHabitacion == null || nuevaHabitacion == habitacionActual) {
 			juego.outputTexto("No puedes ir en esa dirección desde aquí.", Fuente.fuenteBase);
@@ -601,7 +600,7 @@ public class Comandos {
 	// Método para mostrar el mensaje de error al introducir una dirección no válida.
 	private void mostrarOpcionesDeDirecciones(StringBuilder mensaje) {
 		mensaje.append("Parece que no puedes ir por ahí.");
-		
+
 		/*for(Direccion direccion : Direccion.values()) {
 			mensaje.append("%c[comando]").append(direccion.name())
 			.append(" (").append(String.join(", ", direccion.getAtajo())).append(")%/c, ");
@@ -1046,10 +1045,10 @@ public class Comandos {
 		List<Objeto> objetosHabitacion = habitacionActual.getObjetos();
 
 		if(objetosHabitacion != null && !objetosHabitacion.isEmpty()) {
-			StringBuilder mensaje = new StringBuilder("Buscas objetos y encuentras:");
+			StringBuilder mensaje = new StringBuilder("Buscas objetos en el lugar y encuentras:");
 
 			for(Objeto objeto : objetosHabitacion) {
-				mensaje.append("\n").append(objeto.getIcono()).append(" ").append(objeto.getNombre()).append(": ").append(objeto.getDescripcion());
+				mensaje.append("\n").append(objeto.infoBasica());
 			}
 
 			juego.outputTexto(mensaje.toString(), Fuente.fuenteBase);
@@ -1068,92 +1067,108 @@ public class Comandos {
 	 *  
 	 */
 	private void comandoCoger(String arg) {
-		StringBuilder mensaje = new StringBuilder();
-		Habitacion habitacionActual = obtenerHabitacionActual();
-		List<Objeto> objetosHabitacion = habitacionActual.getObjetos();
-		List<Objeto> inventarioJugador = jugador.getInventario();
-		Iterator<Objeto> iterador = objetosHabitacion.iterator();
-		boolean encontrado = false;
+	    StringBuilder mensaje = new StringBuilder();
+	    Habitacion habitacionActual = obtenerHabitacionActual();
+	    List<Objeto> objetosHabitacion = habitacionActual.getObjetos();
+	    List<Objeto> inventarioJugador = jugador.getInventario();
 
-		while(iterador.hasNext()) {
-			Objeto objeto = iterador.next();
-			// Verificar que la lista de objetos de la habitación no sea null.
-			if(objetosHabitacion != null && !objetosHabitacion.isEmpty()) {
-				// Comprobar si el jugador ya tiene un objeto contenedor en su inventario.
-				boolean tieneContenedor = false;
-				for(Objeto objetoJugador : inventarioJugador) {
-					if(objetoJugador instanceof Objeto_Contenedor) {
-						tieneContenedor = true;
-						break;
-					}
-				}
+	    // Verificar que la habitación tiene objetos y que el inventario no es null.
+	    if(objetosHabitacion == null || objetosHabitacion.isEmpty()) {
+	        mensaje.append("No hay objetos en este lugar.");
+	        juego.outputTexto(mensaje.toString(), Fuente.fuenteBase);
+	        return;
+	    }
 
-				StringBuilder objetoNormalizado = new StringBuilder(NormalizarCadena.quitarAcentos(objeto.getNombre()).toUpperCase());
+	    if(inventarioJugador == null) {
+	        mensaje.append("Error: Tu inventario no está disponible.");
+	        juego.outputTexto(mensaje.toString(), Fuente.fuenteBase);
+	        return;
+	    }
 
-				if(arg != null) {
-					StringBuilder argNormalizado = new StringBuilder(NormalizarCadena.quitarAcentos(arg).toUpperCase());
-					// Comprobar si el objeto está en la habitación.
-					if(inventarioJugador.size() < jugador.getMaxObjetosInventario() && 
-							argNormalizado.toString().equalsIgnoreCase(objetoNormalizado.toString())) {
-						// Si el jugador ya tiene un objeto contenedor, no puede coger más objetos contenedor.
-						if(objeto instanceof Objeto_Contenedor && tieneContenedor) {
-							mensaje.append("%icon[halt] No has cogido %c[destacado]")
-							.append(objeto.getNombre())
-							.append("%/c porque ya posees un objeto contenedor.");
+	    // Normalizar el argumento para comparar sin acentos ni mayúsculas.
+	    String argNormalizado = (arg != null) ? NormalizarCadena.quitarAcentos(arg).toUpperCase() : null;
 
-						} else if(objeto instanceof Objeto_Cerradura) {
-							// Comprobar que el objeto que quiere coger no sea un objeto con cerradura.
-							mensaje.append("%icon[weight] No puedes coger el objeto %c[destacado]")
-							.append(objeto.getNombre())
-							.append("%/c. Es demasiado pesado.");
+	    // Verificar si el jugador ya tiene un objeto contenedor.
+	    boolean tieneContenedor = inventarioJugador.stream()
+	            .anyMatch(obj -> obj instanceof Objeto_Contenedor);
 
-						} else {
-							jugador.agregarObjetoAlInventario(objeto);
-							mensaje.append("%icon[card-play] Has cogido %c[destacado]").append(objeto.getNombre()).append("%/c.");
-							// Eliminar el objeto de la habitación.
-							iterador.remove();
-						}
-						encontrado = true;
-						break;
+	    boolean encontrado = false;
 
-					} else if(arg != null && argNormalizado.toString().equalsIgnoreCase("todo")) {
-						// Si el jugador ya tiene un objeto contenedor, no puede coger más objetos.
-						if(objeto instanceof Objeto_Contenedor && tieneContenedor) {
-							mensaje.append("%icon[halt] No puedes coger %c[destacado]")
-							.append(objeto.getNombre()).append("%/c si ya posees otro objeto contenedor.");
+	    // Usar un iterador para evitar ConcurrentModificationException.
+	    Iterator<Objeto> iterador = objetosHabitacion.iterator();
 
-						} else if(objeto instanceof Objeto_Cerradura) {
-							// Comprobar que el objeto que quiere coger no sea un objeto con cerradura.
-							mensaje.append("%icon[weight] No puedes coger el objeto %c[destacado]").append(objeto.getNombre()).append("%/c. Es demasiado pesado.\n");
+	    while(iterador.hasNext()) {
+	        Objeto objeto = iterador.next();
+	        String objetoNormalizado = NormalizarCadena.quitarAcentos(objeto.getNombre()).toUpperCase();
 
-						} else {
-							jugador.agregarObjetoAlInventario(objeto);
-							mensaje.append("%icon[card-play] Has cogido %c[destacado]").append(objeto.getNombre()).append("%/c.\n");
-							// Eliminar el objeto de la habitación.
-							iterador.remove();
-						}
-						encontrado = true;
-					}
+	        // Manejo del comando "coger todo".
+	        if(argNormalizado != null && argNormalizado.equals("TODO")) {
+	            // Verificar capacidad del inventario antes de agregar.
+	            if(inventarioJugador.size() >= jugador.getMaxObjetosInventario()) {
+	                mensaje.append("\nInventario lleno. No puedes coger más objetos.");
+	                break;
+	            }
 
-				}
+	            // Si el jugador ya tiene un objeto contenedor, ignorar cualquier otro contenedor.
+	            if(objeto instanceof Objeto_Contenedor) {
+	                if(tieneContenedor) {
+	                    mensaje.append("%icon[halt] No puedes coger %c[destacado]")
+	                            .append(objeto.getNombre()).append("%/c porque ya posees un objeto contenedor.\n");
+	                    continue; // Pasar al siguiente objeto.
+	                } else {
+	                    tieneContenedor = true; // Actualizar estado al coger el primer contenedor.
+	                }
+	            }
 
-			} else {
-				mensaje.append("No hay objetos en este sitio.");
-				break;
-			}
-		}
+	            if(objeto instanceof Objeto_Cerradura) {
+	                mensaje.append("%icon[weight] No puedes coger el objeto %c[destacado]")
+	                        .append(objeto.getNombre()).append("%/c. Es demasiado pesado.\n");
+	            } else {
+	                // Agregar objeto al inventario.
+	                jugador.agregarObjetoAlInventario(objeto);
+	                iterador.remove();
+	                mensaje.append("%icon[usable] Has cogido %c[destacado]")
+	                        .append(objeto.getNombre()).append("%/c.\n");
+	            }
 
-		// Mensajes adicionales según el resultado de la acción
-		if(!encontrado && arg != null) {
-			mensaje.append("El objeto '" + arg + "' no se encuentra en este lugar.");
-		} else if(inventarioJugador.size() >= jugador.getMaxObjetosInventario()) {
-			mensaje.append("\nInventario lleno. Deshazte de algún objeto para poder guardar otro.");
-		} else if(arg == null && objetosHabitacion != null && !objetosHabitacion.isEmpty()) {
-			mensaje.append("¿Qué objeto quieres coger?");
-		}
+	            encontrado = true;
 
-		juego.outputTexto(mensaje.toString(), Fuente.fuenteBase);
+	        // Manejo del comando para un objeto específico.
+	        } else if(argNormalizado != null && argNormalizado.equals(objetoNormalizado)) {
+	            if(inventarioJugador.size() >= jugador.getMaxObjetosInventario()) {
+	                mensaje.append("\nInventario lleno. No puedes coger más objetos.");
+	                break;
+	            }
+
+	            if(objeto instanceof Objeto_Contenedor && tieneContenedor) {
+	                mensaje.append("%icon[halt] No has cogido %c[destacado]")
+	                        .append(objeto.getNombre()).append("%/c porque ya posees un objeto contenedor.");
+	            } else if(objeto instanceof Objeto_Cerradura) {
+	                mensaje.append("%icon[weight] No puedes coger el objeto %c[destacado]")
+	                        .append(objeto.getNombre()).append("%/c. Es demasiado pesado.");
+	            } else {
+	                // Agregar objeto al inventario.
+	                jugador.agregarObjetoAlInventario(objeto);
+	                iterador.remove();
+	                mensaje.append("%icon[usable] Has cogido %c[destacado]")
+	                        .append(objeto.getNombre()).append("%/c.");
+	            }
+
+	            encontrado = true;
+	            break;
+	        }
+	    }
+
+	    // Mensajes adicionales según el resultado.
+	    if(!encontrado && argNormalizado != null) {
+	        mensaje.append("El objeto '").append(arg).append("' no se encuentra en este lugar.");
+	    } else if(argNormalizado == null) {
+	        mensaje.append("¿Qué objeto quieres coger?");
+	    }
+
+	    juego.outputTexto(mensaje.toString(), Fuente.fuenteBase);
 	}
+
 
 
 
@@ -1250,107 +1265,120 @@ public class Comandos {
 	 * 
 	 *  SACAR
 	 *  
+	 *  TODO: arreglar este comando.
+	 *  - sacar todo no funciona bien.
+	 *  
 	 *  
 	 */
 	private void comandoSacar(String arg) {
 		StringBuilder mensaje = new StringBuilder();
 		List<Objeto> inventarioJugador = jugador.getInventario();
 
-		// Comprobar que el inventario del jugador no esté vacío.
-		if(arg != null && inventarioJugador != null && !inventarioJugador.isEmpty()) {
-			// Dividir el 'arg' en dos partes: objeto y contenedor.
-			String[] partes = arg.split(" DE ", 2);
-			if(partes.length == 2 && !partes[0].endsWith(" ")) {
-				String nombreObjeto = partes[0].trim();
-				String nombreContenedor = partes[1].trim();
+		// Validación inicial del argumento y el inventario del jugador.
+		if(arg == null) {
+			mensaje.append("¿Qué objeto quieres sacar y de dónde?");
+			juego.outputTexto(mensaje.toString(), Fuente.fuenteBase);
+			return;
+		}
 
-				// Normalizar las cadenas de los nombres para compararlas sin acentos y en mayúsculas.
-				String nombreObjetoNormalizado = NormalizarCadena.quitarAcentos(nombreObjeto).toUpperCase();
-				String nombreContenedorNormalizado = NormalizarCadena.quitarAcentos(nombreContenedor).toUpperCase();
+		if(inventarioJugador == null || inventarioJugador.isEmpty()) {
+			mensaje.append("Tu inventario está vacío.");
+			juego.outputTexto(mensaje.toString(), Fuente.fuenteBase);
+			return;
+		}
 
-				// Buscar el contenedor en el inventario del jugador.
-				Objeto_Contenedor contenedor = null;
-				for(Objeto objeto : inventarioJugador) {
-					String objetoContenedorNombreNormalizado = NormalizarCadena.quitarAcentos(objeto.getNombre()).toUpperCase();
-					if(objeto instanceof Objeto_Contenedor && objetoContenedorNombreNormalizado.equals(nombreContenedorNormalizado)) {
-						contenedor = (Objeto_Contenedor) objeto;
-						break;
-					}
-				}
+		// Dividir el argumento en partes: objeto y contenedor.
+		String[] partes = arg.split(" DE ", 2);
+		if(partes.length != 2 || partes[0].trim().isEmpty() || partes[1].trim().isEmpty()) {
+			mensaje.append("Para sacar un objeto de un contenedor usa el comando %c[comando]SACAR <OBJETO> DE <CONTENEDOR>%/c.");
+			juego.outputTexto(mensaje.toString(), Fuente.fuenteBase);
+			return;
+		}
 
-				if(contenedor != null) {
+		String nombreObjeto = partes[0].trim();
+		String nombreContenedor = partes[1].trim();
 
-					if(nombreObjetoNormalizado.equals("TODO")) {
-						Iterator<Objeto> iterador = contenedor.getObjetosContenidos().iterator();
-						while(iterador.hasNext()) {
-							Objeto objeto = iterador.next();
-							if(inventarioJugador.size() < jugador.getMaxObjetosInventario()) {
-								// Añadir objeto al inventario.
-								inventarioJugador.add(objeto);
-								// Eliminar objeto del contenedor.
-								iterador.remove();
-								mensaje.append("Has sacado '")
-								.append(objeto.getNombre())
-								.append("' de '")
-								.append(contenedor.getNombre())
-								.append("'.\n");
-							} else {
-								mensaje.append("Tu inventario está lleno. No puedes sacar más objetos.");
-								break;
-							}
-						}
-					} else {
-						// Buscar el objeto dentro del contenedor.
-						Objeto objetoASacar = null;
-						for(Objeto obj : contenedor.getObjetosContenidos()) {
-							String objetoNombreNormalizado = NormalizarCadena.quitarAcentos(obj.getNombre()).toUpperCase();
-							if(objetoNombreNormalizado.equals(nombreObjetoNormalizado)) {
-								objetoASacar = obj;
-								break;
-							}
-						}
+		// Normalizar las cadenas.
+		String nombreObjetoNormalizado = NormalizarCadena.quitarAcentos(nombreObjeto);
+		String nombreContenedorNormalizado = NormalizarCadena.quitarAcentos(nombreContenedor);
 
-						if(objetoASacar != null) {
-							// Comprobar que el inventario del jugador tiene espacio suficiente para agregar el objeto sacado.
-							if(inventarioJugador.size() < jugador.getMaxObjetosInventario()) {
-								// Agregar el objeto al inventario del jugador.
-								inventarioJugador.add(objetoASacar);
-								// Eliminar el objeto del contenedor.
-								contenedor.getObjetosContenidos().remove(objetoASacar);
-								mensaje.append("Has sacado '")
-								.append(objetoASacar.getNombre())
-								.append("' de '")
-								.append(contenedor.getNombre())
-								.append("'.");
-							} else {
-								mensaje.append("No tienes espacio suficiente en tu inventario para sacar '")
-								.append(objetoASacar.getNombre())
-								.append("'.");
-							}
-						} else {
-							mensaje.append("El objeto '")
-							.append(nombreObjeto)
-							.append("' no está dentro de '")
-							.append(contenedor.getNombre())
-							.append("'.");
-						}
-					}
-				} else {
-					mensaje.append("El contenedor '")
-					.append(nombreContenedor)
-					.append("' no está en tu inventario.");
-				}
-			} else {
-				mensaje.append("Para sacar un objeto de un contenedor usa el comando 'SACAR <OBJETO> DE <CONTENEDOR>'.");
-			}
-		} else {
-			if(arg == null) {
-				mensaje.append("¿Qué objeto quieres sacar y de dónde?");
-			} else {
-				mensaje.append("Tu inventario está vacío.");
+		// Buscar el contenedor en el inventario.
+		Objeto_Contenedor contenedor = null;
+		for(Objeto objeto : inventarioJugador) {
+			if(objeto instanceof Objeto_Contenedor && 
+					NormalizarCadena.quitarAcentos(objeto.getNombre()).equalsIgnoreCase(nombreContenedorNormalizado)) {
+				contenedor = (Objeto_Contenedor) objeto;
+				break;
 			}
 		}
 
+		if(contenedor == null) {
+			mensaje.append("El contenedor '").append(nombreContenedor).append("' no está en tu inventario.");
+			juego.outputTexto(mensaje.toString(), Fuente.fuenteBase);
+			return;
+		}
+
+		// Procesar la extracción.
+		if(nombreObjetoNormalizado.equalsIgnoreCase("TODO")) {
+			// Manejo de "sacar todo".
+			if(contenedor.getObjetosContenidos().isEmpty()) {
+				String vacioA = nombreContenedor.endsWith("a") ? "vacía" : "vacío";
+				mensaje.append("No puedes sacar nada de %c[destacado]").append(contenedor.getNombre())
+				.append("%/c porque está ").append(vacioA).append(".");
+			} else {
+				Iterator<Objeto> iterador = contenedor.getObjetosContenidos().iterator();
+				while(iterador.hasNext()) {
+					if(inventarioJugador.size() >= jugador.getMaxObjetosInventario()) {
+						mensaje.append("Tu inventario está lleno. No puedes sacar más objetos.");
+						break;
+					}
+					Objeto objeto = iterador.next();
+					inventarioJugador.add(objeto);
+					iterador.remove();
+					mensaje.append("Has sacado %c[destacado]").append(objeto.getNombre()).append("%/c de %c[destacado]")
+					.append(contenedor.getNombre()).append("%/c.\n");
+				}
+			}
+		} else {
+			// Buscar el objeto específico dentro del contenedor.
+			Objeto objetoASacar = null;
+			for(Objeto obj : contenedor.getObjetosContenidos()) {
+				if(NormalizarCadena.quitarAcentos(obj.getNombre()).equalsIgnoreCase(nombreObjetoNormalizado)) {
+					objetoASacar = obj;
+					break;
+				}
+			}
+
+			if(objetoASacar != null) {
+				// Verificar si hay espacio en el inventario.
+				if(inventarioJugador.size() < jugador.getMaxObjetosInventario()) {
+					inventarioJugador.add(objetoASacar);
+					contenedor.getObjetosContenidos().remove(objetoASacar);
+					mensaje.append("Has sacado %c[destacado]").append(objetoASacar.getNombre()).append("%/c de %c[destacado]")
+					.append(contenedor.getNombre()).append("%/c.");
+				} else {
+					mensaje.append("No tienes espacio suficiente en tu inventario para sacar %c[destacado]")
+					.append(objetoASacar.getNombre()).append("%/c.");
+				}
+			} else {
+				// Verificar si el objeto está ya en el inventario.
+				Objeto objetoEnInventario = inventarioJugador.stream()
+						.filter(obj -> NormalizarCadena.quitarAcentos(obj.getNombre()).equalsIgnoreCase(nombreObjetoNormalizado))
+						.findFirst()
+						.orElse(null);
+
+				if(objetoEnInventario != null) {
+					// Mostrar el nombre real del objeto del inventario.
+					mensaje.append("El objeto %c[destacado]").append(objetoEnInventario.getNombre()).append("%/c ya está fuera de %c[destacado]")
+					.append(contenedor.getNombre()).append("%/c.");
+				} else {
+					mensaje.append("El objeto '").append(nombreObjeto).append("' no está dentro de %c[destacado]")
+					.append(contenedor.getNombre()).append("%/c.");
+				}
+			}
+		}
+
+		// Mostrar el mensaje final.
 		juego.outputTexto(mensaje.toString(), Fuente.fuenteBase);
 	}
 
@@ -1375,32 +1403,32 @@ public class Comandos {
 			for(Objeto objeto : inventarioJugador) {
 				StringBuilder objetoNormalizado = new StringBuilder(NormalizarCadena.quitarAcentos(objeto.getNombre()));
 				StringBuilder argNormalizado = new StringBuilder(NormalizarCadena.quitarAcentos(arg));
+
 				// Comprobar si el objeto está en el inventario del jugador.
 				if(arg != null && argNormalizado.toString().equalsIgnoreCase(objetoNormalizado.toString())) {
 					// Quitar objeto del inventario del jugador.
 					inventarioJugador.remove(objeto);
-					mensaje.append("Has tirado '")
-					.append(objeto.getNombre())
-					.append("' al suelo.");
+					mensaje.append("%icon[drop] Has soltado %c[destacado]").append(objeto.getNombre()).append("%/c al suelo.");
 					// Añadir el objeto al inventario de la habitación (al suelo).
 					objetosHabitacion.add(objeto);
 					encontrado = true;
 					break;
 
-				} else if(arg != null && argNormalizado.toString().equalsIgnoreCase("todo")) {
+				}
+				// Soltar todos los objetos con el argumento "todo".
+				else if(arg != null && argNormalizado.toString().equalsIgnoreCase("todo")) {
 					// Agregar los objetos del jugador a la habitación.
 					objetosHabitacion.addAll(inventarioJugador);
 					// Eliminar todos los objetos del inventario del jugador.
 					jugador.getInventario().clear();
-					juego.outputTexto("Has soltado todos tus objetos al suelo.", Fuente.fuenteBase);
+					juego.outputTexto("%icon[drop] Has soltado todos tus objetos al suelo.", Fuente.fuenteBase);
 					return;
 				}
 			}
 
+			// No encuentra el objeto en el inventario.
 			if(!encontrado && arg != null) {
-				mensaje.append("El objeto '")
-				.append(arg)
-				.append("' no se encuentra en tu inventario.");
+				mensaje.append("El objeto '").append(arg).append("' no se encuentra en tu inventario.");
 			}
 
 		} else {
@@ -1421,70 +1449,114 @@ public class Comandos {
 	 *  
 	 *  TODO: Terminar y arreglar este comando.
 	 *  
-	 *  - Llaves unicas para cada contenedor.
-	 *  - O tener una llave generica que pueda abrir cualquier contendor.
-	 *  - Tipos de llaves dependiendo de la calidad de los objetos del contenedor.
+	 *  - ¿Llaves unicas para cada contenedor?
+	 *  - ¿Tener una llave generica que pueda abrir cualquier contendor?
+	 *  - ¿Tipos de llaves diferentes dependiendo de la calidad de los objetos del contenedor?
 	 *  - Abrir cofres, puertas, etc.
-	 *  - Al abrir cofres poder coger los objetos.
+	 *  - Al abrir cofres poder coger los objetos que contiene.
 	 *  
 	 */
 	private void comandoAbrir(String arg) {
 		StringBuilder mensaje = new StringBuilder();
+
+		// Validar argumento.
+		if(arg == null || arg.trim().isEmpty()) {
+			mensaje.append("¿Qué quieres abrir?");
+			juego.outputTexto(mensaje.toString(), Fuente.fuenteBase);
+			return;
+		}
+
+		arg = NormalizarCadena.quitarAcentos(arg.trim().toUpperCase());
+
+		// Obtener la habitación actual.
 		Habitacion habitacionActual = obtenerHabitacionActual();
+		if(habitacionActual == null) {
+			mensaje.append("No puedes abrir nada ahora mismo.");
+			juego.outputTexto(mensaje.toString(), Fuente.fuenteBase);
+			return;
+		}
+
 		List<Objeto> objetosHabitacion = habitacionActual.getObjetos();
 		List<Objeto> inventarioJugador = jugador.getInventario();
 
-		boolean hayObjetoCerradura = false;
+		if(objetosHabitacion == null || objetosHabitacion.isEmpty()) {
+			mensaje.append("No hay nada que abrir en este lugar.");
+			juego.outputTexto(mensaje.toString(), Fuente.fuenteBase);
+			return;
+		}
 
-		if(arg != null) {
-			// Comprobar que haya objetos con cerradura en la habitacion.
-			for(Objeto objeto : objetosHabitacion) {
-				if(objeto instanceof Objeto_Cerradura) {
-					hayObjetoCerradura = true;
-					Objeto_Cerradura objetoCerradura = (Objeto_Cerradura) objeto;
-					String nombreNormalizado = NormalizarCadena.quitarAcentos(objetoCerradura.getNombre().toUpperCase());
-					String argNormalizado = NormalizarCadena.quitarAcentos(arg.toUpperCase());
+		// Buscar el contenedor con el nombre especificado.
+		Objeto_Cerradura cerradura = null;
+		for(Objeto objeto : objetosHabitacion) {
+			if(objeto instanceof Objeto_Cerradura) {
+				Objeto_Cerradura objetoCerradura = (Objeto_Cerradura) objeto;
+				String nombreCerradura = NormalizarCadena.quitarAcentos(objetoCerradura.getNombre().toUpperCase());
+				if(nombreCerradura.equals(arg)) {
+					cerradura = objetoCerradura;
+					break;
+				}
+			}
+		}
 
-					if(nombreNormalizado.equals(argNormalizado)) {
-						// Verificar si el jugador tiene la llave correcta en su inventario.
-						boolean llaveCorrecta = false;
-						for(Objeto objetoInventario : inventarioJugador) {
-							if(objetoInventario != null && objetoInventario instanceof Objeto_Llave) {
-								Objeto_Llave llave = (Objeto_Llave) objetoInventario;
-								if(llave != null) {
-									llaveCorrecta = true;
-									break;
-								}
-							}
-						}
+		if(cerradura == null) {
+			mensaje.append("No hay nada llamado '").append(arg).append("' para abrir aquí.");
+			juego.outputTexto(mensaje.toString(), Fuente.fuenteBase);
+			return;
+		}
 
-						if(llaveCorrecta) {
-							boolean tieneObjetos = !objetoCerradura.getObjetosContenidos().isEmpty();
-							if(tieneObjetos) {
-								mensaje.append("El '").append(objetoCerradura.getNombre()).append("' contiene:");
-								for(int i = 0; i < objetoCerradura.getObjetosContenidos().size(); i++) {
-									Objeto objetoContenido = objetoCerradura.getObjetosContenidos().get(i);
-									if(i == objetoCerradura.getObjetosContenidos().size() - 1) {
-										mensaje.append("\n└ ").append(objetoContenido.getNombre());
-									} else {
-										mensaje.append("\n├ ").append(objetoContenido.getNombre());
-									}
-								}
-							} else {
-								mensaje.append("'").append(objetoCerradura.getNombre()).append("' está vacío.\n");
-							}
-						} else {
-							mensaje.append("No tienes ninguna llave para abrir '").append(objetoCerradura.getNombre()).append("'.");
-						}
-					}
+		// Verificar si está cerrado.
+		if(!cerradura.isCerrado()) {
+			mensaje.append("El %c[destacado]").append(cerradura.getNombre()).append("%/c ya está abierto.\n");
+
+			List<Objeto> contenido = cerradura.getObjetosContenidos();
+			if(contenido == null || contenido.isEmpty()) {
+				mensaje.append("%c[destacado]").append(cerradura.getNombre()).append("%/c está vacío.");
+			} else {
+				mensaje.append("Contiene:");
+				for(Objeto objeto : contenido) {
+					mensaje.append("\n").append(objeto.getIcono()).append(" ").append(objeto.getNombre());
 				}
 			}
 
-			if(!hayObjetoCerradura) {
-				mensaje.append("No hay ningún cofre en este lugar.");
+			juego.outputTexto(mensaje.toString(), Fuente.fuenteBase);
+			return;
+		}
+
+		// Verificar si el jugador tiene una llave adecuada.
+		Objeto_Llave llaveUtilizada = null;
+		if(inventarioJugador != null && !inventarioJugador.isEmpty()) {
+			Iterator<Objeto> iterator = inventarioJugador.iterator();
+			while(iterator.hasNext()) {
+				Objeto objeto = iterator.next();
+				if(objeto instanceof Objeto_Llave) {
+					llaveUtilizada = (Objeto_Llave) objeto;
+					iterator.remove(); // Eliminar la llave utilizada del inventario del jugador.
+					break;
+				}
 			}
+		}
+
+		if(llaveUtilizada == null) {
+			mensaje.append("No tienes ninguna llave para abrir %c[destacado]").append(cerradura.getNombre()).append("%/c.");
+			juego.outputTexto(mensaje.toString(), Fuente.fuenteBase);
+			return;
+		}
+
+		// Usar la llave para abrir el objeto contenedor.
+		mensaje.append("Utilizas %c[destacado]").append(llaveUtilizada.getNombre()).append("%/c para abrir %c[destacado]").append(cerradura.getNombre()).append("%/c.\n");
+
+		// Cambiar el estado de la cerradura a abierta.
+		cerradura.setCerrado(false);
+
+		// Mostrar contenido del contenedor.
+		List<Objeto> contenido = cerradura.getObjetosContenidos();
+		if(contenido == null || contenido.isEmpty()) {
+			mensaje.append("%c[destacado]").append(cerradura.getNombre()).append("%/c está vacío.");
 		} else {
-			mensaje.append("¿Qué quieres abrir?");
+			mensaje.append("Contiene:");
+			for(Objeto objeto : contenido) {
+				mensaje.append("\n").append(objeto.getIcono()).append(" ").append(objeto.getNombre());
+			}
 		}
 
 		juego.outputTexto(mensaje.toString(), Fuente.fuenteBase);
@@ -1511,16 +1583,20 @@ public class Comandos {
 				String nombreObjetoNormalizado = NormalizarCadena.quitarAcentos(objeto.getNombre()).toUpperCase();
 
 				if(argNormalizado.equals(nombreObjetoNormalizado)) {
-					// Si es un objeto de misión, no se puede destruir
-					if((objeto instanceof Objeto_Comun && ((Objeto_Comun) objeto).isObjetoDeMision()) 
-							|| (objeto instanceof Objeto_Arma && ((Objeto_Arma) objeto).isObjetoDeMision())) {
+					// Si es un objeto de misión, no se puede destruir.
+					if((objeto.isDeMision())) {
 						mensaje.append("No puedes destruir objetos de misión.");
-					} else {
-						// Eliminar el objeto.
+					}
+					// Si es un objeto de rareza único, tampoco se puede destruir.
+					if((objeto.getRareza() == Objeto.Rareza.UNICO)) {
+						mensaje.append("No puedes destruir objetos únicos.");
+					}
+					// Eliminar el objeto.
+					else {
 						iterator.remove();
-						mensaje.append("Has destruido el objeto '")
+						mensaje.append("%icon[hammer-break] Has destruido %c[destacado]")
 						.append(objeto.getNombre())
-						.append("'.");
+						.append("%/c.");
 					}
 					objetoEncontrado = true;
 					break;
@@ -1561,35 +1637,33 @@ public class Comandos {
 			mensaje.append("Estás portando estos objetos:");
 			// Mostrar información según tipo de objeto.
 			for(Objeto objeto : inventarioJugador) {
-				mensaje.append("\n").append(objeto.getIcono()).append(" ");
+				mensaje.append("\n");
 				// OBJETO ARMA
 				if(objeto instanceof Objeto_Arma) {
 					Objeto_Arma objetoArma = (Objeto_Arma) objeto;
-					mensaje.append(objetoArma.getNombre()).append(": ").append(objetoArma.getDescripcion())
-					.append(objetoArma.isObjetoDeMision() ? " (Objeto de misión)" : "");
+					mensaje.append(objetoArma);
 				}
 
 				// OBJETO COMÚN
 				if(objeto instanceof Objeto_Comun) {
 					Objeto_Comun objetoComun = (Objeto_Comun) objeto;
-					mensaje.append(objetoComun.getNombre()).append(": ").append(objetoComun.getDescripcion())
-					.append(objetoComun.isObjetoDeMision() ? " (Objeto de misión)" : "");
+					mensaje.append(objetoComun);
 				}
 
 				// OBJETO CONTENEDOR
 				if(objeto instanceof Objeto_Contenedor) {
 					Objeto_Contenedor objetoContenedor = (Objeto_Contenedor) objeto;
-					mensaje.append(objetoContenedor.getNombre()).append(": ").append(objetoContenedor.getDescripcion());
+					mensaje.append(objetoContenedor);
 
 					if(objetoContenedor.getObjetosContenidos() != null && !objetoContenedor.getObjetosContenidos().isEmpty()) {
 						int tamanoLista = objetoContenedor.getObjetosContenidos().size(); 
 
 						for(int i = 0; i < tamanoLista; i++) {
 							Objeto objetoContenido = objetoContenedor.getObjetosContenidos().get(i);
-							mensaje.append("\n\t").append(objetoContenido.getIcono()).append(" ").append(objetoContenido.getNombre());
+							mensaje.append("\n\t").append(objetoContenido);
 						}
 					} else {
-						mensaje.append("\n\t(Contenido vacío)");
+						mensaje.append("\n\t%iContenido vacío%/i");
 					}
 
 				}
@@ -1597,14 +1671,9 @@ public class Comandos {
 				// OBJETO LLAVE
 				if(objeto instanceof Objeto_Llave) {
 					Objeto_Llave objetoLlave = (Objeto_Llave) objeto;
-					mensaje.append(objetoLlave.getNombre()).append(": ").append(objetoLlave.getDescripcion());
+					mensaje.append(objetoLlave);
 				}
-
-				// OBJETO DINERO
-				if(objeto instanceof Objeto_Dinero) {
-					Objeto_Dinero objetoDinero = (Objeto_Dinero) objeto;
-					mensaje.append(objetoDinero.getNombre()).append(": ").append(objetoDinero.getDescripcion());
-				}
+				
 			}
 			juego.outputTexto(mensaje.toString(), Fuente.fuenteBase);
 
@@ -1764,7 +1833,7 @@ public class Comandos {
 							ListaComandos.ADIOS
 							);
 					// Mostrar mensajes de la conversación.
-					mensaje.append("Entablas una conversación con ").append(personaje.getNombre()).append(" (").append(personaje.getTipo()).append(")").append(". Para salir de la conversación usa el comando 'ADIÓS'.\n\n");
+					mensaje.append("Entablas una conversación con ").append(personaje.getNombre()).append(" (").append(personaje.getTipo()).append(")").append(". Para salir de la conversación usa el comando %c[comando]ADIÓS%/c.\n\n");
 					mensaje.append(personaje.getNombre()).append(" (").append(personaje.getTipo()).append(")").append(":\n");
 					mensaje.append("%icon[chat-bubble] ").append(personaje.saludoNormal()).append(" ");
 					mensaje.append(personaje.obtenerConversacion());
@@ -1777,7 +1846,7 @@ public class Comandos {
 					for(Enemigo enemigo : habitacionActual.getEnemigos()) {
 						// Comprobar si el nombre coincide con el enemigo que se intenta hablar.
 						if(NormalizarCadena.quitarAcentos(enemigo.getNombre()).equalsIgnoreCase(nombrePersonajeNormalizado)) {
-							// Mostrar mensaje dependiendo del tipo de enemigo.
+							// Mostrar mensaje informando que no puedes hablar con un enemigo dependiendo del tipo.
 							switch(enemigo.getTipo()) {
 							case MALEANTE:
 								mensaje.append("No puedes hablar con ese maleante, parece más interesado en vaciar tus bolsillos que en una charla amistosa.");
@@ -1810,11 +1879,11 @@ public class Comandos {
 
 
 				} else if(personaje != null && personaje.obtenerConversacion() == null) {
-					mensaje.append("'").append(personaje.getNombre()).append("' no tiene nada que decirte.");
+					mensaje.append("%c[destacado]").append(personaje.getNombre()).append("%/c no tiene nada que decirte.");
 				}
 
 			} else {
-				mensaje.append("Para hablar con un personaje, usa el comando 'HABLAR CON <NOMBRE DEL PERSONAJE>'.");
+				mensaje.append("Para hablar con un personaje, usa el comando %c[comando]HABLAR CON <NOMBRE DEL PERSONAJE>%/c.");
 			}
 
 		} else {

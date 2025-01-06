@@ -38,6 +38,12 @@ public class Config {
 	public static final Color COLOR_PNJ = getColorPnj();
 	public static final Color COLOR_ENEMIGO = getColorEnemigo();
 	public static final Color COLOR_COMANDO = getColorComando();
+	public static final Color COLOR_OBJETO_COMUN = Color.decode("#bfbfbf");
+	public static final Color COLOR_OBJETO_RARO = Color.decode("#2ecc71");
+	public static final Color COLOR_OBJETO_DISTINGUIDO = Color.decode("#3498db");
+	public static final Color COLOR_OBJETO_MITICO = Color.decode("#8e44ad");
+	public static final Color COLOR_OBJETO_SUPREMO = Color.decode("#f1c40f");
+	public static final Color COLOR_OBJETO_UNICO = Color.decode("#ffffff");
 
 	// Métodos auxiliares para cambiar a monocromo si se usa el TEMA CLÁSICO.
 	public static Color getColorPnj() {

@@ -8,10 +8,11 @@ public class Objeto_Cerradura extends Objeto {
 	private boolean cerrado;
 	private List<Objeto> objetosContenidos;
 
-	public Objeto_Cerradura(String icono, String nombre, String descripcion, boolean cerrado, List<Objeto> objetosContenidos) {
-		super(icono, nombre, descripcion);
+	public Objeto_Cerradura(String icono, String nombre, String descripcion, Rareza rareza, boolean deMision, Integer valorVenta, boolean cerrado, List<Objeto> objetosContenidos) {
+		super(icono, nombre, descripcion, rareza, deMision, valorVenta);
 		
 		this.cerrado = cerrado;
+		this.rareza = Rareza.COMUN;
 		
 		if(objetosContenidos != null) {
 			this.objetosContenidos = new ArrayList<>(objetosContenidos);

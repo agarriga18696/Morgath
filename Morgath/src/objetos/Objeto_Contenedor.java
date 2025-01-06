@@ -9,8 +9,8 @@ public class Objeto_Contenedor extends Objeto {
 	private Capacidad capacidad;
 	private int maxObjetosContenidos;
 
-	public Objeto_Contenedor(String icono, String nombre, String descripcion, Capacidad capacidad, List<Objeto> objetosContenidos) {
-		super(icono, nombre, descripcion);
+	public Objeto_Contenedor(String icono, String nombre, String descripcion, Rareza rareza, boolean deMision, Integer valorVenta, Capacidad capacidad, List<Objeto> objetosContenidos) {
+		super(icono, nombre, descripcion, rareza, deMision, valorVenta);
 
 		this.capacidad = capacidad;
 
@@ -23,13 +23,13 @@ public class Objeto_Contenedor extends Objeto {
 		// Capacidad del contenedor.
 		switch(capacidad) {
 		case BAJA:
-			this.maxObjetosContenidos = 4;
+			this.maxObjetosContenidos = 2;
 			break;
 		case MEDIA:
-			this.maxObjetosContenidos = 7;
+			this.maxObjetosContenidos = 4;
 			break;
 		case ALTA:
-			this.maxObjetosContenidos = 10;
+			this.maxObjetosContenidos = 7;
 			break;
 		default:
 			break;

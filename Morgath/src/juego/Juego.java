@@ -412,6 +412,12 @@ public class Juego extends JFrame {
 		case "enemigo": return Config.COLOR_ENEMIGO;
 		case "comando": return Config.COLOR_COMANDO;
 		case "destacado": return Config.temaActual.getColorEnfasis();
+		case "obj_comun": return Config.COLOR_OBJETO_COMUN;
+		case "obj_raro": return Config.COLOR_OBJETO_RARO;
+		case "obj_distinguido": return Config.COLOR_OBJETO_DISTINGUIDO;
+		case "obj_mitico": return Config.COLOR_OBJETO_MITICO;
+		case "obj_supremo": return Config.COLOR_OBJETO_SUPREMO;
+		case "obj_unico": return Config.COLOR_OBJETO_UNICO;
 		default: 
 			try {
 				// Intentar interpretar un color en formato hexadecimal.

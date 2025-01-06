@@ -23,7 +23,16 @@ public class Habitaciones {
 		
 		return new Habitacion(0, nombre, desc, tipo,
 				new Objeto[]{
-						ListaObjetos.crearCofre()
+						ListaObjetos.crearCofre(),
+						ListaObjetos.crearLlaveMaestra(),
+						ListaObjetos.crearLlave(),
+						ListaObjetos.crearLampara(),
+						ListaObjetos.crearBolsa(),
+						ListaObjetos.crearMochila(),
+						ListaObjetos.crearEspadaCorta(),
+						ListaObjetos.crearEspadaLarga(),
+						ListaObjetos.crearEspadaRota()
+						
 				},
 				new Personaje[]{
 						ListaPersonajes.crearAldeano(),
