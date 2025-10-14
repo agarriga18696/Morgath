@@ -156,7 +156,7 @@ A continuación se muestra la lista completa de comandos disponibles:
 
 ```bash
 
-git clone https://github.com/agarriga18696/Morgath
+git clone https://github.com/agarriga18696/morgath.git
 
 ```
 
