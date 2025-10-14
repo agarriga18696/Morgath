@@ -86,7 +86,7 @@ A continuación se muestra la lista completa de comandos disponibles:
 
 | Comando | Descripción |
 |----------|--------------|
-| `IR <DIRECCION>` | Te mueves en la dirección indicada. |
+| `IR <DIRECCION>` | Te mueves en la dirección indicada (NORTE, SUR, ESTE, OESTE, NORESTE, NOROESTE, SUDESTE, SUDOESTE, ARRIBA, ABAJO). |
 | `VOLVER` | Retrocedes a la ubicación anterior. |
 
   
