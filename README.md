@@ -86,7 +86,7 @@ A continuación se muestra la lista completa de comandos disponibles:
 
 | Comando | Descripción |
 |----------|--------------|
-| `IR <DIRECCION>` | Te mueves en la dirección indicada. |
+| `IR <DIRECCION>` | Te mueves en la dirección indicada (NORTE, SUR, ESTE, OESTE, NORESTE, NOROESTE, SUDESTE, SUDOESTE, ARRIBA, ABAJO). |
 | `VOLVER` | Retrocedes a la ubicación anterior. |
 
   
@@ -111,7 +111,18 @@ A continuación se muestra la lista completa de comandos disponibles:
 | `DIARIO` | Muestra las misiones que has completado. |
 | `LEVANTARSE` | Te levantas del suelo si estás tumbado. |
 
-  
+
+
+### 🗣️ SOCIAL
+
+
+
+| Comando | Descripción
+|----------|--------------|
+| `HABLAR CON <PERSONAJE>` | Entablas una conversación con un personaje. |
+| `ADIOS` | Dejas de hablar con un personaje. |
+
+
 
 ### 🎮 JUEGO
 
@@ -119,6 +130,7 @@ A continuación se muestra la lista completa de comandos disponibles:
 
 | Comando | Descripción |
 |----------|--------------|
+| `AYUDA` | Muestra una lista con todos los comandos del juego. |
 | `TERMINAR` | Terminas la partida. |
 | `REINICIAR` | Reinicias el juego. |
 | `GUARDAR` | Guardas el progreso del juego. |
