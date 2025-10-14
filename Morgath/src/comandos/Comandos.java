@@ -2042,6 +2042,9 @@ public class Comandos {
 				+ "  ├ MISION: Muestra la misión actual.\n"
 				+ "  ├ DIARIO: Muestra las misiones que has completado.\n"
 				+ "  └ LEVANTARSE: Te levantas del suelo si estás tumbado.\n"
+				+ "- SOCIAL:\n"
+				+ "  ├ HABLAR: Inicias una conversación con un personaje.\n"
+				+ "  └ LEVANTARSE: Dejas de hablar con un personaje.\n"
 				+ "- JUEGO:\n"
 				+ "  ├ TERMINAR: Terminas la partida.\n"
 				+ "  ├ REINICIAR: Reinicias el juego.\n"
@@ -2061,10 +2064,10 @@ public class Comandos {
 	 *  
 	 */
 	private void comandoCreditos() {
-		String mensaje = "MORGATH © 2024\n"
-				+ "Desarrollado por: ANDREU GARRIGA CENDÁN\n"
-				+ "Programado en: Java\n"
-				+ "Fuente utilizada: Flexi IBM VGA True (www.1001fonts.com)";
+		String mensaje = "MORGATH © 2025\n"
+				+ "Desarrollado por ANDREU GARRIGA CENDÁN\n"
+				+ "Programado en Java\n"
+				+ "Fuente utilizada Flexi IBM VGA True (www.1001fonts.com)";
 
 		juego.outputTexto(mensaje, Fuente.fuenteBase);
 	}
@@ -2104,7 +2107,7 @@ public class Comandos {
 	 *  
 	 */
 	private void comandoVersion() {
-		juego.outputTexto("Estás jugando MORGATH (v.1.0.6).", Fuente.fuenteBase);
+		juego.outputTexto("Estás jugando MORGATH (v.1.0.7).", Fuente.fuenteBase);
 	}
 
 	/*
